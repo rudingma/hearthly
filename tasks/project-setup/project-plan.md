@@ -10,6 +10,17 @@
 
 ---
 
+## Progress
+
+| Task | Status | Notes |
+|---|---|---|
+| 0: Git init | Done | Repo: github.com/rudingma/hearthly (private) |
+| 1: Local tooling | Done | Node 24 LTS, all CLIs installed. CLAUDE.md committed. |
+| 2: MCP setup | Skipped | CLI access (gh, hcloud, kubectl, helm, argocd, terraform) covers all needs. Revisit K8s MCP after Task 7 if needed. |
+| 3-17 | Not started | |
+
+---
+
 ## Quick Reference
 
 **Cluster:** 1x CAX11 control plane + 3x CAX11 workers (ARM, 4 GB each) — ~€26/month (post-April 2026 prices)
@@ -19,8 +30,7 @@
 **Repo structure:**
 ```
 /apps/hearthly-api/{src, deploy/Dockerfile, deploy/chart/, infra/}
-/apps/hearthly-web/{src, deploy/Dockerfile, deploy/chart/, infra/}
-/libs/shared/
+/apps/hearthly-app/{src, deploy/Dockerfile, deploy/chart/, infra/}
 /infrastructure/{cluster/, cluster-services/{argocd,cert-manager,infisical,monitoring}/}
 /.github/workflows/
 ```
@@ -41,7 +51,7 @@
 | Infisical (1 replica) + PG + Redis | ~734 MB | App ~350 MB, PG ~256 MB, Redis ~128 MB |
 | Infisical Operator | ~64 MB | |
 | App PostgreSQL (CloudNativePG) | ~256 MB | |
-| hearthly-api + hearthly-web | ~160 MB | API ~128 MB, nginx ~32 MB |
+| hearthly-api + hearthly-app | ~160 MB | API ~128 MB, nginx ~32 MB |
 | **Total requests** | **~4.2 GB** | **~7.8 GB headroom** — comfortable for Phase 1 |
 
 ---
@@ -126,16 +136,17 @@ Install latest stable versions of all tools. Check current docs at implementatio
 
 **Classification:** CLI
 
-**Creates:** `/apps/hearthly-api/`, `/apps/hearthly-web/`, `/libs/shared/`
+**Creates:** `/apps/hearthly-api/`, `/apps/hearthly-app/`
+
+Renamed from `hearthly-web` → `hearthly-app` because Capacitor produces web + iOS + Android from the same codebase. Shared library (`/libs/shared/`) deferred — nothing to share until Phase 2 features.
 
 - [ ] **Step 1:** Check current Nx docs for workspace creation (preset syntax changes between versions)
 - [ ] **Step 2:** Add Nx plugins: `nx add @nx/angular` and `nx add @nx/nest`
 - [ ] **Step 3:** Generate NestJS app: `nx g @nx/nest:application hearthly-api`
-- [ ] **Step 4:** Generate Angular app: `nx g @nx/angular:application hearthly-web`
-- [ ] **Step 5:** Generate shared library: `nx g @nx/js:library shared`
-- [ ] **Step 6:** Add health check endpoint to hearthly-api (install `@nestjs/terminus`, implement `/health`)
-- [ ] **Step 7:** Verify both apps start locally
-- [ ] **Step 8:** Commit
+- [ ] **Step 4:** Generate Angular app: `nx g @nx/angular:application hearthly-app`
+- [ ] **Step 5:** Add health check endpoint to hearthly-api (install `@nestjs/terminus`, implement `/health`)
+- [ ] **Step 6:** Verify both apps start locally
+- [ ] **Step 7:** Commit
 
 ---
 
@@ -158,7 +169,7 @@ Install latest stable versions of all tools. Check current docs at implementatio
 
 **Classification:** AI
 
-**Creates:** `/apps/hearthly-api/deploy/Dockerfile`, `/apps/hearthly-web/deploy/Dockerfile`
+**Creates:** `/apps/hearthly-api/deploy/Dockerfile`, `/apps/hearthly-app/deploy/Dockerfile`
 
 - [ ] **Step 1:** Multi-stage Dockerfile for API (node-alpine, non-root user, health check)
 - [ ] **Step 2:** Multi-stage Dockerfile for web (nginx-alpine)
@@ -221,7 +232,7 @@ Hetzner does not offer managed PostgreSQL. Self-hosted on K8s via CloudNativePG 
 
 **Classification:** AI + CLI + MANUAL
 
-**Creates:** `/apps/hearthly-web/infra/main.tf`
+**Creates:** `/apps/hearthly-app/infra/main.tf`
 
 Use the **official `hetznercloud/hcloud` Terraform provider** for DNS (>= v1.54.0). Do NOT use the deprecated community `hetznerdns` provider. Hetzner's old DNS API (dns.hetzner.com) shuts down May 2026.
 
@@ -236,7 +247,7 @@ Use the **official `hetznercloud/hcloud` Terraform provider** for DNS (>= v1.54.
 
 **Classification:** AI
 
-**Creates:** `/apps/hearthly-api/deploy/chart/`, `/apps/hearthly-web/deploy/chart/`
+**Creates:** `/apps/hearthly-api/deploy/chart/`, `/apps/hearthly-app/deploy/chart/`
 
 - [ ] **Step 1:** Helm chart for API (Deployment, Service, health checks, resource limits, Ingress with Traefik annotations, namespace: hearthly)
 - [ ] **Step 2:** Helm chart for web (Deployment, Service for nginx, Ingress with Traefik annotations, namespace: hearthly)

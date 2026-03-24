@@ -33,3 +33,9 @@ Thumbs.db
 
 # Claude Code
 .claude/settings.local.json
+
+.angular
+
+__screenshots__/
+
+test-output
