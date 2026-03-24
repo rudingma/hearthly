@@ -17,7 +17,7 @@
 | 0: Git init | Done | Repo: github.com/rudingma/hearthly (private) |
 | 1: Local tooling | Done | Node 24 LTS, all CLIs installed. CLAUDE.md committed. |
 | 2: MCP setup | Skipped | CLI access (gh, hcloud, kubectl, helm, argocd, terraform) covers all needs. Revisit K8s MCP after Task 7 if needed. |
-| 3: Nx monorepo scaffold | Done | hearthly-api (NestJS + /health) + hearthly-app (Angular 21, SCSS). Renamed from hearthly-web. Shared lib deferred. Fixed tsconfig.base.json for Angular compatibility. NX_IGNORE_UNSUPPORTED_TS_SETUP=true needed for Angular builds. |
+| 3: Nx monorepo scaffold | Done | hearthly-api (NestJS 11 + /health) + hearthly-app (Angular 21, SCSS). Renamed from hearthly-web. Shared lib deferred. Review fixes: .gitattributes (LF), jest.preset.js, removed nx-welcome + @nestjs/axios, added paths:{} to tsconfig. NX_IGNORE_UNSUPPORTED_TS_SETUP=true needed for Angular builds. |
 | 4-17 | Not started | |
 
 ---
