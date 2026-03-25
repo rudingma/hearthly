@@ -19,7 +19,8 @@
 | 2: MCP setup | Skipped | CLI access (gh, hcloud, kubectl, helm, argocd, terraform) covers all needs. Revisit K8s MCP after Task 7 if needed. |
 | 3: Nx monorepo scaffold | Done | hearthly-api (NestJS 11 + /health) + hearthly-app (Angular 21, SCSS). Renamed from hearthly-web. Shared lib deferred. Review fixes: .gitattributes (LF), jest.preset.js, removed nx-welcome + @nestjs/axios, added paths:{} to tsconfig. NX_IGNORE_UNSUPPORTED_TS_SETUP=true needed for Angular builds. |
 | 4: Docker Compose + Drizzle | Done | PostgreSQL 18 on port 5434 (5432 taken by other projects). Drizzle ORM replaces Prisma (SQL-first, type-safe). Initial schema + migration applied. |
-| 5-17 | Not started | |
+| 5: Dockerfiles | Done | Multi-stage: API (node:24-alpine, nx prune, non-root, /api/health check, 335MB) + App (node:24-alpine builder, nginxinc/nginx-unprivileged, SPA routing, security headers, 82MB). .dockerignore excludes tests/infra/docs. Workspace package.json files must be copied before npm ci (npm workspaces). Buildx supports amd64+arm64. Code-reviewed by Opus 4.6 subagent — fixed: nginx security headers, non-root nginx, source map stripping, npm cache cleanup, OCI labels. |
+| 6-17 | Not started | |
 
 ---
 
