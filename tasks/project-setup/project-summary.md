@@ -37,7 +37,7 @@ Phase 1 deliberately contains no business features. The goal is to invest in a c
 
 **Frontend:** Angular + Capacitor. Leverages existing Angular skills. Capacitor wraps the web app for iOS/Android. Good enough for data-entry-heavy apps.
 
-**Backend:** NestJS + Prisma + PostgreSQL. NestJS mirrors Angular's architecture (decorators, modules, DI). Prisma provides type-safe database access and migrations. Full TypeScript end-to-end reduces context switching.
+**Backend:** NestJS + Drizzle ORM + PostgreSQL. NestJS mirrors Angular's architecture (decorators, modules, DI). Drizzle is an SQL-first, type-safe query builder — the TypeScript equivalent of spring-data-jdbc. Chosen over Prisma (too much abstraction/codegen) and TypeORM (declining, performance issues) for its simplicity, performance, and SQL transparency. Full TypeScript end-to-end reduces context switching.
 
 **Architecture:** Modular monolith. No microservices. Clean internal module boundaries that communicate through service interfaces, not direct table access. Extract services only when there's a real reason (independent scaling, different runtime, team ownership).
 
@@ -71,7 +71,7 @@ Docker Compose provides PostgreSQL (and Redis if needed later) for local develop
 
 ### Database Schema Strategy
 
-One PostgreSQL server instance as shared platform infrastructure. The logical database and schema are owned by the API and managed through Prisma migrations. Within PostgreSQL, separate schemas per module provide a pragmatic middle ground for isolation without the overhead of separate databases. If a service is ever extracted: evaluate per case — shared read-only access, API calls, or separate database depending on domain overlap.
+One PostgreSQL server instance as shared platform infrastructure. The logical database and schema are owned by the API and managed through Drizzle migrations. Within PostgreSQL, separate schemas per module provide a pragmatic middle ground for isolation without the overhead of separate databases. If a service is ever extracted: evaluate per case — shared read-only access, API calls, or separate database depending on domain overlap.
 
 ### Environments
 

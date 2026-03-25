@@ -11,7 +11,7 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 - **Runtime:** Node.js 24 LTS (Krypton) via nvm
 - **Package manager:** npm 11
 - **Monorepo:** Nx (use `npx nx` — not installed globally)
-- **ORM:** Prisma 7 (use `npx prisma` — not installed globally)
+- **Data access:** Drizzle ORM (SQL-first, type-safe query builder)
 - **Containers:** Docker 28 + Docker Buildx (multi-platform: amd64 + arm64)
 - **Infrastructure:** Terraform 1.13, hcloud CLI 1.62
 - **Kubernetes:** kubectl 1.34, Helm 3.17, ArgoCD CLI 3.3
@@ -21,7 +21,7 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 ## Architecture
 
 - **Frontend:** Angular + Capacitor
-- **Backend:** NestJS + Prisma + PostgreSQL
+- **Backend:** NestJS + Drizzle ORM + PostgreSQL
 - **Infrastructure:** Hetzner Cloud, k3s via kube-hetzner, ARM nodes (CAX11)
 - **Ingress:** Traefik (bundled by kube-hetzner)
 - **GitOps:** ArgoCD 3.x, app-of-apps pattern
@@ -49,9 +49,10 @@ npx nx test hearthly-app
 npx nx lint hearthly-api
 npx nx lint hearthly-app
 
-# Prisma
-npx prisma migrate dev           # Run migrations locally
-npx prisma generate              # Regenerate client
+# Drizzle
+npx drizzle-kit generate         # Generate migration from schema changes
+npx drizzle-kit migrate          # Apply migrations
+npx drizzle-kit studio           # Visual database browser
 
 # Docker (multi-platform)
 docker buildx build --platform linux/amd64,linux/arm64 -f apps/hearthly-api/deploy/Dockerfile -t hearthly-api .
@@ -77,4 +78,4 @@ cd infrastructure/cluster && terraform apply
 - kube-hetzner: >= v2.18.1 (v2.18.0 broken)
 - hcloud provider: >= v1.58.0 (DNS support, datacenter deprecation)
 - ArgoCD Helm chart: >= v9.4 (3.x series)
-- Prisma 7: generator `prisma-client`, output to source dir, NestJS needs `moduleFormat = "cjs"`
+- Drizzle ORM: SQL-first, schema in TypeScript, migrations via drizzle-kit
