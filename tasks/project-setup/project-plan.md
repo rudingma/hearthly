@@ -18,7 +18,8 @@
 | 1: Local tooling | Done | Node 24 LTS, all CLIs installed. CLAUDE.md committed. |
 | 2: MCP setup | Skipped | CLI access (gh, hcloud, kubectl, helm, argocd, terraform) covers all needs. Revisit K8s MCP after Task 7 if needed. |
 | 3: Nx monorepo scaffold | Done | hearthly-api (NestJS 11 + /health) + hearthly-app (Angular 21, SCSS). Renamed from hearthly-web. Shared lib deferred. Review fixes: .gitattributes (LF), jest.preset.js, removed nx-welcome + @nestjs/axios, added paths:{} to tsconfig. NX_IGNORE_UNSUPPORTED_TS_SETUP=true needed for Angular builds. |
-| 4-17 | Not started | |
+| 4: Docker Compose + Drizzle | Done | PostgreSQL 18 on port 5434 (5432 taken by other projects). Drizzle ORM replaces Prisma (SQL-first, type-safe). Initial schema + migration applied. |
+| 5-17 | Not started | |
 
 ---
 
