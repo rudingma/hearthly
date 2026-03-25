@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+.angular
+.nx
+
+# Version control
+.git
+.gitattributes
+
+# Documentation
+*.md
+LICENSE
+
+# Environment files
+.env
+.env.*
+
+# Infrastructure (not needed for app builds)
+infrastructure
+.terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# CI/CD
+.github
+
+# Editor config
+.vscode
+.idea
+.DS_Store
+
+# Tests (not needed for production builds)
+**/*.spec.ts
+**/*.test.ts
+apps/*-e2e
+
+# Docker
+docker-compose.yml
