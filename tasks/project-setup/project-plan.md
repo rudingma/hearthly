@@ -6,7 +6,7 @@
 
 **Goal:** From empty repo to default apps running on Kubernetes with full CI/CD, secrets management, and monitoring.
 
-**Tech Stack:** Angular, NestJS, Prisma, PostgreSQL, k3s (Hetzner/kube-hetzner), Terraform, ArgoCD 3.x, GitHub Actions, GHCR, Traefik (bundled), Infisical, Prometheus, Grafana, cert-manager
+**Tech Stack:** Angular, NestJS, Drizzle, PostgreSQL, k3s (Hetzner/kube-hetzner), Terraform, ArgoCD 3.x, GitHub Actions, GHCR, Traefik (bundled), Infisical, Prometheus, Grafana, cert-manager
 
 ---
 
@@ -64,7 +64,7 @@ Task 0: Git init + .gitignore
 Task 1: Local tooling
 Task 2: MCP setup for AI access
     |
-    ├── Tasks 3+4 (sequential): Nx monorepo → Prisma setup
+    ├── Tasks 3+4 (sequential): Nx monorepo → Drizzle setup
     ├── Task 5 (parallel with 3+4): Dockerfiles
     └── Task 6 (parallel, manual): Hetzner account setup
             |
@@ -92,7 +92,7 @@ Task 2: MCP setup for AI access
       Task 17: Deploy & verify end-to-end
 ```
 
-**Key dependencies:** Task 4 (Prisma) depends on Task 3 (Nx scaffold). Task 10 before 11. Task 12 does NOT need Tasks 8-9. Task 13 needs DNS (Task 9). Tasks 13 and 14 are parallel. Traefik is bundled by kube-hetzner in Task 7 — no separate ingress install needed.
+**Key dependencies:** Task 4 (Drizzle) depends on Task 3 (Nx scaffold). Task 10 before 11. Task 12 does NOT need Tasks 8-9. Task 13 needs DNS (Task 9). Tasks 13 and 14 are parallel. Traefik is bundled by kube-hetzner in Task 7 — no separate ingress install needed.
 
 ---
 
@@ -116,7 +116,7 @@ Task 2: MCP setup for AI access
 Install latest stable versions of all tools. Check current docs at implementation time.
 
 - [ ] **Step 1:** Verify Node.js (>= 20 LTS) and npm
-- [ ] **Step 2:** Install global CLI tools: `npm install -g nx@latest prisma`
+- [ ] **Step 2:** Install global CLI tools: `npm install -g nx@latest`
 - [ ] **Step 3:** Install infra CLI tools (hcloud, kubectl, helm, terraform, argocd >= 3.x)
 - [ ] **Step 4:** Verify all tools and print versions
 - [ ] **Step 5:** Create `CLAUDE.md` with tool versions and project conventions, commit
@@ -151,17 +151,17 @@ Renamed from `hearthly-web` → `hearthly-app` because Capacitor produces web + 
 
 ---
 
-### Task 4: Docker Compose + Prisma for Local Development
+### Task 4: Docker Compose + Drizzle for Local Development
 
-**Classification:** AI | **Depends on:** Task 3 (NestJS app must exist for Prisma)
+**Classification:** AI | **Depends on:** Task 3 (NestJS app must exist for Drizzle)
 
-**Creates:** `/docker-compose.yml`, `/.env.example`, Prisma schema
+**Creates:** `/docker-compose.yml`, `/.env.example`, Drizzle schema
 
 - [ ] **Step 1:** Create `docker-compose.yml` with PostgreSQL 16 (persistent volume, health check)
 - [ ] **Step 2:** Create `.env.example` with default credentials
 - [ ] **Step 3:** Verify PostgreSQL starts: `docker compose up -d && docker compose exec postgres pg_isready`
-- [ ] **Step 4:** Configure Prisma in hearthly-api — check Prisma docs for current setup (Prisma 7 changed generator name, output location, and ESM defaults)
-- [ ] **Step 5:** Run initial migration: `npx prisma migrate dev --name init`
+- [ ] **Step 4:** Configure Drizzle ORM in hearthly-api — install `drizzle-orm` + `postgres` driver + `drizzle-kit` (dev), create schema and drizzle config
+- [ ] **Step 5:** Run initial migration: `npx drizzle-kit generate` then `npx drizzle-kit migrate`
 - [ ] **Step 6:** Commit
 
 ---
@@ -415,7 +415,7 @@ Reference for implementation. Check current docs at task execution time.
 | Nx | 22.6.1 | Angular 21 support in 22.3; match plugin versions to Nx version |
 | Angular | 21.0.0 | esbuild default; Ionic 8 verified for Angular 20.x only (Capacitor itself is fine) |
 | NestJS | 11.1.17 | SWC default compiler, Vitest default test runner — verify Nx generator aligns |
-| Prisma | 7.4.1 | Generator: `prisma-client`, output: source dir, NestJS needs `moduleFormat = "cjs"` |
+| Drizzle ORM | latest | SQL-first, type-safe; schema in TypeScript; migrations via drizzle-kit |
 | Capacitor | 8.2.0 | SPM default on iOS |
 | ArgoCD | 3.3.3 (chart v9.4.15) | v3.0 RBAC: policies don't cascade to sub-resources; old metrics removed |
 | cert-manager | 1.20.0 | `crds.enabled=true` still valid; OCI charts now recommended |
@@ -444,7 +444,7 @@ Reference for implementation. Check current docs at task execution time.
 
 - **kube-hetzner:** [GitHub](https://github.com/kube-hetzner/terraform-hcloud-kube-hetzner) | [Terraform Registry](https://registry.terraform.io/modules/kube-hetzner/kube-hetzner/hcloud/latest)
 - **ArgoCD 3.x:** [Upgrade Guide 2.14→3.0](https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/2.14-3.0/) | [Helm Chart](https://artifacthub.io/packages/helm/argo/argo-cd)
-- **Prisma 7:** [Release Blog](https://www.prisma.io/blog/prisma-7-ga) | [NestJS Recipe](https://docs.nestjs.com/recipes/prisma) | [NestJS Discussion #29146](https://github.com/prisma/prisma/discussions/29146)
+- **Drizzle ORM:** [Docs](https://orm.drizzle.team/) | [NestJS integration](https://docs.nestjs.com/recipes/drizzle) | [drizzle-kit](https://orm.drizzle.team/docs/kit-overview)
 - **Hetzner DNS:** [Migration to Console](https://docs.hetzner.com/networking/dns/migration-to-hetzner-console/process/) | [Old API Shutdown](https://status.hetzner.com/incident/c2146c42-6dd2-4454-916a-19f07e0e5a44)
 - **Hetzner Pricing:** [Price Adjustment Docs](https://docs.hetzner.com/general/infrastructure-and-availability/price-adjustment/) | [Cloud Pricing](https://www.hetzner.com/cloud/pricing/)
 - **cert-manager:** [Helm Install](https://cert-manager.io/docs/installation/helm/) | [Releases](https://github.com/cert-manager/cert-manager/releases)
