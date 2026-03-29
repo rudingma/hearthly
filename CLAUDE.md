@@ -13,7 +13,7 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 - **Monorepo:** Nx (use `npx nx` — not installed globally)
 - **Data access:** Drizzle ORM (SQL-first, type-safe query builder)
 - **Containers:** Docker 28 + Docker Buildx (multi-platform: amd64 + arm64)
-- **Infrastructure:** Terraform 1.13, hcloud CLI 1.62
+- **Infrastructure:** Terraform 1.13, hcloud CLI 1.62, Packer 1.12
 - **Kubernetes:** kubectl 1.34, Helm 3.17, ArgoCD CLI 3.3
 - **Git hosting:** GitHub (gh CLI 2.88), private repo
 - **CI/CD:** GitHub Actions → GHCR → ArgoCD
@@ -28,6 +28,16 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 - **Secrets:** Infisical (self-hosted, K8s operator)
 - **Monitoring:** Prometheus + Grafana
 - **Database:** CloudNativePG (self-hosted PostgreSQL)
+
+## Cluster
+
+- **Location:** nbg1 (Nuremberg) — fsn1 had CAX11 capacity issues
+- **Nodes:** 1x CAX11 control plane + 3x CAX11 workers (ARM, 4 GB each)
+- **k3s:** v1.34.5 (stable channel, auto-upgrades enabled)
+- **Traefik LB IP:** 138.199.135.103 (IPv4), 2a01:4f8:c01e:30ba::1 (IPv6)
+- **Module:** kube-hetzner v2.18.5, hcloud provider v1.60.1
+- **Terraform state:** Hetzner Object Storage (S3 backend, bucket: hearthly-tfstate)
+- **Bundled services:** Traefik, cert-manager, hcloud CSI/CCM, metrics-server, kured
 
 ## Build & Run Commands
 
@@ -58,9 +68,15 @@ npx drizzle-kit studio           # Visual database browser
 docker buildx build --platform linux/amd64,linux/arm64 -f apps/hearthly-api/deploy/Dockerfile -t hearthly-api .
 docker buildx build --platform linux/amd64,linux/arm64 -f apps/hearthly-app/deploy/Dockerfile -t hearthly-app .
 
-# Infrastructure
+# Infrastructure (requires TF_VAR_hcloud_token env var)
+cd infrastructure/cluster && terraform init -backend-config=backend.conf
 cd infrastructure/cluster && terraform plan
 cd infrastructure/cluster && terraform apply
+
+# Kubernetes
+export KUBECONFIG=~/.kube/config    # Written by: terraform output -raw kubeconfig > ~/.kube/config
+kubectl get nodes                    # Verify cluster
+kubectl get pods -A                  # All pods across namespaces
 ```
 
 ## Code Conventions
@@ -79,3 +95,8 @@ cd infrastructure/cluster && terraform apply
 - hcloud provider: >= v1.58.0 (DNS support, datacenter deprecation)
 - ArgoCD Helm chart: >= v9.4 (3.x series)
 - Drizzle ORM: SQL-first, schema in TypeScript, migrations via drizzle-kit
+
+## Known Issues
+
+- **WSL2 + kube-hetzner CRLF:** Terraform module files download with CRLF line endings on WSL2, breaking heredoc provisioners. Fix: `find .terraform/modules/kube-hetzner -name "*.tf" -exec sed -i 's/\r$//' {} +` (also .sh, .yaml, .tpl). Must re-run after `terraform init` downloads modules.
+- **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_values` override in main.tf. If Traefik install fails after a fresh apply, patch the HelmChart resource in-cluster.
