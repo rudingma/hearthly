@@ -15,6 +15,7 @@ dist/
 *.tfstate.backup
 *.tfvars
 !*.tfvars.example
+backend.conf
 
 # Kubernetes
 kubeconfig*

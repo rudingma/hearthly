@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars and fill in values.
+# Alternatively, set TF_VAR_hcloud_token as an environment variable.
+
+hcloud_token = "your-hetzner-api-token"
+
+# SSH key paths (defaults to ~/.ssh/id_ed25519)
+# ssh_public_key_file  = "~/.ssh/id_ed25519.pub"
+# ssh_private_key_file = "~/.ssh/id_ed25519"
