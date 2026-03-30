@@ -22,7 +22,8 @@
 | 5: Dockerfiles | Done | Multi-stage: API (node:24-alpine, nx prune, non-root, /api/health check, 335MB) + App (node:24-alpine builder, nginxinc/nginx-unprivileged, SPA routing, security headers, 82MB). .dockerignore excludes tests/infra/docs. Workspace package.json files must be copied before npm ci (npm workspaces). Buildx supports amd64+arm64. Code-reviewed by Opus 4.6 subagent — fixed: nginx security headers, non-root nginx, source map stripping, npm cache cleanup, OCI labels. |
 | 6: Hetzner account | Done | Account created, project `hearthly`, hcloud context active. CAX11 ARM nodes available in fsn1/nbg1/hel1. |
 | 7: Terraform k3s cluster | Done | kube-hetzner v2.18.5, k3s v1.34.5, 1 CP + 3 workers (CAX11 ARM) in nbg1. Traefik LB: 138.199.135.103. Fixed: Traefik chart v34+ schema (globalArguments removed, redirections→http.redirections), CRLF→LF for kube-hetzner on WSL2, fsn1→nbg1 (CAX11 unavailable in fsn1). MicroOS snapshots via Packer. Remote state on Hetzner Object Storage (S3 backend). Smoke test passed. cert-manager bundled by module. |
-| 8-17 | Not started | |
+| 9: DNS | Done | Cloudflare DNS (not Hetzner — Cloudflare Registrar locks NS). A records for @, api, argocd, grafana, secrets → 138.199.135.103. DNS only (grey cloud, no proxy). HTTP→HTTPS redirect confirmed (301). Hetzner DNS zone created then deleted. |
+| 8, 10-17 | Not started | |
 
 ---
 
