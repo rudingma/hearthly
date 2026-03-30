@@ -38,6 +38,25 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 - **Module:** kube-hetzner v2.18.5, hcloud provider v1.60.1
 - **Terraform state:** Hetzner Object Storage (S3 backend, bucket: hearthly-tfstate)
 - **Bundled services:** Traefik, cert-manager, hcloud CSI/CCM, metrics-server, kured
+- **DNS:** Cloudflare (registrar locks NS, can't use Hetzner DNS). A records: @, api, argocd, grafana, secrets → LB IP. DNS only (no proxy).
+
+## ArgoCD
+
+- **Version:** v3.3.6 (Helm chart v9.4.17)
+- **UI:** argocd.hearthly.dev (or `kubectl port-forward svc/argocd-server -n argocd 8080:443`)
+- **Admin password:** `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
+- **Repo access:** HTTPS + GitHub token (SSH blocked by Hetzner firewall outbound). Token in K8s Secret `hearthly-repo` in argocd namespace.
+- **Applications:** hearthly-api, hearthly-app (auto-sync, self-heal), argocd (self-managing)
+- **Firewall note:** Hetzner firewall blocks outbound SSH (port 22). Only 80, 443, 53, 123 allowed outbound.
+
+## Database (Production)
+
+- **Operator:** CloudNativePG v1.28.1 (namespace: cnpg-system)
+- **Cluster:** hearthly-db in hearthly namespace, PostgreSQL 18.1 on ARM64
+- **Storage:** 10Gi Hetzner Volume (hcloud-volumes StorageClass)
+- **Services:** hearthly-db-rw (primary), hearthly-db-ro (replicas), hearthly-db-r (any)
+- **Credentials:** Auto-generated in K8s Secret `hearthly-db-app`
+- **Connection URI:** `kubectl get secret hearthly-db-app -n hearthly -o jsonpath='{.data.uri}' | base64 -d`
 
 ## Build & Run Commands
 
@@ -100,3 +119,4 @@ kubectl get pods -A                  # All pods across namespaces
 
 - **WSL2 + kube-hetzner CRLF:** Terraform module files download with CRLF line endings on WSL2, breaking heredoc provisioners. Fix: `find .terraform/modules/kube-hetzner -name "*.tf" -exec sed -i 's/\r$//' {} +` (also .sh, .yaml, .tpl). Must re-run after `terraform init` downloads modules.
 - **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_values` override in main.tf. If Traefik install fails after a fresh apply, patch the HelmChart resource in-cluster.
+- **Hetzner firewall blocks outbound SSH:** ArgoCD cannot use SSH Git access. Use HTTPS + token instead. If other services need outbound SSH, add `extra_firewall_rules` in Terraform main.tf.
