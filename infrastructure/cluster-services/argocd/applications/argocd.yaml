@@ -15,7 +15,7 @@ spec:
       helm:
         valueFiles:
           - $values/infrastructure/cluster-services/argocd/values.yaml
-    - repoURL: git@github.com:rudingma/hearthly.git
+    - repoURL: https://github.com/rudingma/hearthly.git
       targetRevision: main
       ref: values
   destination:
