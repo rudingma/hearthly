@@ -40,3 +40,5 @@ Thumbs.db
 __screenshots__/
 
 test-output
+infrastructure/cluster/k3s_kubeconfig.yaml
+infrastructure/cluster/k3s_kustomization_backup.yaml
