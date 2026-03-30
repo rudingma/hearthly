@@ -1,0 +1,59 @@
+## ArgoCD Helm chart values for Hearthly
+## Chart: argo/argo-cd v9.4.17 (ArgoCD v3.3.6)
+
+global:
+  domain: argocd.hearthly.dev
+
+# Run behind Traefik without ArgoCD's own TLS (Traefik handles it)
+configs:
+  params:
+    server.insecure: true
+
+# Disable components we don't need yet
+dex:
+  enabled: false
+notifications:
+  enabled: false
+
+# Resource limits for small cluster
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+server:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  # Ingress for ArgoCD UI (TLS via cert-manager comes in Task 13)
+  ingress:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+
+repoServer:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
