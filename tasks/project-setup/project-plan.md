@@ -23,7 +23,9 @@
 | 6: Hetzner account | Done | Account created, project `hearthly`, hcloud context active. CAX11 ARM nodes available in fsn1/nbg1/hel1. |
 | 7: Terraform k3s cluster | Done | kube-hetzner v2.18.5, k3s v1.34.5, 1 CP + 3 workers (CAX11 ARM) in nbg1. Traefik LB: 138.199.135.103. Fixed: Traefik chart v34+ schema (globalArguments removed, redirections→http.redirections), CRLF→LF for kube-hetzner on WSL2, fsn1→nbg1 (CAX11 unavailable in fsn1). MicroOS snapshots via Packer. Remote state on Hetzner Object Storage (S3 backend). Smoke test passed. cert-manager bundled by module. |
 | 9: DNS | Done | Cloudflare DNS (not Hetzner — Cloudflare Registrar locks NS). A records for @, api, argocd, grafana, secrets → 138.199.135.103. DNS only (grey cloud, no proxy). HTTP→HTTPS redirect confirmed (301). Hetzner DNS zone created then deleted. |
-| 8, 10-17 | Not started | |
+| 8: Database (CloudNativePG) | Done | CloudNativePG operator v1.28.1. PostgreSQL 18.1 on ARM64 in hearthly namespace. 10Gi Hetzner Volume, 1 instance, auto-generated credentials. Services: hearthly-db-rw/ro/r. Connectivity verified from test pod. |
+| 10: Helm charts | Done | API chart: 2 replicas, port 3000, /api/health probes, ingress at api.hearthly.dev. App chart: 2 replicas, port 8080, nginx probes, ingress at hearthly.dev. Traefik websecure entrypoint. Both lint clean + dry-run verified. |
+| 11-17 | Not started | |
 
 ---
 
