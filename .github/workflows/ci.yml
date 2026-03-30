@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  NX_IGNORE_UNSUPPORTED_TS_SETUP: "true"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - uses: nrwl/nx-set-shas@v4
+
+      - name: Lint affected
+        run: npx nx affected --target=lint
+
+      - name: Test affected
+        run: npx nx affected --target=test
+
+      - name: Build affected
+        run: npx nx affected --target=build
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high || true

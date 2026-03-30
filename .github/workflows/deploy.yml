@@ -1,0 +1,138 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "*.md"
+      - "tasks/**"
+      - "infrastructure/**"
+
+env:
+  NX_IGNORE_UNSUPPORTED_TS_SETUP: "true"
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - uses: nrwl/nx-set-shas@v4
+
+      # Lint and test
+      - name: Lint affected
+        run: npx nx affected --target=lint
+
+      - name: Test affected
+        run: npx nx affected --target=test
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high || true
+
+      # Determine which apps need new images
+      - name: Check affected apps
+        id: affected
+        run: |
+          AFFECTED=$(npx nx show projects --affected --base=HEAD~1 2>/dev/null || echo "")
+          echo "api=$([[ "$AFFECTED" == *"hearthly-api"* ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "app=$([[ "$AFFECTED" == *"hearthly-app"* ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "Affected projects: $AFFECTED"
+
+      # Docker setup (only if any app is affected)
+      - name: Set up QEMU
+        if: steps.affected.outputs.api == 'true' || steps.affected.outputs.app == 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: steps.affected.outputs.api == 'true' || steps.affected.outputs.app == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        if: steps.affected.outputs.api == 'true' || steps.affected.outputs.app == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build API
+      - name: Build and push hearthly-api
+        if: steps.affected.outputs.api == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/hearthly-api/deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/hearthly-api:sha-${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/hearthly-api:latest
+          cache-from: type=gha,scope=hearthly-api
+          cache-to: type=gha,scope=hearthly-api,mode=max
+
+      - name: Scan hearthly-api
+        if: steps.affected.outputs.api == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/hearthly-api:sha-${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: 0
+
+      # Build App
+      - name: Build and push hearthly-app
+        if: steps.affected.outputs.app == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/hearthly-app/deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/hearthly-app:sha-${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/hearthly-app:latest
+          cache-from: type=gha,scope=hearthly-app
+          cache-to: type=gha,scope=hearthly-app,mode=max
+
+      - name: Scan hearthly-app
+        if: steps.affected.outputs.app == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/hearthly-app:sha-${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: 0
+
+      # Update Helm values and commit (single commit for both apps)
+      - name: Update image tags in Helm values
+        if: steps.affected.outputs.api == 'true' || steps.affected.outputs.app == 'true'
+        run: |
+          TAG="sha-${{ github.sha }}"
+          if [ "${{ steps.affected.outputs.api }}" = "true" ]; then
+            sed -i "s|tag:.*|tag: ${TAG}|" apps/hearthly-api/deploy/chart/values.yaml
+          fi
+          if [ "${{ steps.affected.outputs.app }}" = "true" ]; then
+            sed -i "s|tag:.*|tag: ${TAG}|" apps/hearthly-app/deploy/chart/values.yaml
+          fi
+
+      - name: Commit updated image tags
+        if: steps.affected.outputs.api == 'true' || steps.affected.outputs.app == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps/*/deploy/chart/values.yaml
+          git diff --cached --quiet || git commit -m "deploy: update image tags to sha-${{ github.sha }}"
+          git push
