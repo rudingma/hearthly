@@ -16,11 +16,11 @@ infisical-standalone:
     kubeSecretRef: "infisical-secrets"
     resources:
       requests:
-        cpu: 100m
-        memory: 350Mi
-      limits:
-        cpu: 500m
+        cpu: 200m
         memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
 
   # Traefik ingress for the web UI at secrets.hearthly.dev
   ingress:
