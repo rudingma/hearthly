@@ -27,7 +27,8 @@
 | 10: Helm charts | Done | API chart: 2 replicas, port 3000, /api/health probes, ingress at api.hearthly.dev. App chart: 2 replicas, port 8080, nginx probes, ingress at hearthly.dev. Traefik websecure entrypoint. Both lint clean + dry-run verified. |
 | 11: ArgoCD bootstrap | Done | ArgoCD v3.3.6 (chart v9.4.17). Self-managing via multi-source Application. Apps auto-synced from Git: hearthly-api + hearthly-app deployed (ImagePullBackOff expected — no GHCR images yet, Task 12). Ingress at api.hearthly.dev + hearthly.dev created by ArgoCD. HTTPS repo access (SSH blocked by Hetzner firewall outbound rules). Deploy key on GitHub, token in K8s Secret. Dex + notifications disabled. |
 | 12: CI/CD pipelines | Done | CI workflow (PRs): lint, test, build, audit via Nx affected. Deploy workflow (push to main): lint, test, build multi-platform Docker images (amd64+arm64), push GHCR, Trivy scan, update Helm values tags, commit. ArgoCD auto-syncs. Fixed: actions:read permission for nx-set-shas, Angular test tsconfig missing DOM lib, GHCR pull secret needs read:packages scope. Apps live: api.hearthly.dev/api/health returns ok, hearthly.dev returns 200. |
-| 13-17 | Not started | |
+| 13: TLS (cert-manager) | Done | Let's Encrypt prod via ClusterIssuer (HTTP-01 challenge through Traefik). Both certs issued: hearthly.dev + api.hearthly.dev. Issuer R13, auto-renews. cert-manager was already bundled by kube-hetzner. HTTPS verified with valid certs. |
+| 14-17 | Not started | |
 
 ---
 
