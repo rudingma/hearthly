@@ -33,12 +33,14 @@ server:
     limits:
       cpu: 200m
       memory: 256Mi
-  # Ingress for ArgoCD UI (TLS via cert-manager comes in Task 13)
   ingress:
     enabled: true
+    ingressClassName: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls: true
 
 repoServer:
   resources:
