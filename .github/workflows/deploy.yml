@@ -99,6 +99,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
+          trivyignores: .trivyignore
 
       # Build App
       - name: Build and push hearthly-app
@@ -123,6 +124,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
+          trivyignores: .trivyignore
 
       # Update Helm values and commit (single commit for both apps)
       - name: Update image tags in Helm values

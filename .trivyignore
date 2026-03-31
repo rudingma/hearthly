@@ -1,0 +1,3 @@
+# path-to-regexp CVEs in @nestjs/core — awaiting NestJS 11 patch release
+# These are DoS vulnerabilities in Express route matching, low risk for an internal API
+CVE-2026-4926
