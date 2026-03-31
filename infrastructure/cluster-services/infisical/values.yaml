@@ -1,0 +1,85 @@
+## Infisical self-hosted secrets management
+## Umbrella chart: infisical-standalone + secrets-operator
+
+# --- Infisical application (standalone with bundled PG/Redis) ---
+infisical-standalone:
+  # Override the generated resource names to get clean service names
+  # Without this, Helm generates "infisical-infisical-standalone" (ugly)
+  fullnameOverride: "infisical"
+
+  infisical:
+    enabled: true
+    replicaCount: 1
+    # References a manually-created K8s Secret with ENCRYPTION_KEY,
+    # AUTH_SECRET, and SITE_URL. This secret must exist before deployment.
+    # See bootstrap instructions in the project plan.
+    kubeSecretRef: "infisical-secrets"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 350Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # Traefik ingress for the web UI at secrets.hearthly.dev
+  ingress:
+    enabled: true
+    hostName: "secrets.hearthly.dev"
+    ingressClassName: traefik
+    nginx:
+      enabled: false  # Don't install bundled nginx — we use Traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    tls:
+      - secretName: secrets-hearthly-dev-tls
+        hosts:
+          - secrets.hearthly.dev
+
+  # Bundled PostgreSQL for Infisical's own data (isolated from app DB)
+  postgresql:
+    enabled: true
+    auth:
+      username: infisical
+      database: infisicalDB
+    primary:
+      persistence:
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+  # Bundled Redis for Infisical caching/sessions
+  redis:
+    enabled: true
+    architecture: standalone
+    master:
+      persistence:
+        size: 1Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+# --- Secrets Operator (syncs Infisical secrets → K8s Secrets) ---
+secrets-operator:
+  # Point operator at the in-cluster Infisical service
+  hostAPI: "http://infisical.infisical.svc.cluster.local:8080/api"
+  controllerManager:
+    manager:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
