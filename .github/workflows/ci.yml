@@ -38,4 +38,5 @@ jobs:
         run: npx nx affected --target=build
 
       - name: Audit dependencies
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
+        continue-on-error: true
