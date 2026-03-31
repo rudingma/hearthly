@@ -97,7 +97,8 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/hearthly-api:sha-${{ github.sha }}
           severity: HIGH,CRITICAL
-          exit-code: 0
+          exit-code: 1
+          ignore-unfixed: true
 
       # Build App
       - name: Build and push hearthly-app
@@ -120,7 +121,8 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/hearthly-app:sha-${{ github.sha }}
           severity: HIGH,CRITICAL
-          exit-code: 0
+          exit-code: 1
+          ignore-unfixed: true
 
       # Update Helm values and commit (single commit for both apps)
       - name: Update image tags in Helm values
