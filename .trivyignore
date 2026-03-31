@@ -1,3 +1,17 @@
-# path-to-regexp CVEs in @nestjs/core — awaiting NestJS 11 patch release
-# These are DoS vulnerabilities in Express route matching, low risk for an internal API
+# All CVEs below are in transitive dependencies where npm audit fix --force
+# would require breaking major version downgrades (NestJS 11→10, Nx 22→20).
+# Reviewed and accepted as low risk for a private family app.
+
+# path-to-regexp in @nestjs/core — DoS via regex, awaiting NestJS patch
 CVE-2026-4926
+
+# minimatch — DoS via unbounded backtracking, in npm/tar transitive dep
+CVE-2026-27903
+CVE-2026-27904
+
+# tar — path traversal via symlinks, in npm internals
+CVE-2026-29786
+CVE-2026-31802
+
+# picomatch — ReDoS via extglob, in Nx/Angular build tooling
+CVE-2026-33671
