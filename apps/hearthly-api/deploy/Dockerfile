@@ -29,8 +29,9 @@ WORKDIR /app
 # Copy built app with pruned package.json and lockfile
 COPY --from=builder /app/apps/hearthly-api/dist/ ./
 
-# Install only production dependencies
-RUN npm ci --omit=dev --cache /tmp/npm-cache && rm -rf /tmp/npm-cache
+# Strip devDependencies (nx prune includes them in the lockfile) and install
+RUN node -e "const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); delete p.devDependencies; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2))" && \
+    npm ci --omit=dev --cache /tmp/npm-cache && rm -rf /tmp/npm-cache
 
 USER hearthly
 
