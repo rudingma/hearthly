@@ -8,6 +8,7 @@ dist/
 # Environment
 .env
 .env.local
+.secrets/
 
 # Terraform
 .terraform/
