@@ -22,7 +22,7 @@ FROM node:24-alpine
 
 LABEL org.opencontainers.image.source=https://github.com/rudingma/hearthly
 
-RUN addgroup -S hearthly && adduser -S hearthly -G hearthly
+RUN apk upgrade --no-cache && addgroup -S hearthly && adduser -S hearthly -G hearthly
 
 WORKDIR /app
 
