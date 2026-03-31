@@ -57,6 +57,8 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 - **Services:** hearthly-db-rw (primary), hearthly-db-ro (replicas), hearthly-db-r (any)
 - **Credentials:** Auto-generated in K8s Secret `hearthly-db-app`
 - **Connection URI:** `kubectl get secret hearthly-db-app -n hearthly -o jsonpath='{.data.uri}' | base64 -d`
+- **API wiring:** DATABASE_URL injected into API pods from `hearthly-db-app` secret
+- **PV reclaim policy:** Retain (prevents accidental data loss)
 
 ## Build & Run Commands
 
@@ -102,11 +104,15 @@ kubectl get pods -A                  # All pods across namespaces
 
 - Full TypeScript end-to-end
 - Modular monolith: modules communicate via service interfaces, not direct DB access
-- Helm charts per app in `/apps/xxx/deploy/chart/`
-- App-specific Terraform in `/apps/xxx/infra/`
+- Helm charts per app in `/apps/xxx/deploy/chart/` with `_helpers.tpl` and standard `app.kubernetes.io/*` labels
+- App-specific infra in `/apps/xxx/infra/`
 - Shared platform infra in `/infrastructure/`
 - Separate Terraform state per directory
 - All cluster services managed via ArgoCD (except ArgoCD itself)
+- Security contexts on all deployments (runAsNonRoot, drop ALL capabilities, seccomp RuntimeDefault)
+- X-Powered-By disabled on API
+- Trivy scans in CI with `exit-code: 1` and `ignore-unfixed: true`
+- Phase 2 backlog at `tasks/phase-2-backlog.md`
 
 ## Key Versions to Pin
 
