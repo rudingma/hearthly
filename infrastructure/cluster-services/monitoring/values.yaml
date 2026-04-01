@@ -86,6 +86,16 @@ kube-prometheus-stack:
 
   # --- Prometheus Operator ---
   prometheusOperator:
+    # Use cert-manager for webhook TLS instead of Helm hook Jobs.
+    # The default Job-based approach gets stuck in ArgoCD because
+    # ArgoCD translates Helm hooks into PreSync hooks that don't
+    # always complete correctly.
+    admissionWebhooks:
+      certManager:
+        enabled: true
+        issuerRef:
+          name: letsencrypt-prod
+          kind: ClusterIssuer
     resources:
       requests:
         cpu: 50m
