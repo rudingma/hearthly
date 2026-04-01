@@ -20,9 +20,8 @@ kube-prometheus-stack:
           hosts:
             - grafana.hearthly.dev
 
-    # Retrieve password: kubectl get secret -n monitoring monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 -d
-    adminPassword: "/aL7VOfUglJSyJgc51NdvzYVk2xQ28jW"
-
+    # Default admin: admin / prom-operator — change on first login.
+    # Grafana stores the new password in its SQLite DB (PVC-backed).
     persistence:
       enabled: true
       storageClassName: hcloud-volumes
