@@ -7,8 +7,15 @@ Items identified during Phase 1 that require Phase 2 context to implement.
 - **Content-Security-Policy** on nginx — Requires knowing exact resource origins (API URL, fonts, CDN). Configure after app shell has real content.
 - **CORS configuration** — Define allowed origins when frontend calls API.
 
-## Monitoring Readiness
-- **API `/metrics` endpoint** — Needed for Prometheus ServiceMonitor (Task 15). Install `@willsoto/nestjs-prometheus` or similar.
+## App Observability (OpenTelemetry)
+- **OpenTelemetry instrumentation** — Use `@opentelemetry/auto-instrumentations-node` for NestJS. Single SDK covers metrics, traces, and logs. Replaces the older approach of using `prom-client` / `@willsoto/nestjs-prometheus` for metrics only.
+- **OTel Collector** — Deploy as a DaemonSet or sidecar. Routes signals to backends: metrics → Prometheus, traces → Tempo, logs → Loki.
+- **Tempo** — Distributed tracing backend. Visualize request flows across services in Grafana.
+- **Loki** — Log aggregation. Query structured logs in Grafana (replaces `kubectl logs`).
+- **ServiceMonitor for hearthly-api** — Once OTel exports Prometheus-format metrics, add a ServiceMonitor so Prometheus scrapes them.
+- **App dashboard** — Grafana dashboard with request rate, error rate, response time (p50/p95/p99), pod health.
+
+## Infrastructure Monitoring
 - **Control plane memory** — Monitor for OOM kills. May need larger CP node (CAX21) if stability issues arise.
 
 ## CI/CD Improvements

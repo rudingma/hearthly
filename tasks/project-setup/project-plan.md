@@ -29,7 +29,8 @@
 | 12: CI/CD pipelines | Done | Optimized parallel pipeline: changes job (paths-filter, 5s) → parallel build-api + build-app (ARM-only, ~6 min) → update-tags (4s). CI workflow (PRs): lint, test, build, audit via Nx affected. Trivy enforcement (exit-code: 1, ignore-unfixed, .trivyignore for upstream CVEs). GHCR pull secret with read:packages scope. Concurrency control. No lint/test in deploy (already on PR). |
 | 13: TLS (cert-manager) | Done | Let's Encrypt prod via ClusterIssuer (HTTP-01 challenge through Traefik). All 3 certs issued: hearthly.dev, api.hearthly.dev, argocd.hearthly.dev. Issuer R13, auto-renews at 30 days before expiry. cert-manager was already bundled by kube-hetzner. .dev HSTS requirement resolved. |
 | Post-review fixes | Done | Security contexts (runAsNonRoot, runAsUser numeric, drop ALL). Standard Helm labels (app.kubernetes.io/*) + _helpers.tpl. X-Powered-By disabled. DATABASE_URL wired from CloudNativePG secret. PV reclaim policy → Retain. ArgoCD controller memory → 1Gi. devDependencies stripped from prod image. Old deployments recreated for label migration. |
-| 14-17 | Not started | |
+| 14: Infisical | Done | Infisical v0.158.0 (standalone) + secrets-operator v0.10.29 in infisical namespace. Bundled PG + Redis. UI at secrets.hearthly.dev with Let's Encrypt TLS. Machine identity (Universal Auth) for operator. InfisicalSecret CRD syncs prod secrets → K8s Secret `hearthly-managed-secrets` in hearthly namespace. Resource fix: initial 500m CPU / 512Mi too low for ARM first-boot migrations — increased to 1 CPU / 1Gi (steady-state ~860Mi). Bootstrap secret (ENCRYPTION_KEY, AUTH_SECRET) in .secrets/ (git-ignored). |
+| 15-17 | Not started | |
 
 ---
 
@@ -352,15 +353,13 @@ No separate ingress controller install — Traefik is already running from Task 
 
 **Creates:** `/infrastructure/cluster-services/monitoring/{Chart.yaml, values.yaml, templates/}`
 
-Loki and Tempo deferred — see summary for reasoning.
+Infrastructure monitoring only (cluster health, node/pod resources). App-level observability (request metrics, traces, logs) deferred to Phase 2 via OpenTelemetry — see phase-2-backlog.md.
 
 - [ ] **Step 1:** Create a Helm chart in `/infrastructure/cluster-services/monitoring/` that installs `kube-prometheus-stack` as a dependency. Configure Grafana Traefik IngressRoute at `grafana.<domain>`, retention, resource limits.
 - [ ] **Step 2:** Commit and push — ArgoCD syncs the monitoring Application from Task 11 Step 5
 - [ ] **Step 3:** Verify Prometheus scraping targets
 - [ ] **Step 4:** Verify Grafana accessible with default K8s dashboards
-- [ ] **Step 5:** Add ServiceMonitor for hearthly-api (`/metrics` endpoint)
-- [ ] **Step 6:** Create initial Grafana dashboard (request rate, errors, response time, pod health)
-- [ ] **Step 7:** Commit
+- [ ] **Step 5:** Commit
 
 ---
 
