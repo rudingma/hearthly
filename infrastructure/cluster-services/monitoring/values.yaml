@@ -1,0 +1,115 @@
+## Infrastructure monitoring for Hearthly
+## Umbrella chart wrapping kube-prometheus-stack v82.16.0
+## Phase 1: cluster/infra monitoring only. App observability (OTel) in Phase 2.
+
+kube-prometheus-stack:
+
+  # --- Grafana ---
+  grafana:
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - grafana.hearthly.dev
+      tls:
+        - secretName: grafana-hearthly-dev-tls
+          hosts:
+            - grafana.hearthly.dev
+
+    # Default admin: admin / prom-operator (change in UI after first login)
+    persistence:
+      enabled: true
+      storageClassName: hcloud-volumes
+      size: 2Gi
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+
+  # --- Prometheus ---
+  prometheus:
+    prometheusSpec:
+      retention: 10d
+      retentionSize: "4GB"
+      scrapeInterval: 30s
+      evaluationInterval: 30s
+
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: "1"
+          memory: 512Mi
+
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: hcloud-volumes
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+
+  # --- Alertmanager (disabled for Phase 1) ---
+  alertmanager:
+    enabled: false
+
+  # --- k3s: disable components that bind to 127.0.0.1 ---
+  # k3s runs controller-manager, scheduler, and proxy inside the
+  # single k3s server process. They're not reachable by ServiceMonitors
+  # without changing k3s startup flags. Embedded etcd doesn't expose
+  # the standard metrics endpoint either.
+  kubeEtcd:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+
+  # Not applicable
+  windowsMonitoring:
+    enabled: false
+  thanosRuler:
+    enabled: false
+
+  # --- Prometheus Operator ---
+  prometheusOperator:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+  # --- Node exporter (runs on every node) ---
+  prometheus-node-exporter:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+
+  # --- kube-state-metrics ---
+  kube-state-metrics:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
