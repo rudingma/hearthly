@@ -59,8 +59,8 @@
 |---|---|---|
 | k3s system overhead (3 nodes) | ~1.5 GB | ~500 MB per node |
 | Traefik (bundled) | ~128 MB | Already running after Task 7 |
-| ArgoCD 3.x | ~512 MB | API server, controller, repo-server, Redis |
-| Prometheus + Grafana | ~768 MB | Prometheus ~500 MB, Grafana ~256 MB, exporters |
+| ArgoCD 3.x | ~832 MB | Controller needs 512Mi (2Gi limit) for kube-prometheus-stack CRDs |
+| Prometheus + Grafana | ~608 MB | Prometheus 256Mi (1Gi limit), Grafana 128Mi (384Mi limit), exporters ~128Mi |
 | cert-manager | ~64 MB | |
 | Infisical (1 replica) + PG + Redis | ~734 MB | App ~350 MB, PG ~256 MB, Redis ~128 MB |
 | Infisical Operator | ~64 MB | |
