@@ -73,7 +73,7 @@ infisical-standalone:
 # --- Secrets Operator (syncs Infisical secrets → K8s Secrets) ---
 secrets-operator:
   # Point operator at the in-cluster Infisical service
-  hostAPI: "http://infisical.infisical.svc.cluster.local:8080/api"
+  hostAPI: "http://infisical-infisical-standalone-infisical.infisical.svc.cluster.local:8080/api"
   controllerManager:
     manager:
       resources:
