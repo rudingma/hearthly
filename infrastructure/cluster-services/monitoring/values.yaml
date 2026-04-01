@@ -22,6 +22,12 @@ kube-prometheus-stack:
 
     # Default admin: admin / prom-operator — change on first login.
     # Grafana stores the new password in its SQLite DB (PVC-backed).
+
+    # Recreate strategy required: hcloud-volumes are ReadWriteOnce,
+    # so RollingUpdate fails (new pod can't mount PVC while old holds it).
+    deploymentStrategy:
+      type: Recreate
+
     persistence:
       enabled: true
       storageClassName: hcloud-volumes
