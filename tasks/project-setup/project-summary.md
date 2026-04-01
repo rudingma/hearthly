@@ -61,7 +61,7 @@ Phase 1 deliberately contains no business features. The goal is to invest in a c
 
 **Secrets management: Infisical (self-hosted).** Deployed on K8s via Helm. Open source (MIT core). Has its own Kubernetes Operator that syncs secrets into K8s Secrets. Web UI for managing secrets. Chose over Sealed Secrets (less learning value), OpenBao/Vault (unsealing complexity on Hetzner without cloud KMS), and External Secrets Operator (ESO resumed development in early 2026 after a pause, but Infisical's richer feature set and web UI provide more learning value).
 
-**Monitoring: Phased approach.** Phase 1 deploys Prometheus + Grafana only (metrics and dashboards). Loki (log aggregation) and Tempo + OpenTelemetry (distributed tracing) are deferred until they provide real value — deploying the full LGTM stack at once is too much to absorb alongside K8s, Terraform, and ArgoCD, and the resource footprint is significant.
+**Monitoring: Phased approach.** Phase 1 deploys Prometheus + Grafana for infrastructure monitoring only (cluster health, node/pod resources, K8s dashboards). App-level observability is Phase 2: OpenTelemetry SDK in NestJS (single instrumentation for metrics, traces, and logs) → OTel Collector → Prometheus (metrics), Tempo (traces), Loki (logs). Deploying the full LGTM stack in Phase 1 is too much to absorb alongside K8s, Terraform, and ArgoCD, and there's no app logic to observe yet.
 
 **Database: PostgreSQL.** Self-hosted on K8s via CloudNativePG (or similar Helm chart). Hetzner does not offer a managed PostgreSQL service. Automated daily backups via K8s CronJob to Hetzner Object Storage.
 
