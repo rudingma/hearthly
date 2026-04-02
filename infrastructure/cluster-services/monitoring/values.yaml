@@ -27,12 +27,14 @@ kube-prometheus-stack:
     # We provision a single custom "Hearthly Overview" dashboard instead.
     defaultDashboardsEnabled: false
 
-    # Sidecar picks up dashboards from ConfigMaps with this label
+    # Sidecar picks up dashboards from ConfigMaps with this label.
+    # allowDeletion: sidecar removes dashboards no longer in ConfigMaps.
     sidecar:
       dashboards:
         enabled: true
         label: grafana_dashboard
         labelValue: "1"
+        allowDeletion: true
 
     # Recreate strategy required: hcloud-volumes are ReadWriteOnce,
     # so RollingUpdate fails (new pod can't mount PVC while old holds it).
