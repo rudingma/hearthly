@@ -1,0 +1,108 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+  labels:
+    {{- include "hearthly-api.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: db-backup
+            app.kubernetes.io/instance: {{ .Release.Name }}
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 70
+            runAsGroup: 70
+            seccompProfile:
+              type: RuntimeDefault
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: {{ .Values.backup.image }}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: hearthly-db-app
+                      key: uri
+                - name: S3_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: hearthly-managed-secrets
+                      key: S3_ACCESS_KEY
+                - name: S3_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: hearthly-managed-secrets
+                      key: S3_SECRET_KEY
+                - name: S3_BUCKET
+                  value: {{ .Values.backup.s3.bucket | quote }}
+                - name: S3_ENDPOINT
+                  value: {{ .Values.backup.s3.endpoint | quote }}
+                - name: S3_REGION
+                  value: {{ .Values.backup.s3.region | quote }}
+                - name: RETENTION_DAYS
+                  value: {{ .Values.backup.retentionDays | quote }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache aws-cli > /dev/null 2>&1
+                  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+                  FILENAME="hearthly-db-${TIMESTAMP}.sql.gz"
+
+                  echo "Starting backup: ${FILENAME}"
+                  pg_dump "${DATABASE_URL}" | gzip > "/tmp/${FILENAME}"
+                  SIZE=$(du -h "/tmp/${FILENAME}" | cut -f1)
+                  echo "Dump complete: ${SIZE}"
+
+                  echo "Uploading to s3://${S3_BUCKET}/${FILENAME}"
+                  export AWS_ACCESS_KEY_ID="${S3_ACCESS_KEY}"
+                  export AWS_SECRET_ACCESS_KEY="${S3_SECRET_KEY}"
+                  aws s3 cp "/tmp/${FILENAME}" "s3://${S3_BUCKET}/${FILENAME}" \
+                    --endpoint-url "${S3_ENDPOINT}" \
+                    --region "${S3_REGION}"
+                  echo "Upload complete"
+
+                  echo "Cleaning up backups older than ${RETENTION_DAYS} days"
+                  CUTOFF=$(date -d "-${RETENTION_DAYS} days" +%Y%m%d)
+                  aws s3 ls "s3://${S3_BUCKET}/" \
+                    --endpoint-url "${S3_ENDPOINT}" \
+                    --region "${S3_REGION}" | \
+                  while read -r line; do
+                    FILE=$(echo "$line" | awk '{print $4}')
+                    if [ -n "$FILE" ]; then
+                      FILE_DATE=$(echo "$FILE" | grep -oP '\d{8}' | head -1)
+                      if [ -n "$FILE_DATE" ] && [ "$FILE_DATE" -lt "$CUTOFF" ]; then
+                        echo "Deleting old backup: ${FILE}"
+                        aws s3 rm "s3://${S3_BUCKET}/${FILE}" \
+                          --endpoint-url "${S3_ENDPOINT}" \
+                          --region "${S3_REGION}"
+                      fi
+                    fi
+                  done
+                  echo "Backup complete"
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+{{- end }}
