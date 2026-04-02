@@ -26,7 +26,8 @@ env:
 backup:
   enabled: true
   schedule: "0 2 * * *"  # Daily at 02:00 UTC
-  image: postgres:18-alpine  # Includes pg_dump; aws-cli added below
+  # Two-container approach: postgres:18-alpine for pg_dump (init),
+  # amazon/aws-cli for S3 upload (main). See cronjob template.
   retentionDays: 30
   s3:
     bucket: hearthly-backups
