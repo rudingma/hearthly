@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hearthly-overview-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  hearthly-overview.json: |-
+{{- .Files.Get "dashboards/hearthly-overview.json" | nindent 4 }}
