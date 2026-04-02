@@ -22,3 +22,13 @@ resources:
 
 env:
   PORT: "3000"
+
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 02:00 UTC
+  image: postgres:18-alpine  # Includes pg_dump; aws-cli added below
+  retentionDays: 30
+  s3:
+    bucket: hearthly-backups
+    endpoint: https://nbg1.your-objectstorage.com
+    region: nbg1
