@@ -28,14 +28,17 @@ spec:
           volumes:
             - name: backup-data
               emptyDir: {}
+            - name: tmp
+              emptyDir: {}
           initContainers:
-            # Step 1: pg_dump (postgres image has pg_dump, runs as postgres user)
+            # Step 1: pg_dump with custom format (supports parallel restore)
             - name: dump
-              image: postgres:18-alpine
+              image: {{ .Values.backup.images.dump }}
               securityContext:
                 runAsUser: 70
                 runAsGroup: 70
                 allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
                 capabilities:
                   drop: ["ALL"]
               env:
@@ -51,9 +54,10 @@ spec:
                   set -eo pipefail
                   TIMESTAMP=$(date +%Y%m%d-%H%M%S)
                   echo "${TIMESTAMP}" > /backup/timestamp
-                  FILENAME="hearthly-db-${TIMESTAMP}.sql.gz"
+                  FILENAME="hearthly-db-${TIMESTAMP}.dump"
+
                   echo "Dumping database: ${FILENAME}"
-                  pg_dump "${DATABASE_URL}" | gzip > "/backup/${FILENAME}"
+                  pg_dump "${DATABASE_URL}" --format=custom > "/backup/${FILENAME}"
 
                   FILESIZE=$(stat -c%s "/backup/${FILENAME}" 2>/dev/null || echo 0)
                   if [ "$FILESIZE" -lt 100 ]; then
@@ -61,6 +65,10 @@ spec:
                     exit 1
                   fi
                   echo "Dump complete: $(du -h /backup/${FILENAME} | cut -f1)"
+
+                  echo "Generating checksum"
+                  sha256sum "/backup/${FILENAME}" > "/backup/${FILENAME}.sha256"
+                  cat "/backup/${FILENAME}.sha256"
               volumeMounts:
                 - name: backup-data
                   mountPath: /backup
@@ -72,13 +80,14 @@ spec:
                   cpu: 500m
                   memory: 256Mi
           containers:
-            # Step 2: Upload to S3 (aws-cli image has aws command)
+            # Step 2: Upload to S3 (lifecycle policy handles retention)
             - name: upload
-              image: amazon/aws-cli:2.27.31
+              image: {{ .Values.backup.images.upload }}
               securityContext:
                 runAsUser: 1000
                 runAsGroup: 1000
                 allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
                 capabilities:
                   drop: ["ALL"]
               env:
@@ -98,44 +107,27 @@ spec:
                   value: {{ .Values.backup.s3.endpoint | quote }}
                 - name: S3_REGION
                   value: {{ .Values.backup.s3.region | quote }}
-                - name: RETENTION_DAYS
-                  value: {{ .Values.backup.retentionDays | quote }}
               command:
                 - /bin/sh
                 - -c
                 - |
                   set -e
                   TIMESTAMP=$(cat /backup/timestamp)
-                  FILENAME="hearthly-db-${TIMESTAMP}.sql.gz"
+                  FILENAME="hearthly-db-${TIMESTAMP}.dump"
 
                   echo "Uploading /backup/${FILENAME} to s3://${S3_BUCKET}/"
                   aws s3 cp "/backup/${FILENAME}" "s3://${S3_BUCKET}/${FILENAME}" \
                     --endpoint-url "${S3_ENDPOINT}" \
                     --region "${S3_REGION}"
-                  echo "Upload complete"
-
-                  echo "Cleaning up backups older than ${RETENTION_DAYS} days"
-                  CUTOFF=$(date -d "-${RETENTION_DAYS} days" +%Y%m%d)
-                  aws s3 ls "s3://${S3_BUCKET}/" \
+                  aws s3 cp "/backup/${FILENAME}.sha256" "s3://${S3_BUCKET}/${FILENAME}.sha256" \
                     --endpoint-url "${S3_ENDPOINT}" \
-                    --region "${S3_REGION}" > /tmp/backup-list.txt || true
-
-                  while read -r line; do
-                    FILE=$(echo "$line" | awk '{print $4}')
-                    if [ -n "$FILE" ]; then
-                      FILE_DATE=$(echo "$FILE" | grep -oP '\d{8}' | head -1)
-                      if [ -n "$FILE_DATE" ] && [ "$FILE_DATE" -lt "$CUTOFF" ]; then
-                        echo "Deleting old backup: ${FILE}"
-                        aws s3 rm "s3://${S3_BUCKET}/${FILE}" \
-                          --endpoint-url "${S3_ENDPOINT}" \
-                          --region "${S3_REGION}" || true
-                      fi
-                    fi
-                  done < /tmp/backup-list.txt
-                  echo "Backup complete"
+                    --region "${S3_REGION}"
+                  echo "Upload complete (backup + checksum)"
               volumeMounts:
                 - name: backup-data
                   mountPath: /backup
+                - name: tmp
+                  mountPath: /tmp
               resources:
                 requests:
                   cpu: 50m
