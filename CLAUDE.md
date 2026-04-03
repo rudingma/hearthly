@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Family management app. Phase 1 (infrastructure) is complete — see `tasks/phase-1-record.md` for architecture decisions and implementation log. Phase 2 backlog at `tasks/phase-2/backlog.md`.
+Family management app. See `tasks/project-summary.md` for architecture decisions and key rationale. Phase 2 backlog at `tasks/phase-2/backlog.md`.
 
 **Domain:** hearthly.dev
 
