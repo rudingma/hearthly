@@ -59,8 +59,9 @@ Family management app. Phase 1 = infrastructure setup (no features). See `tasks/
 - **Connection URI:** `kubectl get secret hearthly-db-app -n hearthly -o jsonpath='{.data.uri}' | base64 -d`
 - **API wiring:** DATABASE_URL injected into API pods from `hearthly-db-app` secret
 - **PV reclaim policy:** Retain (prevents accidental data loss)
-- **Backups:** Daily pg_dump CronJob at 02:00 UTC → gzip → Hetzner Object Storage (`hearthly-backups` bucket). 30-day retention. S3 credentials from Infisical.
-- **Restore:** `aws s3 cp s3://hearthly-backups/<filename>.sql.gz . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && gunzip <filename>.sql.gz && psql "$(kubectl get secret hearthly-db-app -n hearthly -o jsonpath='{.data.uri}' | base64 -d)" < <filename>.sql`
+- **Backups:** Daily pg_dump (custom format) CronJob at 02:00 UTC → Hetzner Object Storage (`hearthly-backups` bucket). S3 lifecycle policy handles 30-day retention. SHA256 checksums uploaded alongside each backup. S3 credentials from Infisical.
+- **Restore:** `aws s3 cp s3://hearthly-backups/<filename>.dump . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && pg_restore -d "$(kubectl get secret hearthly-db-app -n hearthly -o jsonpath='{.data.uri}' | base64 -d)" <filename>.dump`
+- **Verify checksum:** `aws s3 cp s3://hearthly-backups/<filename>.dump.sha256 . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && sha256sum -c <filename>.dump.sha256`
 
 ## Build & Run Commands
 

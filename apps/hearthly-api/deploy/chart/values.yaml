@@ -26,9 +26,10 @@ env:
 backup:
   enabled: true
   schedule: "0 2 * * *"  # Daily at 02:00 UTC
-  # Two-container approach: postgres:18-alpine for pg_dump (init),
-  # amazon/aws-cli for S3 upload (main). See cronjob template.
-  retentionDays: 30
+  images:
+    dump: postgres:18-alpine
+    upload: amazon/aws-cli:2.27.31
+  # Retention handled by S3 lifecycle policy on the bucket (30-day expiry).
   s3:
     bucket: hearthly-backups
     endpoint: https://nbg1.your-objectstorage.com
