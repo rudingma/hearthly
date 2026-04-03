@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Family management app. Phase 1 = infrastructure setup (no features). See `tasks/project-setup/project-summary.md` for architecture decisions and `tasks/project-setup/project-plan.md` for implementation tasks.
+Family management app. Phase 1 (infrastructure) is complete — see `tasks/phase-1-record.md` for architecture decisions and implementation log. Phase 2 backlog at `tasks/phase-2/backlog.md`.
 
 **Domain:** hearthly.dev
 
@@ -115,7 +115,7 @@ kubectl get pods -A                  # All pods across namespaces
 - Security contexts on all deployments (runAsNonRoot, drop ALL capabilities, seccomp RuntimeDefault)
 - X-Powered-By disabled on API
 - Trivy scans in CI with `exit-code: 1` and `ignore-unfixed: true`
-- Phase 2 backlog at `tasks/phase-2-backlog.md`
+- Phase 2 backlog at `tasks/phase-2/backlog.md`
 
 ## Key Versions to Pin
 
