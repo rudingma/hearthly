@@ -186,7 +186,7 @@ hearthly/
 
 ## Phase 2 (Next)
 
-See `tasks/phase-2-backlog.md`. Key topics:
+See `tasks/phase-2/backlog.md`. Key topics:
 - Authentication (Keycloak)
 - App observability (OpenTelemetry → Prometheus/Tempo/Loki)
 - Business features (Haushaltsbuch / household budget tracker)
