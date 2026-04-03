@@ -60,14 +60,17 @@ Family management app. Phase 1 = fully automated infrastructure on Kubernetes. N
 
 ```bash
 # Prerequisites: Node.js 24, Docker, nvm
-docker compose up -d              # Local PostgreSQL
+cp .env.example .env              # Database connection for local dev
+docker compose up -d              # Local PostgreSQL (port 5434)
 npx nx serve hearthly-api        # Backend (hot reload, port 3000)
 npx nx serve hearthly-app        # Frontend (hot reload, port 4200)
 ```
 
+This is an Nx monorepo — use `npx nx` for all build/serve/test/lint commands.
+
 ## Deployment
 
-Push to `main` → GitHub Actions builds Docker images → pushes to GHCR → updates image tags → ArgoCD syncs automatically.
+Pull requests trigger CI (lint, test, build for affected projects). Merging to `main` triggers the deploy pipeline: build Docker images → push to GHCR → update image tags → ArgoCD syncs automatically.
 
 ```bash
 # Check deployment status
@@ -86,7 +89,7 @@ Application secrets are managed in Infisical (https://secrets.hearthly.dev):
 2. The K8s operator syncs them into `hearthly-managed-secrets` in the `hearthly` namespace (every 60s)
 3. Pods reference the K8s Secret — no secrets in Git
 
-Bootstrap secrets (Infisical's own ENCRYPTION_KEY, AUTH_SECRET) are in `.secrets/` (gitignored).
+Bootstrap secrets and credentials are in `.secrets/` (gitignored): Infisical bootstrap (ENCRYPTION_KEY, AUTH_SECRET), Infisical machine identity, and Grafana API token.
 
 ## Monitoring
 
@@ -101,7 +104,7 @@ The dashboard shows:
 - Namespace breakdown
 - Prometheus self-health
 
-Prometheus scrapes 23 targets every 30s. 10-day retention on 10Gi storage.
+Prometheus scrapes cluster targets every 30s. 10-day retention on 10Gi storage.
 
 ## Database Backups
 
@@ -140,9 +143,13 @@ terraform apply
 terraform output -raw kubeconfig > ~/.kube/config && chmod 600 ~/.kube/config
 ```
 
-**Cluster:** 1x CAX11 control plane + 3x CAX11 workers (ARM, Nuremberg). ~€32/month.
+**Cluster:** 1x CAX11 control plane + 3x CAX11 workers (ARM, Nuremberg). ~€32/month (post-April 2026 pricing).
 
 **Namespaces:** `hearthly` (app), `argocd`, `infisical`, `monitoring`, `traefik`, `cert-manager`, `kube-system`, `cnpg-system`
+
+**CloudNativePG operator:** Installed via `kubectl apply` from [CNPG releases](https://cloudnative-pg.io/releases/) (v1.28.1). Not managed by ArgoCD — the operator is a one-time install in the `cnpg-system` namespace. The database Cluster CRD is at `apps/hearthly-api/infra/database.yaml`.
+
+**Requires:** `terraform`, `kubectl`, `helm`, `argocd` CLI tools. See `CLAUDE.md` for exact versions.
 
 ## Project Structure
 
@@ -151,22 +158,29 @@ hearthly/
 ├── apps/
 │   ├── hearthly-api/          # NestJS backend
 │   │   ├── src/
+│   │   ├── migrations/        # Drizzle ORM migrations
+│   │   ├── infra/
+│   │   │   └── database.yaml  # CloudNativePG Cluster CRD
 │   │   └── deploy/
 │   │       ├── Dockerfile
 │   │       └── chart/         # Helm chart (incl. backup CronJob)
-│   └── hearthly-app/          # Angular frontend
-│       ├── src/
-│       └── deploy/
-│           ├── Dockerfile
-│           └── chart/         # Helm chart
+│   ├── hearthly-app/          # Angular frontend
+│   │   ├── src/
+│   │   └── deploy/
+│   │       ├── Dockerfile
+│   │       └── chart/         # Helm chart
+│   ├── hearthly-api-e2e/      # API end-to-end tests
+│   └── hearthly-app-e2e/      # App end-to-end tests
 ├── infrastructure/
 │   ├── cluster/               # Terraform (kube-hetzner, k3s)
 │   └── cluster-services/
 │       ├── argocd/            # ArgoCD config + app-of-apps
 │       ├── cert-manager/      # ClusterIssuer
 │       ├── infisical/         # Infisical + secrets operator
-│       └── monitoring/        # Prometheus + Grafana
-├── .github/workflows/         # CI/CD pipelines
+│       └── monitoring/        # Prometheus + Grafana + dashboard
+├── .github/workflows/         # CI (ci.yml) + Deploy (deploy.yml)
+├── docker-compose.yml         # Local PostgreSQL for development
+├── CLAUDE.md                  # AI assistant context (env, commands, conventions)
 └── tasks/                     # Project plans and backlog
 ```
 
