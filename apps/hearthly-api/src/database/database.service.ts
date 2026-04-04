@@ -10,21 +10,33 @@ export type DrizzleDB = ReturnType<typeof drizzle<typeof schema>>;
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
+  private readonly databaseUrl: string;
   private readonly sql: ReturnType<typeof postgres>;
   readonly db: DrizzleDB;
 
   constructor() {
-    this.sql = postgres(process.env.DATABASE_URL!);
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
+    this.databaseUrl = databaseUrl;
+    this.sql = postgres(databaseUrl);
     this.db = drizzle(this.sql, { schema });
   }
 
   async onModuleInit() {
     this.logger.log('Running database migrations...');
-    const migrationClient = postgres(process.env.DATABASE_URL!, { max: 1 });
-    const migrationDb = drizzle(migrationClient);
-    await migrate(migrationDb, { migrationsFolder: './migrations' });
-    await migrationClient.end();
-    this.logger.log('Migrations complete');
+    const migrationClient = postgres(this.databaseUrl, { max: 1 });
+    try {
+      const migrationDb = drizzle(migrationClient);
+      await migrate(migrationDb, { migrationsFolder: './migrations' });
+      this.logger.log('Migrations complete');
+    } catch (error) {
+      this.logger.error('Migration failed', error);
+      throw error;
+    } finally {
+      await migrationClient.end();
+    }
   }
 
   async onModuleDestroy() {
