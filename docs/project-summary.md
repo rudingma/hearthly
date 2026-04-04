@@ -9,19 +9,23 @@ Hearthly is a family management app. It starts as a Haushaltsbuch (household bud
 ## Goals
 
 1. **Learning** — Hands-on experience with Kubernetes, Terraform, GitOps, observability, and secrets management. The infrastructure complexity is intentional.
-2. **Building a real product** — A family app that will grow over multiple phases.
+2. **Building a real product** — A family app that will grow milestone by milestone.
 
 **Development philosophy:** AI-first. Claude Code implements ~99% of the app. The developer focuses on planning and decisions.
 
 **Work tracking:** GitHub Issues + GitHub Projects kanban board. Feature work is grouped into milestones (naturally sized, each with a clear deliverable). Infrastructure and bugs are standalone issues. No sprints, no story points — work top to bottom.
 
-## Phases
+## Milestones
 
-| Phase | Focus | Status |
+| Milestone | Focus | Status |
 |---|---|---|
-| **Phase 1** | Infrastructure & DevOps | Complete |
-| **Phase 2** | Auth, app shell, first features | Next |
-| **Phase 3+** | Business features (budget, groceries, schedules) | Future |
+| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups | Complete |
+| **Data Layer Foundation** | Drizzle module, repository pattern, transactions, test infra | Next |
+| **Authentication** | Keycloak, OIDC in NestJS + Angular | Planned |
+| **App Shell** | Angular layout, navigation, routing, theming | Planned |
+| **Family & Household Model** | Data model, multi-tenancy | Planned |
+| **Observability** | OpenTelemetry, Tempo, Loki, app dashboards | Planned |
+| *Future* | Business features (budget, groceries, schedules) | — |
 
 ## Tech Stack
 
@@ -33,11 +37,11 @@ Hearthly is a family management app. It starts as a Haushaltsbuch (household bud
 | Architecture | Modular monolith | No microservices. Clean module boundaries via service interfaces. Extract only when there's a real reason. |
 | Hosting | Hetzner Cloud (k3s) | 2-3x cheaper than DigitalOcean/Civo/Scaleway. Self-managed k3s via kube-hetzner Terraform module. |
 | Nodes | ARM (CAX11) | Cheaper than x86. 1 CP + 3 workers, 4GB each. ~€32/month total. |
-| Ingress | Traefik | Bundled by kube-hetzner. ingress-nginx retired March 2026. Gateway API migration in Phase 2. |
+| Ingress | Traefik | Bundled by kube-hetzner. ingress-nginx retired March 2026. Gateway API migration planned (see GitHub Issues). |
 | GitOps | ArgoCD (app-of-apps) | Everything deployed via Git commits. CI never needs cluster credentials. |
 | CI/CD | GitHub Actions → GHCR | PR: lint+test. Push to main: build → push → ArgoCD syncs. ARM-only builds (cluster is ARM-only). |
 | Secrets | Infisical (self-hosted) | Chosen over Sealed Secrets (less learning value), Vault (unsealing complexity without cloud KMS), ESO (less mature UI). |
-| Monitoring | Prometheus + Grafana | Phase 1: infra only. Phase 2: OpenTelemetry for app metrics/traces/logs. |
+| Monitoring | Prometheus + Grafana | Infrastructure monitoring live. App-level observability (OpenTelemetry) tracked in Observability milestone. |
 | Backups | pg_dump CronJob → S3 | Daily, custom format, SHA256 checksums, 30-day S3 lifecycle policy. |
 
 ## Key Decisions
@@ -64,14 +68,14 @@ CloudNativePG has built-in backup via the Barman Cloud Plugin, which provides po
 
 **Revisit when:** plugin reaches 1.0, Hetzner S3 restore bug is fixed, or real users exist.
 
-### Infra monitoring only (Phase 1)
+### Infra monitoring only (initial setup)
 
-Phase 1 deploys Prometheus + Grafana for cluster health. App-level observability (request metrics, traces, logs) deferred because:
+The Project Setup & Infrastructure milestone deployed Prometheus + Grafana for cluster health. App-level observability (request metrics, traces, logs) deferred because:
 - No app logic to observe yet
 - OpenTelemetry SDK + Collector + Tempo + Loki is too much to absorb alongside K8s/Terraform/ArgoCD
 - Significant resource footprint on small nodes
 
-**Phase 2 approach:** OpenTelemetry SDK in NestJS (single instrumentation) → OTel Collector → Prometheus (metrics), Tempo (traces), Loki (logs).
+**Observability milestone approach:** OpenTelemetry SDK in NestJS (single instrumentation) → OTel Collector → Prometheus (metrics), Tempo (traces), Loki (logs).
 
 ### Custom Grafana dashboard over bundled
 
@@ -82,7 +86,7 @@ kube-prometheus-stack ships 23 generic dashboards. Replaced with 1 custom "Heart
 
 ### ArgoCD admission webhooks disabled
 
-kube-prometheus-stack's Helm hook annotations for admission webhook creation block ArgoCD sync permanently (PreSync hooks never complete). Webhooks only validate PrometheusRule CRDs — not needed until custom alerting rules are written.
+kube-prometheus-stack's Helm hook annotations for admission webhook creation block ArgoCD sync permanently (PreSync hooks never complete). Webhooks only validate PrometheusRule CRDs — not needed until custom alerting rules are written (Observability milestone).
 
 ### ArgoCD controller memory (2Gi)
 
@@ -90,7 +94,7 @@ kube-prometheus-stack generates ~80 CRDs + many PrometheusRules and ServiceMonit
 
 ### No staging environment
 
-Production only. No staging until there are real features and users to justify the resource cost. A staging namespace is trivial to add later.
+Production only. No staging until there are real features and users to justify the resource cost. CI free tier (2,000 min/month) has sufficient headroom for direct-to-main workflow. A staging namespace is trivial to add later.
 
 ### Database schema strategy
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Family management app. See `tasks/project-summary.md` for architecture decisions and key rationale.
+Family management app. See `docs/project-summary.md` for architecture decisions and key rationale.
 
 **Work tracking:** GitHub Issues + GitHub Projects (kanban board). Milestones group feature work (Authentication, App Shell, etc.). Infra/bugs are standalone issues. Labels: `feature`, `bug`, `infra`, `documentation`.
 
@@ -117,7 +117,7 @@ kubectl get pods -A                  # All pods across namespaces
 - Security contexts on all deployments (runAsNonRoot, drop ALL capabilities, seccomp RuntimeDefault)
 - X-Powered-By disabled on API
 - Trivy scans in CI with `exit-code: 1` and `ignore-unfixed: true`
-- Phase 2 backlog at `tasks/phase-2/backlog.md`
+- Work tracked via GitHub Issues + Milestones (see `gh milestone list`, `gh issue list`)
 
 ## Key Versions to Pin
 
