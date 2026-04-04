@@ -13,8 +13,5 @@ CVE-2026-27904
 CVE-2026-29786
 CVE-2026-31802
 
-# picomatch — ReDoS via extglob, in Nx/Angular build tooling
-CVE-2026-33671
-
 # zlib in Alpine base — buffer overflow, awaiting nginx-unprivileged image update
 CVE-2026-22184
