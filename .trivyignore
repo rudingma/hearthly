@@ -13,5 +13,8 @@ CVE-2026-27904
 CVE-2026-29786
 CVE-2026-31802
 
+# picomatch — ReDoS via extglob, bundled in node:24-alpine's npm (not app code)
+CVE-2026-33671
+
 # zlib in Alpine base — buffer overflow, awaiting nginx-unprivileged image update
 CVE-2026-22184
