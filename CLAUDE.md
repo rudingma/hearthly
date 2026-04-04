@@ -119,6 +119,15 @@ kubectl get pods -A                  # All pods across namespaces
 - Trivy scans in CI with `exit-code: 1` and `ignore-unfixed: true`
 - Work tracked via GitHub Issues + Milestones (see `gh milestone list`, `gh issue list`)
 
+## Git Workflow
+
+- **Feature branches** for all work: `feat/<issue#>-<short-desc>`, `fix/<issue#>-<short-desc>`
+- Commit freely on the branch (small, incremental commits are fine)
+- Create a PR via `gh pr create` when done
+- **Squash merge** to main (one clean commit per issue/feature)
+- Delete the branch after merge
+- Never commit directly to main
+
 ## Key Versions to Pin
 
 - kube-hetzner: >= v2.18.1 (v2.18.0 broken)
