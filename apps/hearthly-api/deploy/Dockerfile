@@ -26,12 +26,14 @@ RUN apk upgrade --no-cache && addgroup -S hearthly && adduser -S hearthly -G hea
 
 WORKDIR /app
 
-# Copy built app with pruned package.json and lockfile
+# Copy pruned package.json and lockfile for dependency install
 COPY --from=builder /app/apps/hearthly-api/dist/ ./
 
-# Strip devDependencies (nx prune includes them in the lockfile) and install
+# Strip devDependencies (nx prune includes them in the lockfile), install,
+# then remove the lockfile — it contains dev dependency entries that trigger
+# false Trivy CVE positives (e.g. drizzle-kit's bundled esbuild).
 RUN node -e "const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); delete p.devDependencies; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2))" && \
-    npm ci --omit=dev --cache /tmp/npm-cache && rm -rf /tmp/npm-cache
+    npm ci --omit=dev --cache /tmp/npm-cache && rm -rf /tmp/npm-cache package-lock.json
 
 USER hearthly
 
