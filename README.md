@@ -1,6 +1,6 @@
 # Hearthly
 
-Family management app. Phase 1 = fully automated infrastructure on Kubernetes. No business features yet.
+Family management app. Infrastructure is live on Kubernetes (Project Setup & Infrastructure milestone complete). Feature development tracked via [GitHub Milestones](https://github.com/rudingma/hearthly/milestones).
 
 ## Architecture
 
@@ -181,13 +181,16 @@ hearthly/
 ├── .github/workflows/         # CI (ci.yml) + Deploy (deploy.yml)
 ├── docker-compose.yml         # Local PostgreSQL for development
 ├── CLAUDE.md                  # AI assistant context (env, commands, conventions)
-└── tasks/                     # Project plans and backlog
+└── docs/                      # Architecture decisions and design documents
 ```
 
-## Phase 2 (Next)
+## What's Next
 
-See `tasks/phase-2/backlog.md`. Key topics:
-- Authentication (Keycloak)
-- App observability (OpenTelemetry → Prometheus/Tempo/Loki)
-- Business features (Haushaltsbuch / household budget tracker)
-- Kubernetes Gateway API migration
+Tracked via [GitHub Milestones](https://github.com/rudingma/hearthly/milestones):
+- **Data Layer Foundation** — Drizzle module, repository pattern, test infrastructure
+- **Authentication** — Keycloak, OIDC across the stack
+- **App Shell** — Angular layout, navigation, theming
+- **Family & Household Model** — Data model, multi-tenancy
+- **Observability** — OpenTelemetry → Prometheus/Tempo/Loki
+
+See also standalone issues for security hardening, Gateway API migration, and infrastructure improvements.

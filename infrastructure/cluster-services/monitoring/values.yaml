@@ -1,6 +1,6 @@
 ## Infrastructure monitoring for Hearthly
 ## Umbrella chart wrapping kube-prometheus-stack v82.16.0
-## Phase 1: cluster/infra monitoring only. App observability (OTel) in Phase 2.
+## Cluster/infra monitoring only. App observability (OTel) in Observability milestone.
 
 kube-prometheus-stack:
 
@@ -80,7 +80,7 @@ kube-prometheus-stack:
               requests:
                 storage: 10Gi
 
-  # --- Alertmanager (disabled for Phase 1) ---
+  # --- Alertmanager (disabled until custom alerting rules are needed) ---
   alertmanager:
     enabled: false
 
@@ -106,7 +106,7 @@ kube-prometheus-stack:
 
   # --- Prometheus Operator ---
   prometheusOperator:
-    # Disable admission webhooks for Phase 1.
+    # Disable admission webhooks.
     # The chart's webhook hook resources (Jobs, RBAC) use Helm hook
     # annotations that ArgoCD translates to PreSync hooks, blocking
     # the entire sync. Webhooks only validate PrometheusRule CRDs —

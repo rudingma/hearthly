@@ -64,8 +64,8 @@ apps/hearthly-api/src/
 │
 apps/hearthly-api/
 ├── migrations/                        # Centralized migration directory (all modules)
-│   ├── 20260401_PROJ-101_create-users.sql
-│   ├── 20260403_PROJ-115_create-products.sql
+│   ├── 20260401_13_create-users.sql
+│   ├── 20260403_14_create-products.sql
 │   └── ...
 └── drizzle.config.ts                  # Points to barrel file
 ```
@@ -214,19 +214,18 @@ export default defineConfig({
 1. Dev changes a table definition in their module's `schema/`
 2. Run: `npx drizzle-kit generate`
 3. Drizzle Kit diffs TS schema vs last snapshot, generates SQL file
-4. Dev renames the file: `20260401_PROJ-101_add-user-preferences.sql`
+4. Dev renames the file: `20260401_13_add-user-preferences.sql` (issue number from GitHub)
 5. Dev reviews the generated SQL (learning opportunity!)
 6. Commit schema change + migration file together
-7. CI runs migrations against staging DB
-8. On deploy: migrations run before app starts
+7. On deploy: migrations run before app starts
 
 **Naming convention:**
 
 | Format | Example |
 |---|---|
-| `YYYYMMDD_TICKET_description.sql` | `20260401_PROJ-101_create-users.sql` |
-| Multiple migrations per ticket | `20260401_PROJ-101_create-users.sql`, `20260401_PROJ-101_add-user-index.sql` |
-| Hotfix / no ticket | `20260405_hotfix_fix-email-constraint.sql` |
+| `YYYYMMDD_ISSUE_description.sql` | `20260401_13_create-users.sql` |
+| Multiple migrations per issue | `20260401_13_create-users.sql`, `20260401_13_add-user-index.sql` |
+| Hotfix / no issue | `20260405_hotfix_fix-email-constraint.sql` |
 
 **Running migrations at app startup:**
 
