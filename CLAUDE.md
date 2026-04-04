@@ -123,13 +123,15 @@ kubectl get pods -A                  # All pods across namespaces
 
 **Issue lifecycle:**
 
-1. Create feature branch: `feat/<issue#>-<short-desc>` or `fix/<issue#>-<short-desc>`
-2. Commit freely on the branch (small, incremental commits are fine — they get squashed)
-3. Push branch and create PR via `gh pr create` — link the issue in the PR body
-4. **Wait for CI to pass** before merging (CI runs lint/test/build, ~1-2 min)
-5. Squash merge via `gh pr merge --squash --delete-branch`
-6. Close the issue with `gh issue close <#> --comment "summary"` — reference the PR number
-7. Never commit directly to main
+1. Assign the issue to yourself and mark it **in progress** (`gh issue edit <#> --add-assignee @me`)
+2. Create feature branch: `feat/<issue#>-<short-desc>` or `fix/<issue#>-<short-desc>`
+3. Commit freely on the branch (small, incremental commits are fine — they get squashed)
+4. Push branch and create PR via `gh pr create` — link the issue in the PR body
+5. **Wait for CI to pass** before merging (CI runs lint/test/build, ~1-2 min)
+6. Squash merge via `gh pr merge --squash --delete-branch`
+7. Close the issue with `gh issue close <#> --comment "summary"` — reference the PR number
+
+**Small changes** (docs, config, CLAUDE.md updates) not tied to an issue can be committed directly to main without a branch or PR.
 
 **Commit messages:** Use `type(scope): description (#issue)` — e.g., `feat(api): add helmet for security headers (#25)`. The `(#issue)` suffix auto-links to the GitHub issue.
 
