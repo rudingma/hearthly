@@ -111,9 +111,9 @@ export const users = pgTable('users', {
 **Approach:** Thin repository layer on every module. Not for ORM swappability — for encapsulation, testability, and a consistent data access boundary.
 
 ```
-Controller  →  Service  →  Repository  →  Drizzle
-   (HTTP)      (business     (data         (SQL)
-                logic)        access)
+Resolver  →  Service  →  Repository  →  Drizzle
+(GraphQL)    (business     (data         (SQL)
+              logic)        access)
 ```
 
 **Repository rules:**
@@ -170,18 +170,25 @@ export class UserRepository {
 
 **Service example:**
 
+Services return plain TypeScript discriminated unions — no framework imports (no HTTP exceptions, no GraphQL types). The resolver maps service results to GraphQL types. See `docs/api-design.md` Section 3 for the full error handling pattern.
+
 ```ts
 // modules/user/user.service.ts
+type RegisterResult =
+  | { kind: 'success'; user: UserEntity }
+  | { kind: 'email_taken' };
+
 @Injectable()
 export class UserService {
   constructor(private readonly userRepo: UserRepository) {}
 
-  async register(email: string, name: string) {
+  async register(email: string, name: string): Promise<RegisterResult> {
     const existing = await this.userRepo.findByEmail(email);
     if (existing) {
-      throw new ConflictException('Email already registered');
+      return { kind: 'email_taken' };
     }
-    return this.userRepo.create({ email, name });
+    const user = await this.userRepo.create({ email, name });
+    return { kind: 'success', user };
   }
 }
 ```
