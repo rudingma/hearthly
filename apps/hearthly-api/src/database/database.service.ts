@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import { join } from 'path';
 import postgres from 'postgres';
 import * as schema from './schema';
 
@@ -29,7 +30,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     const migrationClient = postgres(this.databaseUrl, { max: 1 });
     try {
       const migrationDb = drizzle(migrationClient);
-      await migrate(migrationDb, { migrationsFolder: './migrations' });
+      await migrate(migrationDb, { migrationsFolder: join(__dirname, 'migrations') });
       this.logger.log('Migrations complete');
     } catch (error) {
       this.logger.error('Migration failed', error);
