@@ -28,6 +28,7 @@ WORKDIR /app
 
 # Copy pruned package.json and lockfile for dependency install
 COPY --from=builder /app/apps/hearthly-api/dist/ ./
+COPY --from=builder /app/apps/hearthly-api/migrations/ ./migrations/
 
 # Strip devDependencies (nx prune includes them in the lockfile), install,
 # then remove the lockfile — it contains dev dependency entries that trigger
