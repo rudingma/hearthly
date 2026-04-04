@@ -13,6 +13,8 @@ Hearthly is a family management app. It starts as a Haushaltsbuch (household bud
 
 **Development philosophy:** AI-first. Claude Code implements ~99% of the app. The developer focuses on planning and decisions.
 
+**Work tracking:** GitHub Issues + GitHub Projects kanban board. Feature work is grouped into milestones (naturally sized, each with a clear deliverable). Infrastructure and bugs are standalone issues. No sprints, no story points — work top to bottom.
+
 ## Phases
 
 | Phase | Focus | Status |

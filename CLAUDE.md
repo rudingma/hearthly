@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-Family management app. See `tasks/project-summary.md` for architecture decisions and key rationale. Phase 2 backlog at `tasks/phase-2/backlog.md`.
+Family management app. See `tasks/project-summary.md` for architecture decisions and key rationale.
+
+**Work tracking:** GitHub Issues + GitHub Projects (kanban board). Milestones group feature work (Authentication, App Shell, etc.). Infra/bugs are standalone issues. Labels: `feature`, `bug`, `infra`, `documentation`.
 
 **Domain:** hearthly.dev
 
