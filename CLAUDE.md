@@ -121,12 +121,17 @@ kubectl get pods -A                  # All pods across namespaces
 
 ## Git Workflow
 
-- **Feature branches** for all work: `feat/<issue#>-<short-desc>`, `fix/<issue#>-<short-desc>`
-- Commit freely on the branch (small, incremental commits are fine)
-- Create a PR via `gh pr create` when done
-- **Squash merge** to main (one clean commit per issue/feature)
-- Delete the branch after merge
-- Never commit directly to main
+**Issue lifecycle:**
+
+1. Create feature branch: `feat/<issue#>-<short-desc>` or `fix/<issue#>-<short-desc>`
+2. Commit freely on the branch (small, incremental commits are fine — they get squashed)
+3. Push branch and create PR via `gh pr create` — link the issue in the PR body
+4. **Wait for CI to pass** before merging (CI runs lint/test/build, ~1-2 min)
+5. Squash merge via `gh pr merge --squash --delete-branch`
+6. Close the issue with `gh issue close <#> --comment "summary"` — reference the PR number
+7. Never commit directly to main
+
+**Commit messages:** Use `type(scope): description (#issue)` — e.g., `feat(api): add helmet for security headers (#25)`. The `(#issue)` suffix auto-links to the GitHub issue.
 
 ## Key Versions to Pin
 
