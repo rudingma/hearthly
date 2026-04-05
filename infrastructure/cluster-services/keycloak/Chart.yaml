@@ -1,8 +1,5 @@
 apiVersion: v2
 name: keycloak
-version: 0.1.0
+version: 0.2.0
+appVersion: "26.3.3"
 description: Keycloak identity provider for Hearthly
-dependencies:
-  - name: keycloak
-    version: "25.2.0"
-    repository: "https://charts.bitnami.com/bitnami"
