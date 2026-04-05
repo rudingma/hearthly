@@ -18,3 +18,22 @@ CVE-2026-33671
 
 # zlib in Alpine base — buffer overflow, awaiting nginx-unprivileged image update
 CVE-2026-22184
+
+# Keycloak 26.3.3 base image (RHEL UBI 9 / Java 21) — upstream unfixed
+# java-21-openjdk-headless, Netty, OWASP sanitizer, Infinispan, Jackson
+# Review on next Keycloak version upgrade
+CVE-2025-59250
+CVE-2025-64720
+CVE-2025-65018
+CVE-2025-66021
+CVE-2025-6965
+CVE-2026-1486
+CVE-2026-1529
+CVE-2026-21945
+CVE-2026-3009
+CVE-2026-33870
+CVE-2026-33871
+CVE-2026-3872
+CVE-2026-4282
+CVE-2026-4634
+CVE-2026-4636
