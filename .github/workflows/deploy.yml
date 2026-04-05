@@ -81,6 +81,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         env:
           TRIVY_PLATFORM: linux/arm64
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/hearthly-api:sha-${{ github.sha }}
           severity: HIGH,CRITICAL
@@ -126,6 +128,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         env:
           TRIVY_PLATFORM: linux/arm64
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/hearthly-app:sha-${{ github.sha }}
           severity: HIGH,CRITICAL
