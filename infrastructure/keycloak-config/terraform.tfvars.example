@@ -1,0 +1,8 @@
+# Keycloak connection settings
+# The admin password should be set via environment variable:
+#   export TF_VAR_keycloak_admin_password="your-password"
+# Retrieve it from Infisical or:
+#   kubectl -n keycloak get secret keycloak-admin-credentials -o jsonpath="{.data.admin-password}" | base64 -d
+
+keycloak_url        = "https://auth.hearthly.dev"
+keycloak_admin_user = "admin"
