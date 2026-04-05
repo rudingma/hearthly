@@ -43,13 +43,16 @@ server:
     tls: true
 
 repoServer:
+  env:
+    - name: ARGOCD_EXEC_TIMEOUT
+      value: "180s"
   resources:
     requests:
       cpu: 50m
       memory: 128Mi
     limits:
       cpu: 500m
-      memory: 256Mi
+      memory: 512Mi
 
 redis:
   resources:
