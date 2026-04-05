@@ -14,7 +14,7 @@ keycloak:
     - name: KC_HOSTNAME
       value: "https://auth.hearthly.dev"
     - name: JAVA_OPTS_APPEND
-      value: "-Xms256m -Xmx384m -XX:MaxMetaspaceSize=128m"
+      value: "-Xms256m -Xmx384m -XX:MaxMetaspaceSize=128m -Djgroups.dns.query=keycloak-headless.keycloak.svc.cluster.local"
 
   # --- Admin credentials (synced from Infisical) ---
   auth:
@@ -58,7 +58,3 @@ keycloak:
       traefik.ingress.kubernetes.io/router.tls: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
     tls: true
-    extraTls:
-      - secretName: auth-hearthly-dev-tls
-        hosts:
-          - auth.hearthly.dev
