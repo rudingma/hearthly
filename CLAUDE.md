@@ -71,6 +71,17 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Secrets:** Admin password via Infisical (cross-namespace ref to `hearthly` ns machine identity), DB password via CloudNativePG auto-generated secret
 - **Note:** Bitnami images paywalled since Aug 2025 — do NOT use `bitnami/keycloak`
 
+## Keycloak Realm Configuration (Terraform)
+
+- **Module:** `infrastructure/keycloak-config/` (separate Terraform state from cluster)
+- **Provider:** `mrparkers/keycloak` ~> 4.4
+- **State key:** `keycloak-config/terraform.tfstate` in `hearthly-tfstate` bucket
+- **Realm:** `hearthly` at `https://auth.hearthly.dev/realms/hearthly`
+- **Client:** `hearthly-app` (public, Authorization Code + PKCE)
+- **Default role:** `user` (assigned to all new registrations)
+- **Apply:** `cd infrastructure/keycloak-config && export TF_VAR_keycloak_admin_password=... && terraform init -backend-config=backend.conf && terraform apply`
+- **Admin password:** `kubectl -n keycloak get secret keycloak-admin-credentials -o jsonpath="{.data.admin-password}" | base64 -d`
+
 ## Database (Production)
 
 - **Operator:** CloudNativePG v1.28.1 (namespace: cnpg-system)
