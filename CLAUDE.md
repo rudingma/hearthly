@@ -40,7 +40,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Module:** kube-hetzner v2.18.5, hcloud provider v1.60.1
 - **Terraform state:** Hetzner Object Storage (S3 backend, bucket: hearthly-tfstate)
 - **Bundled services:** Traefik, cert-manager, hcloud CSI/CCM, metrics-server, kured
-- **DNS:** Cloudflare (registrar locks NS, can't use Hetzner DNS). A records: @, api, argocd, grafana, secrets → LB IP. DNS only (no proxy).
+- **DNS:** Cloudflare (registrar locks NS, can't use Hetzner DNS). A records: @, api, argocd, auth, grafana, secrets → LB IP. DNS only (no proxy).
 
 ## ArgoCD
 
@@ -48,8 +48,28 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **UI:** argocd.hearthly.dev (or `kubectl port-forward svc/argocd-server -n argocd 8080:443`)
 - **Admin password:** `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
 - **Repo access:** HTTPS + GitHub token (SSH blocked by Hetzner firewall outbound). Token in K8s Secret `hearthly-repo` in argocd namespace.
-- **Applications:** hearthly-api, hearthly-app (auto-sync, self-heal), argocd (self-managing)
+- **Applications:** hearthly-api, hearthly-app, keycloak, keycloak-db (auto-sync, self-heal), argocd (self-managing)
 - **Firewall note:** Hetzner firewall blocks outbound SSH (port 22). Only 80, 443, 53, 123 allowed outbound.
+
+## Keycloak (Identity Provider)
+
+- **Version:** 26.3.3 (Quarkus-based, official image)
+- **Image:** `ghcr.io/rudingma/hearthly-keycloak` (custom optimized build, ARM64)
+- **UI:** auth.hearthly.dev (admin console at `/admin`)
+- **Admin user:** `admin` (password in Infisical: `KEYCLOAK_ADMIN_PASSWORD`)
+- **Namespace:** `keycloak` (dedicated)
+- **Database:** Separate CloudNativePG cluster `keycloak-db` in `keycloak` namespace
+- **DB credentials:** Auto-generated in K8s Secret `keycloak-db-app`
+- **ArgoCD:** Two apps — `keycloak` (prune: true) + `keycloak-db` (prune: false, protects data)
+- **PV reclaim policy:** Retain (patched manually, not in manifest)
+- **CI:** `.github/workflows/build-keycloak.yml` — builds optimized image on Dockerfile changes, pushes to GHCR, auto-updates values.yaml tag
+- **Dockerfile:** `infrastructure/cluster-services/keycloak/deploy/Dockerfile` (multi-stage, `kc.sh build` in CI)
+- **Chart:** `infrastructure/cluster-services/keycloak/` (custom Helm chart, own templates)
+- **Upgrade:** Change `FROM` tag in Dockerfile → CI rebuilds → auto-deploys
+- **Resources:** 250m/512Mi request, 1/1Gi limit. Runtime ~374Mi.
+- **NetworkPolicy:** Ingress from Traefik only, egress to DB + DNS + HTTPS (443, for external IdPs)
+- **Secrets:** Admin password via Infisical (cross-namespace ref to `hearthly` ns machine identity), DB password via CloudNativePG auto-generated secret
+- **Note:** Bitnami images paywalled since Aug 2025 — do NOT use `bitnami/keycloak`
 
 ## Database (Production)
 
