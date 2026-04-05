@@ -21,11 +21,13 @@ spec:
         fsGroup: 0
         seccompProfile:
           type: RuntimeDefault
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/opt/keycloak/bin/kc.sh", "start"]
+          args: ["start", "--optimized"]
           ports:
             - name: http
               containerPort: {{ .Values.service.httpPort }}
@@ -34,9 +36,7 @@ spec:
               containerPort: {{ .Values.service.managementPort }}
               protocol: TCP
           env:
-            # Database
-            - name: KC_DB
-              value: "postgres"
+            # Database (runtime config — DB vendor baked into image)
             - name: KC_DB_URL_HOST
               value: {{ .Values.keycloak.db.host | quote }}
             - name: KC_DB_URL_PORT
@@ -53,18 +53,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.keycloak.db.existingSecret }}
                   key: password
-            # Production config
+            # Production config (runtime)
             - name: KC_HOSTNAME
               value: {{ .Values.keycloak.hostname | quote }}
             - name: KC_PROXY_HEADERS
               value: "xforwarded"
             - name: KC_HTTP_ENABLED
-              value: "true"
-            - name: KC_HEALTH_ENABLED
-              value: "true"
-            - name: KC_CACHE
-              value: "local"
-            - name: KC_METRICS_ENABLED
               value: "true"
             # Admin bootstrap (first startup only)
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
@@ -83,7 +77,7 @@ spec:
               path: /health/started
               port: management
               scheme: HTTP
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 30
           livenessProbe:
