@@ -1,60 +1,37 @@
 ## Keycloak identity provider for Hearthly
-## Umbrella chart: bitnami/keycloak v25.2.0 (Keycloak 26.3.3)
+## Official image: quay.io/keycloak/keycloak 26.3.3
+
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "26.3.3"
+  pullPolicy: IfNotPresent
+
+service:
+  httpPort: 8080
+  managementPort: 9000
+
+ingress:
+  enabled: true
+  host: auth.hearthly.dev
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 768Mi
 
 keycloak:
-  # --- Production mode (enforces HTTPS, disables dev console) ---
-  production: true
-
-  # --- Proxy headers (CRITICAL: Traefik terminates TLS) ---
-  # Without this, Keycloak generates http:// redirect URIs and OAuth breaks
-  proxyHeaders: xforwarded
-
-  # --- Hostname and JVM tuning ---
-  extraEnvVars:
-    - name: KC_HOSTNAME
-      value: "https://auth.hearthly.dev"
-    - name: JAVA_OPTS_APPEND
-      value: "-Xms256m -Xmx384m -XX:MaxMetaspaceSize=128m -Djgroups.dns.query=keycloak-headless.keycloak.svc.cluster.local"
-
-  # --- Admin credentials (synced from Infisical) ---
-  auth:
-    adminUser: admin
-    existingSecret: "keycloak-admin-credentials"
-    passwordSecretKey: "admin-password"
-
-  # --- Single replica (family app, no HA needed) ---
-  replicaCount: 1
-
-  # --- Resources ---
-  # Pod memory limit MUST exceed JVM -Xmx (384m) by ~200-300MB
-  # to account for metaspace, thread stacks, and native memory.
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: "1"
-      memory: 768Mi
-
-  # --- Disable bundled PostgreSQL, use external CloudNativePG ---
-  postgresql:
-    enabled: false
-
-  externalDatabase:
+  hostname: "https://auth.hearthly.dev"
+  db:
     host: "keycloak-db-rw.keycloak.svc.cluster.local"
-    port: 5432
-    user: "keycloak"
+    port: "5432"
     database: "keycloak"
     existingSecret: "keycloak-db-app"
-    existingSecretPasswordKey: "password"
-
-  # --- Ingress via Traefik + cert-manager ---
-  ingress:
-    enabled: true
-    hostname: auth.hearthly.dev
-    ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    tls: true
+  admin:
+    username: "admin"
+    existingSecret: "keycloak-admin-credentials"
+    passwordKey: "admin-password"
