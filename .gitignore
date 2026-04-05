@@ -33,6 +33,9 @@ Thumbs.db
 # Nx
 .nx/
 
+# Helm dependency artifacts (downloaded chart archives)
+infrastructure/cluster-services/*/charts/
+
 # Claude Code
 .claude/settings.local.json
 docs/superpowers/

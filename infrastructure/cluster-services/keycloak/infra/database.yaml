@@ -1,0 +1,29 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: keycloak-db
+  namespace: keycloak
+spec:
+  instances: 1
+
+  postgresql:
+    parameters:
+      shared_buffers: "64MB"
+      max_connections: "30"
+
+  storage:
+    size: 5Gi
+    storageClass: hcloud-volumes
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+  bootstrap:
+    initdb:
+      database: keycloak
+      owner: keycloak
