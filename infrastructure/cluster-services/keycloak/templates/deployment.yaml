@@ -64,6 +64,8 @@ spec:
               value: "true"
             - name: KC_CACHE
               value: "local"
+            - name: KC_METRICS_ENABLED
+              value: "true"
             # Admin bootstrap (first startup only)
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               value: {{ .Values.keycloak.admin.username | quote }}
