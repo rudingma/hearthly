@@ -17,5 +17,49 @@ services:
       timeout: 5s
       retries: 5
 
+  keycloak-postgres:
+    image: postgres:18-alpine
+    container_name: hearthly-keycloak-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${KC_POSTGRES_DB:-keycloak}
+      POSTGRES_USER: ${KC_POSTGRES_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KC_POSTGRES_PASSWORD:-keycloak_local}
+    volumes:
+      - keycloak-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KC_POSTGRES_USER:-keycloak}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.3
+    container_name: hearthly-keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/${KC_POSTGRES_DB:-keycloak}
+      KC_DB_USERNAME: ${KC_POSTGRES_USER:-keycloak}
+      KC_DB_PASSWORD: ${KC_POSTGRES_PASSWORD:-keycloak_local}
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./infrastructure/keycloak-config/local/realm-hearthly.json:/opt/keycloak/data/import/realm-hearthly.json:ro
+    depends_on:
+      keycloak-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && timeout 5 cat <&3 | grep -q '\"status\": \"UP\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
 volumes:
   pgdata:
+  keycloak-pgdata:
