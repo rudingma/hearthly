@@ -1,8 +1,10 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { join } from 'path';
 import postgres from 'postgres';
+import { databaseConfig } from '../config';
+import type { DatabaseConfig } from '../config';
 import * as schema from './schema';
 
 export const DRIZZLE = Symbol('DRIZZLE');
@@ -15,13 +17,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly sql: ReturnType<typeof postgres>;
   readonly db: DrizzleDB;
 
-  constructor() {
-    const databaseUrl = process.env.DATABASE_URL;
-    if (!databaseUrl) {
-      throw new Error('DATABASE_URL environment variable is required');
-    }
-    this.databaseUrl = databaseUrl;
-    this.sql = postgres(databaseUrl);
+  constructor(
+    @Inject(databaseConfig.KEY) config: DatabaseConfig,
+  ) {
+    this.databaseUrl = config.url;
+    this.sql = postgres(config.url);
     this.db = drizzle(this.sql, { schema });
   }
 

@@ -5,6 +5,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TerminusModule } from '@nestjs/terminus';
 import { Request, Response } from 'express';
+import { validate, appConfig, databaseConfig, authConfig } from '../config';
 import { DatabaseModule } from '../database';
 import { AuthModule } from '../modules/auth/auth.module';
 import { UserModule } from '../modules/user/user.module';
@@ -14,7 +15,11 @@ import { HealthController } from './health.controller';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate,
+      load: [appConfig, databaseConfig, authConfig],
+    }),
     DatabaseModule,
     TerminusModule,
     AuthModule,
