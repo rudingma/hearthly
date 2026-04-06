@@ -56,7 +56,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && timeout 5 cat <&3 | grep -q '\"status\": \"UP\"'"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 12
       start_period: 30s
 
