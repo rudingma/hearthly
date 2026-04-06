@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TerminusModule } from '@nestjs/terminus';
 import { Request, Response } from 'express';
 import { DatabaseModule } from '../database';
+import { AuthModule } from '../modules/auth/auth.module';
 import { UserModule } from '../modules/user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,8 +13,10 @@ import { HealthController } from './health.controller';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     TerminusModule,
+    AuthModule,
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       useFactory: () => ({

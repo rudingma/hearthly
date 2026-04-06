@@ -75,4 +75,52 @@ describe('UserService', () => {
       expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
     });
   });
+
+  describe('getOrSyncByKeycloakId', () => {
+    it('returns existing user when data matches', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      repo.findByKeycloakId.mockResolvedValue(mockUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(mockUser);
+      expect(repo.findByKeycloakId).toHaveBeenCalledWith('kc-1');
+      expect(repo.findOrCreateByKeycloakId).not.toHaveBeenCalled();
+    });
+
+    it('upserts when user not found (first login)', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      repo.findByKeycloakId.mockResolvedValue(null);
+      repo.findOrCreateByKeycloakId.mockResolvedValue(mockUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(mockUser);
+      expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
+    });
+
+    it('upserts when email has changed (profile drift)', async () => {
+      const claims = { sub: 'kc-1', email: 'new@b.com', name: 'Alice' };
+      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'old@b.com', name: 'Alice' };
+      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'new@b.com', name: 'Alice' };
+      repo.findByKeycloakId.mockResolvedValue(existingUser);
+      repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(updatedUser);
+      expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
+    });
+
+    it('upserts when name has changed (profile drift)', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'New Name' };
+      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Old Name' };
+      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'New Name' };
+      repo.findByKeycloakId.mockResolvedValue(existingUser);
+      repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(updatedUser);
+      expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
+    });
+  });
 });
