@@ -102,7 +102,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 # Local development
 npx nx serve hearthly-api        # Backend (hot reload)
 npx nx serve hearthly-app        # Frontend (hot reload)
-docker compose up -d             # Local PostgreSQL
+docker compose up -d             # Local PostgreSQL + Keycloak
 
 # Build
 npx nx build hearthly-api
@@ -172,6 +172,19 @@ modules/user/
 - Repositories use `TransactionHost` (never direct `@Inject(DRIZZLE)`)
 - New schemas must be re-exported from `src/database/schema.ts`
 - Reference: `docs/data-layer-design.md`
+
+## Authentication (OIDC / Keycloak)
+
+- **Library:** `jose` (JWT verification, JWKS fetching — NOT Passport.js)
+- **Guard:** `JwtAuthGuard` — global via `APP_GUARD`, verifies JWT signature/issuer/audience
+- **Decorators:** `@Public()` opts out of auth, `@CurrentUser()` extracts `JwtPayload` from context
+- **Guard has no DB access** — only verifies tokens. User provisioning (`findOrCreateByKeycloakId`) happens in resolvers.
+- **`JwtPayload`:** `{ sub, email, name, roles }` — token claims, not a DB entity
+- **Config:** `KEYCLOAK_ISSUER_URL` and `KEYCLOAK_CLIENT_ID` via `@nestjs/config` `ConfigService`
+- **Local Keycloak:** `docker compose up -d` starts Keycloak on `http://localhost:8180`
+- **Test user:** `dev@hearthly.dev` / `dev` (10-hour access tokens locally)
+- **Get token:** `curl -s -X POST http://localhost:8180/realms/hearthly/protocol/openid-connect/token -d "grant_type=password&client_id=hearthly-app&username=dev@hearthly.dev&password=dev"`
+- **Audience mapper:** Required on `hearthly-app` client — Keycloak public clients don't include client_id in `aud` by default
 
 ## Testing
 
