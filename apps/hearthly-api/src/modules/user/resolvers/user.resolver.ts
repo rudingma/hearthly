@@ -7,7 +7,8 @@ import { UserService } from '../user.service';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => User, { description: 'Returns the currently authenticated user' })
+  @Query(() => User, { nullable: false, description: 'Returns the currently authenticated user' })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO(#8): Replace with typed auth decorator
   async me(@Context('req') req: any): Promise<User> {
     // TODO(#8): Replace with JWT-based user extraction from GraphQL context
     const keycloakId = req.user?.sub;
