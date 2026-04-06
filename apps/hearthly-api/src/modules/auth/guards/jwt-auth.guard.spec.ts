@@ -175,4 +175,18 @@ describe('JwtAuthGuard', () => {
 
     expect(request.user.name).toBe('alice@example.com');
   });
+
+  it('throws UnauthorizedException for token signed with wrong key', async () => {
+    const wrongKeys = await generateTestKeyPair();
+    const token = await signTestToken(wrongKeys.privateKey, {
+      sub: 'kc-123',
+      email: 'alice@example.com',
+      name: 'Alice',
+    });
+    const { context } = createMockExecutionContext(token);
+
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
 });

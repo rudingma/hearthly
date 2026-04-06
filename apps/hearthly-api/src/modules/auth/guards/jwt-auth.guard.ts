@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   Optional,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import type { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
   private readonly issuer: string;
   private readonly audience: string;
   private readonly jwks: JWTVerifyGetKey;
@@ -50,28 +52,36 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Missing authorization token');
     }
 
+    let payload: Awaited<ReturnType<typeof jwtVerify>>['payload'];
     try {
-      const { payload } = await jwtVerify(token, this.jwks, {
+      const result = await jwtVerify(token, this.jwks, {
         issuer: this.issuer,
         audience: this.audience,
         clockTolerance: 30,
         requiredClaims: ['sub'],
       });
-
-      const jwtPayload: JwtPayload = {
-        sub: payload.sub!,
-        email: (payload as Record<string, unknown>).email as string,
-        name: this.extractName(payload as Record<string, unknown>),
-        roles:
-          ((payload as Record<string, unknown>).realm_access as { roles?: string[] })
-            ?.roles ?? [],
-      };
-
-      request.user = jwtPayload;
-      return true;
-    } catch {
+      payload = result.payload;
+    } catch (error) {
+      this.logger.warn(`JWT verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw new UnauthorizedException('Invalid or expired token');
     }
+
+    const email = (payload as Record<string, unknown>).email;
+    if (typeof email !== 'string' || !email) {
+      throw new UnauthorizedException('Token missing required email claim');
+    }
+
+    const jwtPayload: JwtPayload = {
+      sub: payload.sub!,
+      email,
+      name: this.extractName(payload as Record<string, unknown>),
+      roles:
+        ((payload as Record<string, unknown>).realm_access as { roles?: string[] })
+          ?.roles ?? [],
+    };
+
+    request.user = jwtPayload;
+    return true;
   }
 
   private getRequest(
