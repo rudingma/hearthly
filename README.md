@@ -34,7 +34,7 @@ Family management app. Infrastructure is live on Kubernetes (Project Setup & Inf
 | Service | URL | Purpose |
 |---|---|---|
 | Frontend | https://hearthly.dev | Angular app |
-| API | https://api.hearthly.dev | NestJS backend (health: `/api/health`) |
+| API | https://api.hearthly.dev | NestJS backend (health: `/health`, GraphQL: `/graphql`) |
 | ArgoCD | https://argocd.hearthly.dev | GitOps deployment dashboard |
 | Grafana | https://grafana.hearthly.dev | Cluster monitoring dashboard |
 | Infisical | https://secrets.hearthly.dev | Secrets management UI |

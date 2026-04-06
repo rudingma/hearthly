@@ -55,6 +55,13 @@
         ],
         "executor": "nx:noop"
       },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "vitest run --passWithNoTests",
+          "cwd": "apps/hearthly-api"
+        }
+      },
       "serve": {
         "continuous": true,
         "executor": "@nx/js:node",
@@ -78,13 +85,18 @@
     }
   },
   "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
     "@nestjs-cls/transactional": "^3.2.0",
     "@nestjs-cls/transactional-adapter-drizzle-orm": "^1.2.3",
+    "@nestjs/apollo": "^13.0.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
+    "@nestjs/graphql": "^13.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/terminus": "^11.1.1",
     "drizzle-orm": "^0.45.1",
+    "graphql": "^16.0.0",
     "helmet": "^8.1.0",
     "nestjs-cls": "^6.2.0",
     "postgres": "^3.4.8",
@@ -93,6 +105,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.4.0",
     "@nestjs/testing": "^11.0.0",
     "drizzle-kit": "^0.31.10"
   }
