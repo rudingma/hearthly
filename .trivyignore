@@ -17,6 +17,11 @@ CVE-2026-31802
 # picomatch — ReDoS via extglob, bundled in node:24-alpine's npm (not app code)
 CVE-2026-33671
 
+# lodash — arbitrary code execution via untrusted input, pinned at 4.17.23 by @nestjs/config
+# Fixed in 4.18.0 but @nestjs/config@4.0.3 pins exact 4.17.23; npm overrides don't force workspace transitive deps
+# Remove when @nestjs/config updates lodash dependency
+CVE-2026-4800
+
 # zlib in Alpine base — buffer overflow, awaiting nginx-unprivileged image update
 CVE-2026-22184
 
