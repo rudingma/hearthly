@@ -71,6 +71,7 @@
     },
     "test": {
       "executor": "@angular/build:unit-test",
+      "dependsOn": ["graphql-codegen"],
       "options": {}
     },
     "serve-static": {
