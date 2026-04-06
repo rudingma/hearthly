@@ -26,7 +26,9 @@ import { HealthController } from './health.controller';
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       useFactory: () => ({
-        autoSchemaFile: join(process.cwd(), 'apps/hearthly-api/src/schema.gql'),
+        autoSchemaFile: process.env.NODE_ENV === 'production'
+          ? true
+          : join(process.cwd(), 'apps/hearthly-api/src/schema.gql'),
         sortSchema: true,
         playground: false,
         context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),
