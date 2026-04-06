@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService, HealthCheckResult } from '@nestjs/terminus';
-import { Public } from '../modules/auth/decorators/public.decorator';
+import { Public } from '../modules/auth';
 
 @Public()
 @Controller('health')
