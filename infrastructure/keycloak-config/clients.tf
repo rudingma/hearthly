@@ -32,3 +32,12 @@ resource "keycloak_openid_client" "hearthly_app" {
     "http://localhost:4200",
   ]
 }
+
+resource "keycloak_openid_audience_protocol_mapper" "hearthly_app_audience" {
+  realm_id                 = keycloak_realm.hearthly.id
+  client_id                = keycloak_openid_client.hearthly_app.id
+  name                     = "audience-mapper"
+  included_client_audience = keycloak_openid_client.hearthly_app.client_id
+  add_to_access_token      = true
+  add_to_id_token          = false
+}
