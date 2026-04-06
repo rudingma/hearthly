@@ -85,6 +85,7 @@
     },
     "graphql-codegen": {
       "executor": "nx:run-commands",
+      "dependsOn": ["@hearthly/hearthly-api:generate-schema"],
       "options": {
         "command": "npx graphql-codegen --config codegen.ts"
       },
