@@ -1,0 +1,207 @@
+name: Terraform
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "infrastructure/cluster/**/*.tf"
+      - "infrastructure/keycloak-config/**/*.tf"
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/cluster/**/*.tf"
+      - "infrastructure/keycloak-config/**/*.tf"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      cluster: ${{ steps.filter.outputs.cluster }}
+      keycloak-config: ${{ steps.filter.outputs.keycloak-config }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            cluster:
+              - 'infrastructure/cluster/**/*.tf'
+            keycloak-config:
+              - 'infrastructure/keycloak-config/**/*.tf'
+
+  # --- Cluster module ---
+  plan-cluster:
+    needs: changes
+    if: needs.changes.outputs.cluster == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: terraform-cluster
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: hashicorp/setup-terraform@v4
+
+      - name: Configure backend
+        working-directory: infrastructure/cluster
+        run: |
+          cat > backend.conf <<'CONF'
+          access_key = "${{ secrets.TF_BACKEND_ACCESS_KEY }}"
+          secret_key = "${{ secrets.TF_BACKEND_SECRET_KEY }}"
+          CONF
+          sed -i 's/^ *//' backend.conf
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+
+      - name: Terraform init
+        working-directory: infrastructure/cluster
+        run: terraform init -backend-config=backend.conf
+
+      - name: Terraform plan
+        id: plan
+        working-directory: infrastructure/cluster
+        run: terraform plan -no-color -out=tfplan
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+
+      - name: Post plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let plan = `${{ steps.plan.outputs.stdout }}`;
+            if (plan.length > 60000) plan = plan.substring(0, 60000) + '\n... (truncated)';
+            const output = `#### Terraform Plan — \`infrastructure/cluster\`\n\`\`\`\n${plan}\n\`\`\`\n*Triggered by @${{ github.actor }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+  apply-cluster:
+    needs: [changes, plan-cluster]
+    if: github.event_name == 'push' && needs.changes.outputs.cluster == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: terraform-cluster
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: hashicorp/setup-terraform@v4
+
+      - name: Configure backend
+        working-directory: infrastructure/cluster
+        run: |
+          cat > backend.conf <<'CONF'
+          access_key = "${{ secrets.TF_BACKEND_ACCESS_KEY }}"
+          secret_key = "${{ secrets.TF_BACKEND_SECRET_KEY }}"
+          CONF
+          sed -i 's/^ *//' backend.conf
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+
+      - name: Terraform init
+        working-directory: infrastructure/cluster
+        run: terraform init -backend-config=backend.conf
+
+      - name: Terraform apply
+        working-directory: infrastructure/cluster
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+
+  # --- Keycloak config module ---
+  plan-keycloak-config:
+    needs: changes
+    if: needs.changes.outputs.keycloak-config == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: terraform-keycloak-config
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: hashicorp/setup-terraform@v4
+
+      - name: Configure backend
+        working-directory: infrastructure/keycloak-config
+        run: |
+          cat > backend.conf <<'CONF'
+          access_key = "${{ secrets.TF_BACKEND_ACCESS_KEY }}"
+          secret_key = "${{ secrets.TF_BACKEND_SECRET_KEY }}"
+          CONF
+          sed -i 's/^ *//' backend.conf
+
+      - name: Terraform init
+        working-directory: infrastructure/keycloak-config
+        run: terraform init -backend-config=backend.conf
+
+      - name: Terraform plan
+        id: plan
+        working-directory: infrastructure/keycloak-config
+        run: terraform plan -no-color -out=tfplan
+        env:
+          TF_VAR_keycloak_admin_password: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+
+      - name: Post plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let plan = `${{ steps.plan.outputs.stdout }}`;
+            if (plan.length > 60000) plan = plan.substring(0, 60000) + '\n... (truncated)';
+            const output = `#### Terraform Plan — \`infrastructure/keycloak-config\`\n\`\`\`\n${plan}\n\`\`\`\n*Triggered by @${{ github.actor }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+  apply-keycloak-config:
+    needs: [changes, plan-keycloak-config]
+    if: github.event_name == 'push' && needs.changes.outputs.keycloak-config == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: terraform-keycloak-config
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: hashicorp/setup-terraform@v4
+
+      - name: Configure backend
+        working-directory: infrastructure/keycloak-config
+        run: |
+          cat > backend.conf <<'CONF'
+          access_key = "${{ secrets.TF_BACKEND_ACCESS_KEY }}"
+          secret_key = "${{ secrets.TF_BACKEND_SECRET_KEY }}"
+          CONF
+          sed -i 's/^ *//' backend.conf
+
+      - name: Terraform init
+        working-directory: infrastructure/keycloak-config
+        run: terraform init -backend-config=backend.conf
+
+      - name: Terraform apply
+        working-directory: infrastructure/keycloak-config
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_keycloak_admin_password: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
