@@ -8,6 +8,7 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
+      "dependsOn": ["graphql-codegen"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/hearthly-app",
@@ -81,6 +82,21 @@
         "staticFilePath": "dist/apps/hearthly-app/browser",
         "spa": true
       }
+    },
+    "graphql-codegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx graphql-codegen --config codegen.ts"
+      },
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/apps/hearthly-api/src/schema.gql",
+        "{projectRoot}/src/**/*.graphql",
+        "{workspaceRoot}/codegen.ts"
+      ],
+      "outputs": [
+        "{projectRoot}/src/generated/graphql.ts"
+      ]
     }
   }
 }
