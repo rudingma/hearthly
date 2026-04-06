@@ -1,0 +1,98 @@
+import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { sql } from 'drizzle-orm';
+import { createTestDb, TestDb } from '../../../test/support/test-db';
+import { users } from './schema';
+import { UserRepository } from './user.repository';
+
+function createMockTxHost(db: TestDb) {
+  return { tx: db } as any;
+}
+
+describe('UserRepository (integration)', () => {
+  let db: TestDb;
+  let repo: UserRepository;
+
+  beforeAll(async () => {
+    db = await createTestDb();
+    repo = new UserRepository(createMockTxHost(db));
+  });
+
+  afterEach(async () => {
+    await db.execute(sql`TRUNCATE TABLE users`);
+  });
+
+  describe('findById', () => {
+    it('returns null when user does not exist', async () => {
+      const result = await repo.findById('00000000-0000-0000-0000-000000000000');
+      expect(result).toBeNull();
+    });
+
+    it('returns the user when found', async () => {
+      const [inserted] = await db.insert(users).values({
+        keycloakId: 'kc-1',
+        email: 'alice@example.com',
+        name: 'Alice',
+      }).returning();
+
+      const result = await repo.findById(inserted.id);
+      expect(result).not.toBeNull();
+      expect(result!.email).toBe('alice@example.com');
+    });
+  });
+
+  describe('findByKeycloakId', () => {
+    it('returns null when user does not exist', async () => {
+      const result = await repo.findByKeycloakId('nonexistent');
+      expect(result).toBeNull();
+    });
+
+    it('returns the user when found', async () => {
+      await db.insert(users).values({
+        keycloakId: 'kc-2',
+        email: 'bob@example.com',
+        name: 'Bob',
+      });
+
+      const result = await repo.findByKeycloakId('kc-2');
+      expect(result).not.toBeNull();
+      expect(result!.name).toBe('Bob');
+    });
+  });
+
+  describe('findOrCreateByKeycloakId', () => {
+    it('creates a new user when keycloakId does not exist', async () => {
+      const result = await repo.findOrCreateByKeycloakId({
+        sub: 'kc-new',
+        email: 'charlie@example.com',
+        name: 'Charlie',
+      });
+
+      expect(result.keycloakId).toBe('kc-new');
+      expect(result.email).toBe('charlie@example.com');
+      expect(result.name).toBe('Charlie');
+      expect(result.id).toBeDefined();
+    });
+
+    it('updates and returns existing user on conflict', async () => {
+      await db.insert(users).values({
+        keycloakId: 'kc-existing',
+        email: 'old@example.com',
+        name: 'Old Name',
+      });
+
+      const result = await repo.findOrCreateByKeycloakId({
+        sub: 'kc-existing',
+        email: 'new@example.com',
+        name: 'New Name',
+      });
+
+      expect(result.keycloakId).toBe('kc-existing');
+      expect(result.email).toBe('new@example.com');
+      expect(result.name).toBe('New Name');
+
+      // Verify only one row exists
+      const allUsers = await db.select().from(users);
+      expect(allUsers).toHaveLength(1);
+    });
+  });
+});
