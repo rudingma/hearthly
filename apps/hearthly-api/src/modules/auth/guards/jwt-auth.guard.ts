@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -21,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     configService: ConfigService,
-    jwks?: JWTVerifyGetKey,
+    @Optional() jwks?: JWTVerifyGetKey,
   ) {
     this.issuer = configService.getOrThrow<string>('KEYCLOAK_ISSUER_URL');
     this.audience = configService.getOrThrow<string>('KEYCLOAK_CLIENT_ID');
