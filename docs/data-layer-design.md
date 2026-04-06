@@ -93,14 +93,14 @@ export * from '../modules/order/schema';
 
 ```ts
 // modules/user/schema/user.table.ts
-import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  name: varchar('name', { length: 255 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  email: text('email').notNull().unique(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 ```
 
@@ -301,26 +301,36 @@ If two devs change schemas on different branches and both merge to main: delete 
 
 Three levels, each serving a different purpose. All tests use **Vitest**.
 
+**Running tests:** `npx nx test hearthly-api`
+
+**File convention:** Test files live next to the code they test — `<name>.spec.ts` for both unit and integration tests.
+
 ### Level 1: Unit Tests — Mock the Repository
 
 For testing business logic in services. Fast, no DB needed.
+
+Mock each repository method with `vi.fn()`, wire up via `@nestjs/testing` Test module.
 
 ```ts
 // modules/user/user.service.spec.ts
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Test } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 
 describe('UserService', () => {
   let service: UserService;
-  let repo: { findByEmail: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn> };
+  let repo: {
+    findById: ReturnType<typeof vi.fn>;
+    findByKeycloakId: ReturnType<typeof vi.fn>;
+    findOrCreateByKeycloakId: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     repo = {
-      findByEmail: vi.fn(),
-      create: vi.fn(),
+      findById: vi.fn(),
+      findByKeycloakId: vi.fn(),
+      findOrCreateByKeycloakId: vi.fn(),
     };
 
     const module = await Test.createTestingModule({
@@ -333,10 +343,19 @@ describe('UserService', () => {
     service = module.get(UserService);
   });
 
-  it('throws on duplicate email', async () => {
-    repo.findByEmail.mockResolvedValue({ id: '1', email: 'a@b.com', name: 'X' });
-    await expect(service.register('a@b.com', 'Y'))
-      .rejects.toThrow(ConflictException);
+  it('returns the user when found', async () => {
+    const mockUser = { id: '1', email: 'a@b.com', name: 'Alice' };
+    repo.findById.mockResolvedValue(mockUser);
+
+    const result = await service.getById('1');
+    expect(result).toEqual(mockUser);
+    expect(repo.findById).toHaveBeenCalledWith('1');
+  });
+
+  it('returns null when not found', async () => {
+    repo.findById.mockResolvedValue(null);
+    const result = await service.getById('nonexistent');
+    expect(result).toBeNull();
   });
 });
 ```
@@ -345,15 +364,17 @@ describe('UserService', () => {
 
 For testing repositories and queries against real Postgres SQL. No Docker required.
 
-PGlite is a WASM build of Postgres (~2.6MB). Real Postgres SQL engine, not SQLite pretending. ~50ms startup vs ~5-10s for a Docker container.
+PGlite is a WASM build of Postgres. Real Postgres SQL engine, not SQLite pretending. ~2-3s startup (including migrations) vs ~5-10s for a Docker container.
 
-**Limitations:** PGlite does not support all PostgreSQL extensions (e.g., `pg_trgm`, `citext`, custom C extensions), runs tests sequentially within a single instance, and has no connection pooling. If you need extensions or parallel execution, use Testcontainers instead. Verify PGlite's bundled PostgreSQL version is close to production (18.x) to avoid SQL dialect surprises.
+**Limitations:** PGlite does not support all PostgreSQL extensions (e.g., `pg_trgm`, `citext`, custom C extensions), runs tests sequentially within a single instance, and has no connection pooling. If you need extensions or parallel execution, use Testcontainers instead.
+
+**Shared test helper** at `test/support/test-db.ts`:
 
 ```ts
-// test/support/test-db.ts
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
+import { join } from 'path';
 import * as schema from '../../src/database/schema';
 
 export type TestDb = ReturnType<typeof drizzle<typeof schema>>;
@@ -361,16 +382,24 @@ export type TestDb = ReturnType<typeof drizzle<typeof schema>>;
 export async function createTestDb(): Promise<TestDb> {
   const client = new PGlite();
   const db = drizzle(client, { schema });
-  await migrate(db, { migrationsFolder: './migrations' });
+  await migrate(db, { migrationsFolder: join(__dirname, '../../migrations') });
   return db;
 }
 ```
 
+**Integration test pattern** — create DB once in `beforeAll`, truncate tables in `afterEach`, mock `TransactionHost` with `{ tx: db }`:
+
 ```ts
 // modules/user/user.repository.integration.spec.ts
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { sql } from 'drizzle-orm';
 import { createTestDb, TestDb } from '../../../test/support/test-db';
 import { users } from './schema';
+import { UserRepository } from './user.repository';
+
+function createMockTxHost(db: TestDb) {
+  return { tx: db } as any;
+}
 
 describe('UserRepository (integration)', () => {
   let db: TestDb;
@@ -378,23 +407,46 @@ describe('UserRepository (integration)', () => {
 
   beforeAll(async () => {
     db = await createTestDb();
-    // For integration tests, create repo with a mock TransactionHost
-    // that always returns the test db instance
-    repo = new UserRepository({ tx: db } as any);
+    repo = new UserRepository(createMockTxHost(db));
   });
 
   afterEach(async () => {
-    await db.delete(users); // clean slate between tests
+    await db.execute(sql`TRUNCATE TABLE users`);
   });
 
-  it('creates and finds a user by email', async () => {
-    await repo.create({ email: 'a@b.com', name: 'Alice' });
-    const found = await repo.findByEmail('a@b.com');
-    expect(found).not.toBeNull();
-    expect(found!.name).toBe('Alice');
+  it('creates and finds a user', async () => {
+    const [inserted] = await db.insert(users).values({
+      keycloakId: 'kc-1',
+      email: 'alice@example.com',
+      name: 'Alice',
+    }).returning();
+
+    const result = await repo.findById(inserted.id);
+    expect(result).not.toBeNull();
+    expect(result!.email).toBe('alice@example.com');
   });
 });
 ```
+
+### Adding Tests to a New Module
+
+When creating a new module (e.g., `family`), follow this pattern:
+
+1. **Integration tests** (`family.repository.integration.spec.ts`):
+   - Import `createTestDb` and `TestDb` from `test/support/test-db`
+   - Create a `createMockTxHost(db)` helper that returns `{ tx: db } as any`
+   - Use `beforeAll` to create the DB and repository instance (shared across tests for speed)
+   - Use `afterEach` with `TRUNCATE TABLE <table_name>` to isolate tests
+   - Test each repository method: null case, found case, edge cases (conflicts, etc.)
+
+2. **Unit tests** (`family.service.spec.ts`):
+   - Mock each repository method with `vi.fn()`
+   - Wire up via `Test.createTestingModule` with `{ provide: FamilyRepository, useValue: repo }`
+   - Test business logic: delegation, error handling, conditional behavior
+
+3. **No resolver tests** — resolvers are thin wrappers. Test them via E2E tests (Level 3) when those exist.
+
+**Reference implementation:** `modules/user/` has both test types as a working example.
 
 ### Level 3: E2E Tests — Testcontainers (Real Postgres)
 
