@@ -5,6 +5,11 @@ import { AuthService } from './auth.service';
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
 
+  // Init still in progress — don't navigate or redirect
+  if (authService.isLoading()) {
+    return false;
+  }
+
   // If authenticated, allow navigation
   if (authService.isAuthenticated()) {
     return true;

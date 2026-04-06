@@ -1,7 +1,7 @@
 @if (auth.error()) {
   <div>
     <p>Could not load your profile. The server may be unavailable.</p>
-    <button (click)="auth.login()">Retry</button>
+    <button (click)="auth.retry()">Retry</button>
   </div>
 } @else {
   <h1>Welcome, {{ auth.currentUser()?.name }}</h1>

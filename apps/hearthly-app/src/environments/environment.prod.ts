@@ -1,4 +1,6 @@
-export const environment = {
+import type { Environment } from './environment';
+
+export const environment: Environment = {
   production: true,
   keycloak: {
     issuer: 'https://auth.hearthly.dev/realms/hearthly',

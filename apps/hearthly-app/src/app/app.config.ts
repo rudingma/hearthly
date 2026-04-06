@@ -5,11 +5,10 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import { provideOAuthClient, OAuthService } from 'angular-oauth2-oidc';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
-import { HttpHeaders } from '@angular/common/http';
 import { InMemoryCache, ApolloLink } from '@apollo/client/core';
 import { SetContextLink } from '@apollo/client/link/context';
 import { appRoutes } from './app.routes';

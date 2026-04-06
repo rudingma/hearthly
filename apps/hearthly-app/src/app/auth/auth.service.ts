@@ -36,7 +36,12 @@ export class AuthService {
 
   logout(): void {
     this.currentUser.set(null);
-    this.oauthService.logOut({ postLogoutRedirectUri: window.location.origin });
+    this.oauthService.logOut();
+  }
+
+  async retry(): Promise<void> {
+    this.error.set(null);
+    await this.loadUserProfile();
   }
 
   private async loadUserProfile(): Promise<void> {
