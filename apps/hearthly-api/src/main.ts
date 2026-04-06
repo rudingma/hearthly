@@ -1,22 +1,25 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
+import { appConfig } from './config';
+import type { AppConfig } from './config';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get<AppConfig>(appConfig.KEY);
+
   app.use(
     helmet({
-      contentSecurityPolicy: process.env.NODE_ENV === 'production',
+      contentSecurityPolicy: config.nodeEnv === 'production',
     }),
   );
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:4200',
+    origin: config.corsOrigin,
   });
   app.enableShutdownHooks();
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  Logger.log(`Application is running on: http://localhost:${port}`);
+  await app.listen(config.port);
+  Logger.log(`Application is running on: http://localhost:${config.port}`);
 }
 
 bootstrap();

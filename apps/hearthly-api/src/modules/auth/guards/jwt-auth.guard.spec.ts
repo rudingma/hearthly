@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 import { createLocalJWKSet } from 'jose';
 import {
   generateTestKeyPair,
@@ -10,6 +9,8 @@ import {
   signTestToken,
   TestKeyPair,
 } from '../../../../test/support/test-jwt';
+import { authConfig } from '../../../config';
+import type { AuthConfig } from '../../../config';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
@@ -52,22 +53,17 @@ describe('JwtAuthGuard', () => {
 
     reflector = new Reflector();
 
+    const testAuthConfig: AuthConfig = {
+      issuerUrl: 'http://localhost:8180/realms/hearthly',
+      clientId: 'hearthly-app',
+    };
+
     const module = await Test.createTestingModule({
       providers: [
         {
           provide: JwtAuthGuard,
-          useFactory: () => {
-            const configService = {
-              getOrThrow: vi.fn((key: string) => {
-                if (key === 'KEYCLOAK_ISSUER_URL')
-                  return 'http://localhost:8180/realms/hearthly';
-                if (key === 'KEYCLOAK_CLIENT_ID') return 'hearthly-app';
-                throw new Error(`Unknown config key: ${key}`);
-              }),
-            } as unknown as ConfigService;
-
-            return new JwtAuthGuard(reflector, configService, localJwks);
-          },
+          useFactory: () =>
+            new JwtAuthGuard(reflector, testAuthConfig, localJwks),
         },
       ],
     }).compile();

@@ -1,16 +1,18 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
   Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
 import type { JWTVerifyGetKey } from 'jose';
+import { authConfig } from '../../../config';
+import type { AuthConfig } from '../../../config';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import type { JwtPayload } from '../interfaces/jwt-payload.interface';
 
@@ -23,11 +25,11 @@ export class JwtAuthGuard implements CanActivate {
 
   constructor(
     private readonly reflector: Reflector,
-    configService: ConfigService,
+    @Inject(authConfig.KEY) config: AuthConfig,
     @Optional() jwks?: JWTVerifyGetKey,
   ) {
-    this.issuer = configService.getOrThrow<string>('KEYCLOAK_ISSUER_URL');
-    this.audience = configService.getOrThrow<string>('KEYCLOAK_CLIENT_ID');
+    this.issuer = config.issuerUrl;
+    this.audience = config.clientId;
     this.jwks =
       jwks ??
       createRemoteJWKSet(

@@ -22,6 +22,8 @@ resources:
 
 env:
   PORT: "3000"
+  NODE_ENV: "production"
+  CORS_ORIGIN: "https://hearthly.dev"
   KEYCLOAK_ISSUER_URL: "https://auth.hearthly.dev/realms/hearthly"
   KEYCLOAK_CLIENT_ID: "hearthly-app"
 
