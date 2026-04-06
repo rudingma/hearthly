@@ -44,7 +44,7 @@ export class AuthService {
       const result = await firstValueFrom(
         this.meGQL.fetch()
       );
-      this.currentUser.set(result.data.me);
+      this.currentUser.set(result.data?.me ?? null);
       this.error.set(null);
     } catch (err) {
       console.error('Failed to load user profile:', err);
