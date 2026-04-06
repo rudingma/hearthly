@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -20,7 +21,7 @@ import { HealthController } from './health.controller';
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       useFactory: () => ({
-        autoSchemaFile: true,
+        autoSchemaFile: join(process.cwd(), 'apps/hearthly-api/src/schema.gql'),
         sortSchema: true,
         playground: false,
         context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),

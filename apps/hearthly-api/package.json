@@ -55,6 +55,22 @@
         ],
         "executor": "nx:noop"
       },
+      "generate-schema": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx ts-node --project apps/hearthly-api/tsconfig.generate-schema.json apps/hearthly-api/src/generate-schema.ts",
+          "cwd": "{workspaceRoot}"
+        },
+        "cache": true,
+        "inputs": [
+          "{projectRoot}/src/**/*.ts",
+          "!{projectRoot}/src/**/*.spec.ts",
+          "!{projectRoot}/src/generate-schema.ts"
+        ],
+        "outputs": [
+          "{projectRoot}/src/schema.gql"
+        ]
+      },
       "test": {
         "executor": "nx:run-commands",
         "options": {

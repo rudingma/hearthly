@@ -8,6 +8,7 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
+      "dependsOn": ["graphql-codegen"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/hearthly-app",
@@ -36,7 +37,13 @@
               "maximumError": "8kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "fileReplacements": [
+            {
+              "replace": "apps/hearthly-app/src/environments/environment.ts",
+              "with": "apps/hearthly-app/src/environments/environment.prod.ts"
+            }
+          ]
         },
         "development": {
           "optimization": false,
@@ -64,6 +71,7 @@
     },
     "test": {
       "executor": "@angular/build:unit-test",
+      "dependsOn": ["graphql-codegen"],
       "options": {}
     },
     "serve-static": {
@@ -75,6 +83,22 @@
         "staticFilePath": "dist/apps/hearthly-app/browser",
         "spa": true
       }
+    },
+    "graphql-codegen": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["@hearthly/hearthly-api:generate-schema"],
+      "options": {
+        "command": "npx graphql-codegen --config codegen.ts"
+      },
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/apps/hearthly-api/src/schema.gql",
+        "{projectRoot}/src/**/*.graphql",
+        "{workspaceRoot}/codegen.ts"
+      ],
+      "outputs": [
+        "{projectRoot}/src/generated/graphql.ts"
+      ]
     }
   }
 }
