@@ -54,6 +54,7 @@ export class JwtAuthGuard implements CanActivate {
         issuer: this.issuer,
         audience: this.audience,
         clockTolerance: 30,
+        requiredClaims: ['sub'],
       });
 
       const jwtPayload: JwtPayload = {
