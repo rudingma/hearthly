@@ -5,5 +5,4 @@
 // When adding a new module with tables, add a re-export here:
 //   export * from '../modules/<name>/schema';
 
-// Placeholder table from initial setup (will be replaced by real module schemas)
-export { healthCheck } from './health-check.table';
+export * from '../modules/user/schema';
