@@ -136,6 +136,51 @@ kubectl get nodes                    # Verify cluster
 kubectl get pods -A                  # All pods across namespaces
 ```
 
+## API Endpoints
+
+- **No global prefix** — the `api.hearthly.dev` subdomain handles routing, so no `/api` prefix on routes
+- **Health:** `GET /health` (Terminus, used by K8s probes and Dockerfile HEALTHCHECK)
+- **GraphQL:** `POST /graphql` (Apollo Server 5, code-first schema, Apollo Sandbox in dev)
+- GraphQL requires `@as-integrations/express5` — must be in both root and app `package.json` for npm workspace hoisting
+
+## GraphQL (Code-First)
+
+- **Server:** Apollo Server 5 (`@nestjs/graphql@13`, `@nestjs/apollo@13`)
+- **Approach:** Code-first — TypeScript decorators (`@ObjectType`, `@Field`, `@Query`) generate the schema at startup
+- **Config:** `GraphQLModule.forRootAsync()` in `AppModule` with `autoSchemaFile: true` (in-memory)
+- **Context:** `{ req, res }` — #8 will extend with JWT user extraction
+- **Playground:** Disabled; Apollo Sandbox auto-serves in dev (Helmet CSP disabled in dev for this)
+- **Resolver → Service → Repository → Drizzle** — resolvers are thin, services are framework-agnostic
+- **Design doc:** `docs/api-design.md` (naming conventions, error handling, pagination, DataLoader, codegen)
+
+## Module Structure
+
+Each domain module lives under `apps/hearthly-api/src/modules/<name>/`:
+
+```
+modules/user/
+  user.module.ts           # NestJS module
+  user.service.ts          # Business logic (framework-agnostic)
+  user.repository.ts       # Drizzle queries via TransactionHost
+  models/user.model.ts     # @ObjectType() — GraphQL type
+  resolvers/user.resolver.ts  # @Query() and @Mutation()
+  schema/user.table.ts     # Drizzle pgTable definition
+  schema/index.ts          # Barrel re-export
+```
+
+- Services return plain TypeScript types, NOT GraphQL types
+- Repositories use `TransactionHost` (never direct `@Inject(DRIZZLE)`)
+- New schemas must be re-exported from `src/database/schema.ts`
+- Reference: `docs/data-layer-design.md`
+
+## Testing
+
+- **Framework:** Vitest (config at `apps/hearthly-api/vitest.config.ts`)
+- **Unit tests:** Mock repository with `vi.fn()`, wire via `@nestjs/testing`
+- **Integration tests:** PGlite (in-memory Postgres), shared helper at `test/support/test-db.ts`
+- **DB column conventions:** `text` over `varchar`, `timestamptz` over `timestamp`
+- **Pattern guide:** `docs/data-layer-design.md` Section 4
+
 ## Code Conventions
 
 - Full TypeScript end-to-end
