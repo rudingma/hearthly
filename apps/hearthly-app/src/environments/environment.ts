@@ -1,13 +1,5 @@
-export interface Environment {
-  production: boolean;
-  keycloak: {
-    issuer: string;
-    clientId: string;
-  };
-  graphql: {
-    uri: string;
-  };
-}
+export type { Environment } from './environment.interface';
+import type { Environment } from './environment.interface';
 
 export const environment: Environment = {
   production: false,
