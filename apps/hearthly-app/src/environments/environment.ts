@@ -1,4 +1,15 @@
-export const environment = {
+export interface Environment {
+  production: boolean;
+  keycloak: {
+    issuer: string;
+    clientId: string;
+  };
+  graphql: {
+    uri: string;
+  };
+}
+
+export const environment: Environment = {
   production: false,
   keycloak: {
     issuer: 'http://localhost:8180/realms/hearthly',
