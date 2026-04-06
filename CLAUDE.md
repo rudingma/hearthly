@@ -208,6 +208,17 @@ modules/user/
 - Trivy scans in CI with `exit-code: 1` and `ignore-unfixed: true`
 - Work tracked via GitHub Issues + Milestones (see `gh milestone list`, `gh issue list`)
 
+## CI/CD Pipeline
+
+- **CI (PR checks):** `ci.yml` — lint, test, build affected (x86 runner, Node.js 24)
+- **Deploy:** `deploy.yml` — Docker build on native ARM64 runners (`ubuntu-24.04-arm`), Trivy scan before push, update Helm values
+- **Keycloak:** `build-keycloak.yml` — same pattern, triggers on Dockerfile changes
+- **Terraform:** `terraform.yml` — plan on PR (posted as comment), apply on merge. Covers `infrastructure/cluster/` and `infrastructure/keycloak-config/`
+- **ARM64 runners require public repo** — if repo goes private, Docker build jobs fail
+- **Scan-before-push:** images are built locally, scanned by Trivy, pushed to GHCR only if clean
+- **Terraform concurrency:** serialized per module (`cancel-in-progress: false`) — Hetzner S3 has no state locking
+- **No manual `terraform apply` while CI is running** — Hetzner S3 has no state locking, concurrent applies corrupt state
+
 ## Git Workflow
 
 **Issue lifecycle:**
