@@ -2,7 +2,9 @@
   "name": "@hearthly/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "postinstall": "node scripts/patch-ionic-esm.mjs"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~21.2.0",
