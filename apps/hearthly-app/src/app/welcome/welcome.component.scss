@@ -1,0 +1,32 @@
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.welcome-logo {
+  margin-bottom: 24px;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.welcome-tagline {
+  font-size: 16px;
+  color: var(--hearthly-text-muted);
+  margin: 0 0 48px;
+}
+
+ion-button {
+  width: 100%;
+  max-width: 320px;
+  --border-radius: var(--hearthly-radius-button);
+}
