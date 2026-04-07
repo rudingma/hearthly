@@ -31,7 +31,7 @@ Hearthly is a family management app. It starts as a Haushaltsbuch (household bud
 
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | Angular + Capacitor | Existing Angular skills. Capacitor wraps web for iOS/Android. |
+| Frontend | Angular + Ionic + Capacitor | Existing Angular skills. Ionic for mobile-first UI components (tabs, gestures, split-pane). Capacitor wraps web for iOS/Android. |
 | Backend | NestJS + Drizzle ORM | NestJS mirrors Angular (decorators, modules, DI). Drizzle is SQL-first, type-safe — chosen over Prisma (too much abstraction) and TypeORM (declining). |
 | Database | PostgreSQL (CloudNativePG) | Self-hosted on K8s. Hetzner has no managed database. |
 | Architecture | Modular monolith | No microservices. Clean module boundaries via service interfaces. Extract only when there's a real reason. |
