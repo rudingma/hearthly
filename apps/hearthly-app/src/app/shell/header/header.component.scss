@@ -1,0 +1,18 @@
+.avatar-button {
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
