@@ -1,0 +1,22 @@
+import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { notificationsOutline } from 'ionicons/icons';
+import { AuthService } from '../../auth/auth.service';
+
+@Component({
+  selector: 'app-header',
+  imports: [RouterLink, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon],
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.scss',
+})
+export class HeaderComponent {
+  private readonly authService = inject(AuthService);
+
+  readonly initials = this.authService.initials;
+
+  constructor() {
+    addIcons({ notificationsOutline });
+  }
+}

@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/app/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Account</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="profile-section">
+    <div class="profile-avatar">{{ initials() }}</div>
+    <h2 class="profile-name">{{ userName() }}</h2>
+    <p class="profile-email">{{ userEmail() }}</p>
+  </div>
+
+  <ion-list lines="inset">
+    <ion-item button="true" detail="true">
+      <ion-icon name="people-outline" slot="start"></ion-icon>
+      <ion-label>Family</ion-label>
+    </ion-item>
+    <ion-item button="true" detail="true">
+      <ion-icon name="settings-outline" slot="start"></ion-icon>
+      <ion-label>Settings</ion-label>
+    </ion-item>
+    <ion-item button="true" detail="true">
+      <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+      <ion-label>Help</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <div class="sign-out-section">
+    <ion-button expand="block" fill="outline" color="medium" data-testid="sign-out-button" (click)="signOut()">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Sign out
+    </ion-button>
+  </div>
+</ion-content>

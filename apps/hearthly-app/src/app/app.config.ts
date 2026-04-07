@@ -7,6 +7,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import { provideOAuthClient, OAuthService } from 'angular-oauth2-oidc';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { InMemoryCache, ApolloLink } from '@apollo/client/core';
@@ -21,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes),
     provideHttpClient(),
     provideOAuthClient(),
+    provideIonicAngular({}),
     provideApollo(() => {
       const httpLink = inject(HttpLink);
       const oauthService = inject(OAuthService);

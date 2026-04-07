@@ -22,7 +22,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 
 ## Architecture
 
-- **Frontend:** Angular + Capacitor
+- **Frontend:** Angular + Ionic + Capacitor
 - **Backend:** NestJS + Drizzle ORM + PostgreSQL
 - **Infrastructure:** Hetzner Cloud, k3s via kube-hetzner, ARM nodes (CAX11)
 - **Ingress:** Traefik (bundled by kube-hetzner)
@@ -172,6 +172,39 @@ modules/user/
 - Repositories use `TransactionHost` (never direct `@Inject(DRIZZLE)`)
 - New schemas must be re-exported from `src/database/schema.ts`
 - Reference: `docs/data-layer-design.md`
+
+## Frontend (Ionic + Angular)
+
+- **UI Framework:** Ionic v8 (standalone components from `@ionic/angular/standalone`)
+- **Theming:** Terracotta on warm neutrals. Tokens in `apps/hearthly-app/src/theme/variables.scss` as Ionic CSS variables
+- **Dark mode:** System preference via `prefers-color-scheme` (no manual toggle yet)
+- **Navigation:** Bottom tabs (Home, Budget, Lists, Calendar) + header avatar → Account page
+- **Desktop:** `ion-split-pane` pins sidebar on screens >992px, tab bar hides via CSS
+- **Shell:** `ShellComponent` wraps authenticated UI (header + tabs). `WelcomeComponent` is the public login screen.
+- **Account page:** Full-screen outside the tab system (sibling route, not a child of tabs)
+- **Routing:** `ShellComponent` eagerly imported (Ionic tabs need routes at resolution time). Tab pages lazy-loaded via `loadComponent`.
+- **Icons:** Ionicons, registered per-component via `addIcons()` in constructor
+- **Ionic ESM patch:** `scripts/patch-ionic-esm.mjs` (postinstall) fixes `@ionic/core` exports for Vitest
+- **Design doc:** `docs/frontend-design.md` (navigation, theming, component conventions, testing patterns)
+
+### Frontend Structure
+
+Feature-based folders directly under `app/` (Angular style guide):
+
+```
+app/
+  welcome/          → Login screen (public)
+  shell/            → Authenticated layout (tabs + header + split-pane)
+    header/         → Toolbar with avatar
+  home/             → Home tab
+  budget/           → Budget tab (placeholder)
+  lists/            → Lists tab (placeholder)
+  calendar/         → Calendar tab (placeholder)
+  account/          → Account page (from avatar, outside tabs)
+  auth/             → Auth service, guard, config
+  theme/
+    variables.scss  → Design tokens (light + dark)
+```
 
 ## Authentication (OIDC / Keycloak)
 

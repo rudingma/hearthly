@@ -16,6 +16,13 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly initials = computed(() => {
+    const name = this.currentUser()?.name;
+    if (!name) return '';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  });
 
   async init(): Promise<void> {
     this.oauthService.configure(authConfig);
