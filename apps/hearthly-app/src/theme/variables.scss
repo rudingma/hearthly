@@ -1,0 +1,71 @@
+// Hearthly Design Tokens
+// Terracotta on warm neutrals — see docs/superpowers/specs/2026-04-07-app-shell-design.md
+
+:root {
+  // Primary (terracotta)
+  --ion-color-primary: #c7724e;
+  --ion-color-primary-rgb: 199, 114, 78;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #a3572e;
+  --ion-color-primary-tint: #d4885e;
+
+  // Background & surfaces (warm)
+  --ion-background-color: #f8f7f5;
+  --ion-background-color-rgb: 248, 247, 245;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #ffffff;
+  --ion-tab-bar-background: #ffffff;
+
+  // Text
+  --ion-text-color: #1c1917;
+  --ion-text-color-rgb: 28, 25, 23;
+  --ion-color-medium: #78716c;
+  --ion-color-medium-rgb: 120, 113, 108;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #65605b;
+  --ion-color-medium-tint: #867f7b;
+
+  // Borders
+  --ion-border-color: #e5e2dc;
+
+  // Typography
+  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  // Shape
+  --hearthly-radius-card: 14px;
+  --hearthly-radius-button: 12px;
+
+  // Custom tokens (not Ionic standard)
+  --hearthly-surface: #ffffff;
+  --hearthly-text-muted: #78716c;
+}
+
+// Dark mode — follows system preference
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-color-primary: #d4885e;
+    --ion-color-primary-rgb: 212, 136, 94;
+    --ion-color-primary-shade: #c7724e;
+    --ion-color-primary-tint: #e8a67a;
+
+    --ion-background-color: #0f0e0d;
+    --ion-background-color-rgb: 15, 14, 13;
+    --ion-item-background: #1c1a18;
+    --ion-card-background: #1c1a18;
+    --ion-toolbar-background: #1c1a18;
+    --ion-tab-bar-background: #1c1a18;
+
+    --ion-text-color: #f5f0eb;
+    --ion-text-color-rgb: 245, 240, 235;
+    --ion-color-medium: #a39e98;
+    --ion-color-medium-rgb: 163, 158, 152;
+
+    --ion-border-color: #2a2725;
+
+    --hearthly-surface: #1c1a18;
+    --hearthly-text-muted: #a39e98;
+  }
+}
