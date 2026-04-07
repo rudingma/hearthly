@@ -8,6 +8,7 @@ WORKDIR /app
 # Add a COPY line here for each new workspace package that has a package.json.
 COPY package.json package-lock.json ./
 COPY apps/hearthly-api/package.json ./apps/hearthly-api/
+COPY scripts/ ./scripts/
 RUN npm ci
 
 # Copy workspace source
