@@ -7,11 +7,19 @@ import type { User } from '../../auth/auth.service';
 
 function createMockAuthService(user: User | null = { name: 'Matthias Rudingsdorfer', email: 'dev@hearthly.dev', id: '1' }) {
   const currentUser = signal(user);
+  const initials = computed(() => {
+    const name = currentUser()?.name;
+    if (!name) return '';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  });
   return {
     currentUser,
     isAuthenticated: computed(() => currentUser() !== null),
     isLoading: signal(false),
     error: signal<string | null>(null),
+    initials,
     login: vi.fn(),
     logout: vi.fn(),
     retry: vi.fn(),

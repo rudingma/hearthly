@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -14,13 +14,7 @@ import { AuthService } from '../../auth/auth.service';
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
 
-  readonly initials = computed(() => {
-    const name = this.authService.currentUser()?.name;
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  });
+  readonly initials = this.authService.initials;
 
   constructor() {
     addIcons({ notificationsOutline });

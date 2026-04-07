@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
+import type { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { signal, computed } from '@angular/core';
 import { authGuard } from './auth.guard';
 import { AuthService } from './auth.service';
@@ -11,6 +12,13 @@ function createMockAuthService(overrides: { loading?: boolean; authenticated?: b
     isAuthenticated: computed(() => currentUser() !== null),
     isLoading: signal(overrides.loading ?? false),
     error: signal<string | null>(overrides.error ?? null),
+    initials: computed(() => {
+      const name = currentUser()?.name;
+      if (!name) return '';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0][0].toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }),
     login: vi.fn(),
     logout: vi.fn(),
     retry: vi.fn(),
@@ -30,7 +38,7 @@ describe('authGuard', () => {
       ],
     });
 
-    TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
     expect(createUrlTree).toHaveBeenCalledWith(['/']);
     expect(mockAuth.login).not.toHaveBeenCalled();
   });
@@ -45,7 +53,7 @@ describe('authGuard', () => {
       ],
     });
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    const result = TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
     expect(result).toBe(true);
   });
 
@@ -59,7 +67,7 @@ describe('authGuard', () => {
       ],
     });
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    const result = TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
     expect(result).toBe(false);
   });
 
@@ -73,7 +81,7 @@ describe('authGuard', () => {
       ],
     });
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    const result = TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
     expect(result).toBe(true);
   });
 });

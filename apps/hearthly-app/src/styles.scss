@@ -1,3 +1,6 @@
+// Hearthly design tokens
+@use './theme/variables.scss';
+
 // Ionic global styles
 @import '@ionic/angular/css/core.css';
 @import '@ionic/angular/css/normalize.css';
@@ -7,6 +10,3 @@
 @import '@ionic/angular/css/text-alignment.css';
 @import '@ionic/angular/css/flex-utils.css';
 @import '@ionic/angular/css/display.css';
-
-// Hearthly design tokens
-@import './theme/variables.scss';

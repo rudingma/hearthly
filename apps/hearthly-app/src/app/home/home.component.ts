@@ -11,12 +11,12 @@ import { AuthService } from '../auth/auth.service';
 export class HomeComponent {
   private readonly authService = inject(AuthService);
 
-  readonly greeting = computed(() => {
+  get greeting(): string {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
     if (hour < 18) return 'Good afternoon';
     return 'Good evening';
-  });
+  }
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
 }

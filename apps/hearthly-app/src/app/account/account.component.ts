@@ -4,7 +4,7 @@ import {
   IonBackButton, IonHeader, IonToolbar, IonTitle, IonButtons,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { peopleOutline, settingsOutline, helpCircleOutline, logOutOutline, chevronForward } from 'ionicons/icons';
+import { peopleOutline, settingsOutline, helpCircleOutline, logOutOutline } from 'ionicons/icons';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -21,16 +21,10 @@ export class AccountComponent {
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
   readonly userEmail = computed(() => this.authService.currentUser()?.email ?? '');
-  readonly initials = computed(() => {
-    const name = this.authService.currentUser()?.name;
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  });
+  readonly initials = this.authService.initials;
 
   constructor() {
-    addIcons({ peopleOutline, settingsOutline, helpCircleOutline, logOutOutline, chevronForward });
+    addIcons({ peopleOutline, settingsOutline, helpCircleOutline, logOutOutline });
   }
 
   signOut(): void {
