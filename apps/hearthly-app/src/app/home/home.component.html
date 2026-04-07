@@ -1,10 +1,14 @@
-@if (auth.error()) {
-  <div>
-    <p>Could not load your profile. The server may be unavailable.</p>
-    <button (click)="auth.retry()">Retry</button>
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ greeting() }}, {{ userName() }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Welcome to Hearthly — your household management hub.
+    </ion-card-content>
+  </ion-card>
+
+  <div class="empty-state">
+    <p>Your dashboard will grow as you add features.</p>
   </div>
-} @else {
-  <h1>Welcome, {{ auth.currentUser()?.name }}</h1>
-  <p>{{ auth.currentUser()?.email }}</p>
-  <button (click)="auth.logout()">Log out</button>
-}
+</ion-content>
