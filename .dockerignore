@@ -20,7 +20,6 @@ LICENSE
 
 # Infrastructure (not needed for app builds)
 infrastructure
-!infrastructure/cluster-services/keycloak/deploy
 .terraform
 *.tfstate
 *.tfstate.*
