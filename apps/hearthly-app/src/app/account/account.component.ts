@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   IonContent, IonList, IonItem, IonLabel, IonIcon, IonButton,
   IonBackButton, IonHeader, IonToolbar, IonTitle, IonButtons,
@@ -27,6 +27,10 @@ export class AccountComponent {
 
   constructor() {
     addIcons({ peopleOutline, settingsOutline, helpCircleOutline, logOutOutline });
+    effect(() => {
+      this.pictureUrl();
+      this.imageError.set(false);
+    });
   }
 
   onImageError(): void {

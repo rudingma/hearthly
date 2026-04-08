@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -20,6 +20,10 @@ export class HeaderComponent {
 
   constructor() {
     addIcons({ notificationsOutline });
+    effect(() => {
+      this.pictureUrl();
+      this.imageError.set(false);
+    });
   }
 
   onImageError(): void {
