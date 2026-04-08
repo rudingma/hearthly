@@ -69,7 +69,7 @@ GraphQLModule.forRootAsync<ApolloDriverConfig>({
 })
 ```
 
-**Security:** Configure query depth limiting and complexity analysis before production. Use `graphql-depth-limit` or Apollo Server's built-in options. Add CORS for the `/graphql` endpoint via `app.enableCors()` in `main.ts`.
+**Security:** Query depth limiting (`graphql-depth-limit`, max 7) and complexity analysis (`graphql-query-complexity`, max 1000) are configured as `validationRules` in the GraphQL module. Introspection is disabled in production. CORS is configured via `app.enableCors()` in `main.ts`.
 
 **Schema generation for codegen:** NestJS code-first generates `schema.gql` at runtime. For CI builds (where the API isn't running), create an Nx target that bootstraps a minimal NestJS context to generate the schema file. See Section 6 for the codegen dependency chain.
 
