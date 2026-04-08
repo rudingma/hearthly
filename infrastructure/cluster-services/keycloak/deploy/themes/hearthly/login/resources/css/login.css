@@ -187,6 +187,12 @@ body {
   box-shadow: 0 0 0 3px rgba(199, 114, 78, 0.2);
 }
 
+@media (prefers-color-scheme: dark) {
+  .hearthly-input:focus {
+    box-shadow: 0 0 0 3px rgba(212, 136, 94, 0.2);
+  }
+}
+
 .hearthly-input-error {
   border-color: var(--hearthly-error-input);
 }
@@ -320,8 +326,14 @@ body {
   transition: border-color 0.15s;
 }
 
-.hearthly-social-button:hover {
+.hearthly-social-button:hover,
+.hearthly-social-button:focus-visible {
   border-color: var(--hearthly-primary);
+}
+
+.hearthly-social-button:focus-visible {
+  outline: 2px solid var(--hearthly-primary);
+  outline-offset: 2px;
 }
 
 /* Try another way link */
@@ -335,8 +347,15 @@ body {
   text-decoration: none;
 }
 
-.hearthly-try-another a:hover {
+.hearthly-try-another a:hover,
+.hearthly-try-another a:focus-visible {
   text-decoration: underline;
+}
+
+.hearthly-try-another a:focus-visible {
+  outline: 2px solid var(--hearthly-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Info section */
