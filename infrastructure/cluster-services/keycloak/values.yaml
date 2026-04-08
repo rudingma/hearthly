@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/rudingma/hearthly-keycloak
-  tag: "26.3.3-sha-e7357ed"
+  tag: "26.3.3-sha-31b64dc"
   pullPolicy: IfNotPresent
 
 service:
