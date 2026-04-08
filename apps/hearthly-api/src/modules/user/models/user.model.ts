@@ -11,7 +11,7 @@ export class User {
   @Field()
   name!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   picture?: string | null;
 
   @Field(() => GraphQLISODateTime)

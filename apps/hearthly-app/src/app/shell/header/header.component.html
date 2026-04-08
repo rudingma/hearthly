@@ -6,7 +6,11 @@
         <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
       </ion-button>
       <ion-button [routerLink]="['/app/account']" class="avatar-button">
-        <span class="avatar">{{ initials() }}</span>
+        @if (pictureUrl() && !imageError()) {
+          <img class="avatar avatar-img" [src]="pictureUrl()" (error)="onImageError()" alt="Profile">
+        } @else {
+          <span class="avatar">{{ initials() }}</span>
+        }
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

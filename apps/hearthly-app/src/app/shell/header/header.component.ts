@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -15,8 +15,14 @@ export class HeaderComponent {
   private readonly authService = inject(AuthService);
 
   readonly initials = this.authService.initials;
+  readonly pictureUrl = this.authService.pictureUrl;
+  readonly imageError = signal(false);
 
   constructor() {
     addIcons({ notificationsOutline });
+  }
+
+  onImageError(): void {
+    this.imageError.set(true);
   }
 }
