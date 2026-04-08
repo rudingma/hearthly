@@ -50,6 +50,7 @@ services:
       - "8180:8080"
     volumes:
       - ./infrastructure/keycloak-config/local/realm-hearthly.json:/opt/keycloak/data/import/realm-hearthly.json:ro
+      - ./infrastructure/cluster-services/keycloak/deploy/themes/hearthly:/opt/keycloak/themes/hearthly:ro
     depends_on:
       keycloak-postgres:
         condition: service_healthy
