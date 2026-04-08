@@ -13,13 +13,23 @@ export class UserService {
     return this.userRepo.findByKeycloakId(keycloakId);
   }
 
-  async findOrCreateByKeycloakId(claims: { sub: string; email: string; name: string }) {
+  async findOrCreateByKeycloakId(claims: {
+    sub: string;
+    email: string;
+    name: string;
+    picture?: string;
+  }) {
     return this.userRepo.findOrCreateByKeycloakId(claims);
   }
 
-  async getOrSyncByKeycloakId(claims: { sub: string; email: string; name: string }) {
+  async getOrSyncByKeycloakId(claims: {
+    sub: string;
+    email: string;
+    name: string;
+    picture?: string;
+  }) {
     const existing = await this.userRepo.findByKeycloakId(claims.sub);
-    if (!existing || existing.email !== claims.email || existing.name !== claims.name) {
+    if (!existing || existing.email !== claims.email) {
       return this.userRepo.findOrCreateByKeycloakId(claims);
     }
     return existing;
