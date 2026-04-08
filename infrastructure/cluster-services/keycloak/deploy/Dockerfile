@@ -3,6 +3,8 @@ FROM quay.io/keycloak/keycloak:26.3.3 AS builder
 
 WORKDIR /opt/keycloak
 
+COPY infrastructure/cluster-services/keycloak/deploy/themes/hearthly /opt/keycloak/themes/hearthly
+
 ENV KC_DB=postgres
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true

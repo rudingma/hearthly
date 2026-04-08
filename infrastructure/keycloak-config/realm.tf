@@ -9,16 +9,15 @@ resource "keycloak_realm" "hearthly" {
   login_with_email_allowed       = true
   duplicate_emails_allowed       = false
   reset_password_allowed         = true
-  remember_me                    = true
+  remember_me                    = false
+
+  # Login theme
+  login_theme = "hearthly"
 
   # Token and session lifetimes
   access_token_lifespan = "5m0s"
 
-  # Normal sessions
-  sso_session_idle_timeout = "24h0m0s"
-  sso_session_max_lifespan = "72h0m0s"
-
-  # Remember-me sessions (30 days)
-  sso_session_idle_timeout_remember_me = "720h0m0s"
-  sso_session_max_lifespan_remember_me = "720h0m0s"
+  # 30-day sessions for all users (no remember-me checkbox)
+  sso_session_idle_timeout = "720h0m0s"
+  sso_session_max_lifespan = "720h0m0s"
 }
