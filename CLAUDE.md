@@ -62,7 +62,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **DB credentials:** Auto-generated in K8s Secret `keycloak-db-app`
 - **ArgoCD:** Two apps — `keycloak` (prune: true) + `keycloak-db` (prune: false, protects data)
 - **PV reclaim policy:** Retain (patched manually, not in manifest)
-- **CI:** `.github/workflows/build-keycloak.yml` — builds optimized image on Dockerfile changes, pushes to GHCR, auto-updates values.yaml tag
+- **CI:** Keycloak build is part of `deploy.yml` (consolidated). Triggers on changes to `infrastructure/cluster-services/keycloak/deploy/**`, or via `workflow_dispatch` with `force_keycloak` input
 - **Dockerfile:** `infrastructure/cluster-services/keycloak/deploy/Dockerfile` (multi-stage, `kc.sh build` in CI)
 - **Chart:** `infrastructure/cluster-services/keycloak/` (custom Helm chart, own templates)
 - **Upgrade:** Change `FROM` tag in Dockerfile → CI rebuilds → auto-deploys
@@ -244,8 +244,7 @@ app/
 ## CI/CD Pipeline
 
 - **CI (PR checks):** `ci.yml` — lint, test, build affected (x86 runner, Node.js 24)
-- **Deploy:** `deploy.yml` — Docker build on native ARM64 runners (`ubuntu-24.04-arm`), Trivy scan before push, update Helm values
-- **Keycloak:** `build-keycloak.yml` — same pattern, triggers on Dockerfile changes
+- **Deploy:** `deploy.yml` — builds API, App, and Keycloak images on native ARM64 runners (`ubuntu-24.04-arm`), Trivy scan before push, single commit for all tag updates. Keycloak build conditional on `infrastructure/cluster-services/keycloak/deploy/**` changes, or manual via `workflow_dispatch` with `force_keycloak` input.
 - **Terraform:** `terraform.yml` — plan on PR (posted as comment), apply on merge. Covers `infrastructure/cluster/` and `infrastructure/keycloak-config/`
 - **ARM64 runners require public repo** — if repo goes private, Docker build jobs fail
 - **Scan-before-push:** images are built locally, scanned by Trivy, pushed to GHCR only if clean
