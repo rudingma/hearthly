@@ -1,0 +1,347 @@
+/* Hearthly Login Theme
+   Design tokens mirror apps/hearthly-app/src/theme/variables.scss */
+
+:root {
+  --hearthly-primary: #c7724e;
+  --hearthly-primary-shade: #a3572e;
+  --hearthly-primary-tint: #d4885e;
+  --hearthly-bg: #f8f7f5;
+  --hearthly-surface: #ffffff;
+  --hearthly-text: #1c1917;
+  --hearthly-text-muted: #78716c;
+  --hearthly-border: #e5e2dc;
+  --hearthly-radius: 12px;
+  --hearthly-error-bg: #fef2f2;
+  --hearthly-error-border: #fecaca;
+  --hearthly-error-text: #991b1b;
+  --hearthly-error-input: #dc2626;
+  --hearthly-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hearthly-primary: #d4885e;
+    --hearthly-primary-shade: #c7724e;
+    --hearthly-primary-tint: #e8a67a;
+    --hearthly-bg: #0f0e0d;
+    --hearthly-surface: #1c1a18;
+    --hearthly-text: #f5f0eb;
+    --hearthly-text-muted: #a39e98;
+    --hearthly-border: #2a2725;
+    --hearthly-error-bg: #2d1b1b;
+    --hearthly-error-border: #5c2828;
+    --hearthly-error-text: #fca5a5;
+    --hearthly-error-input: #dc2626;
+  }
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--hearthly-font);
+  background: var(--hearthly-bg);
+  color: var(--hearthly-text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout — vertically centered column matching welcome screen */
+.hearthly-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+/* Logo */
+.hearthly-logo {
+  margin-bottom: 24px;
+}
+
+/* Title — matches welcome screen exactly */
+.hearthly-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0 0 8px;
+  color: var(--hearthly-text);
+}
+
+/* Subtitle */
+.hearthly-subtitle {
+  font-size: 16px;
+  color: var(--hearthly-text-muted);
+  margin: 0 0 48px;
+}
+
+/* Re-auth flow (session expired, user known) */
+.hearthly-reauth {
+  margin-bottom: 48px;
+}
+
+.hearthly-reauth-user {
+  display: block;
+  font-size: 15px;
+  color: var(--hearthly-text);
+  margin-bottom: 4px;
+}
+
+.hearthly-reauth-link {
+  font-size: 13px;
+  color: var(--hearthly-primary);
+  text-decoration: none;
+}
+
+.hearthly-reauth-link:hover,
+.hearthly-reauth-link:focus-visible {
+  text-decoration: underline;
+}
+
+.hearthly-reauth-link:focus-visible {
+  outline: 2px solid var(--hearthly-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Alert banner — global errors (account locked, etc.) */
+.hearthly-alert {
+  width: 100%;
+  max-width: 360px;
+  padding: 12px 16px;
+  border-radius: var(--hearthly-radius);
+  font-size: 13px;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.hearthly-alert-error {
+  background: var(--hearthly-error-bg);
+  border: 1px solid var(--hearthly-error-border);
+  color: var(--hearthly-error-text);
+}
+
+.hearthly-alert-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.hearthly-alert-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hearthly-alert-success {
+    background: #1b2d1b;
+    border-color: #285c28;
+    color: #a5fca5;
+  }
+
+  .hearthly-alert-info {
+    background: #1b1b2d;
+    border-color: #28285c;
+    color: #a5a5fc;
+  }
+}
+
+/* Form */
+.hearthly-form {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Input fields */
+.hearthly-field {
+  margin-bottom: 14px;
+}
+
+.hearthly-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--hearthly-border);
+  border-radius: var(--hearthly-radius);
+  background: var(--hearthly-surface);
+  color: var(--hearthly-text);
+  font-family: var(--hearthly-font);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.hearthly-input::placeholder {
+  color: var(--hearthly-text-muted);
+}
+
+.hearthly-input:focus {
+  border-color: var(--hearthly-primary);
+  box-shadow: 0 0 0 3px rgba(199, 114, 78, 0.2);
+}
+
+.hearthly-input-error {
+  border-color: var(--hearthly-error-input);
+}
+
+.hearthly-input-error:focus {
+  border-color: var(--hearthly-error-input);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Field-level error text */
+.hearthly-field-error {
+  font-size: 12px;
+  color: var(--hearthly-error-input);
+  text-align: left;
+  margin-top: 4px;
+  margin-bottom: 14px;
+}
+
+/* Forgot password link */
+.hearthly-forgot {
+  text-align: right;
+  margin-bottom: 24px;
+}
+
+/* Links */
+.hearthly-link-primary {
+  color: var(--hearthly-primary);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.hearthly-link-primary:hover,
+.hearthly-link-primary:focus-visible {
+  text-decoration: underline;
+}
+
+.hearthly-link-primary:focus-visible {
+  outline: 2px solid var(--hearthly-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Submit button — matches welcome screen sign-in button */
+.hearthly-button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--hearthly-radius);
+  background: var(--hearthly-primary);
+  color: #ffffff;
+  font-family: var(--hearthly-font);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.hearthly-button:hover {
+  background: var(--hearthly-primary-shade);
+}
+
+.hearthly-button:active {
+  background: var(--hearthly-primary-shade);
+  transform: scale(0.99);
+}
+
+.hearthly-button:focus-visible {
+  outline: 2px solid var(--hearthly-primary);
+  outline-offset: 2px;
+}
+
+.hearthly-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Registration link */
+.hearthly-register {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--hearthly-text-muted);
+}
+
+/* Social login (future) */
+.hearthly-social {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 24px;
+}
+
+.hearthly-divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  color: var(--hearthly-text-muted);
+  font-size: 13px;
+}
+
+.hearthly-divider::before,
+.hearthly-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--hearthly-border);
+}
+
+.hearthly-divider span {
+  padding: 0 12px;
+}
+
+.hearthly-social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hearthly-social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--hearthly-border);
+  border-radius: var(--hearthly-radius);
+  background: var(--hearthly-surface);
+  color: var(--hearthly-text);
+  font-family: var(--hearthly-font);
+  font-size: 14px;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.hearthly-social-button:hover {
+  border-color: var(--hearthly-primary);
+}
+
+/* Try another way link */
+.hearthly-try-another {
+  margin-top: 16px;
+}
+
+.hearthly-try-another a {
+  color: var(--hearthly-primary);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.hearthly-try-another a:hover {
+  text-decoration: underline;
+}
+
+/* Info section */
+.hearthly-info {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--hearthly-text-muted);
+}
