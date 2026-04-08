@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   IonContent, IonList, IonItem, IonLabel, IonIcon, IonButton,
   IonBackButton, IonHeader, IonToolbar, IonTitle, IonButtons,
@@ -22,9 +22,15 @@ export class AccountComponent {
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
   readonly userEmail = computed(() => this.authService.currentUser()?.email ?? '');
   readonly initials = this.authService.initials;
+  readonly pictureUrl = this.authService.pictureUrl;
+  readonly imageError = signal(false);
 
   constructor() {
     addIcons({ peopleOutline, settingsOutline, helpCircleOutline, logOutOutline });
+  }
+
+  onImageError(): void {
+    this.imageError.set(true);
   }
 
   signOut(): void {

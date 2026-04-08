@@ -9,7 +9,11 @@
 
 <ion-content class="ion-padding">
   <div class="profile-section">
-    <div class="profile-avatar">{{ initials() }}</div>
+    @if (pictureUrl() && !imageError()) {
+      <img class="profile-avatar profile-avatar-img" [src]="pictureUrl()" (error)="onImageError()" alt="Profile">
+    } @else {
+      <div class="profile-avatar">{{ initials() }}</div>
+    }
     <h2 class="profile-name">{{ userName() }}</h2>
     <p class="profile-email">{{ userEmail() }}</p>
   </div>
