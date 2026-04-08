@@ -25,6 +25,7 @@ export async function signTestToken(
     sub?: string;
     email?: string;
     name?: string;
+    picture?: string;
     given_name?: string;
     family_name?: string;
     preferred_username?: string;
@@ -42,6 +43,7 @@ export async function signTestToken(
     realm_access: claims.realm_access ?? { roles: ['user'] },
   };
   if (claims.name !== undefined) payload.name = claims.name;
+  if (claims.picture !== undefined) payload.picture = claims.picture;
   if (claims.given_name !== undefined) payload.given_name = claims.given_name;
   if (claims.family_name !== undefined) payload.family_name = claims.family_name;
 
