@@ -1,0 +1,3 @@
+# Keycloak build only needs its own deploy directory (themes, scripts)
+*
+!infrastructure/cluster-services/keycloak/deploy
