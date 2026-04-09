@@ -60,7 +60,22 @@ describe('UserRepository (integration)', () => {
   });
 
   describe('findOrCreateByKeycloakId', () => {
-    it('creates a new user when keycloakId does not exist', async () => {
+    it('creates a new user with all fields including picture', async () => {
+      const result = await repo.findOrCreateByKeycloakId({
+        sub: 'kc-new',
+        email: 'charlie@example.com',
+        name: 'Charlie',
+        picture: 'https://lh3.googleusercontent.com/charlie.jpg',
+      });
+
+      expect(result.keycloakId).toBe('kc-new');
+      expect(result.email).toBe('charlie@example.com');
+      expect(result.name).toBe('Charlie');
+      expect(result.picture).toBe('https://lh3.googleusercontent.com/charlie.jpg');
+      expect(result.id).toBeDefined();
+    });
+
+    it('creates a new user with null picture', async () => {
       const result = await repo.findOrCreateByKeycloakId({
         sub: 'kc-new',
         email: 'charlie@example.com',
@@ -68,29 +83,29 @@ describe('UserRepository (integration)', () => {
       });
 
       expect(result.keycloakId).toBe('kc-new');
-      expect(result.email).toBe('charlie@example.com');
-      expect(result.name).toBe('Charlie');
-      expect(result.id).toBeDefined();
+      expect(result.picture).toBeNull();
     });
 
-    it('updates and returns existing user on conflict', async () => {
+    it('updates only email on conflict — does not overwrite name or picture', async () => {
       await db.insert(users).values({
         keycloakId: 'kc-existing',
         email: 'old@example.com',
-        name: 'Old Name',
+        name: 'Original Name',
+        picture: 'https://lh3.googleusercontent.com/original.jpg',
       });
 
       const result = await repo.findOrCreateByKeycloakId({
         sub: 'kc-existing',
         email: 'new@example.com',
-        name: 'New Name',
+        name: 'New Name From Google',
+        picture: 'https://lh3.googleusercontent.com/new.jpg',
       });
 
       expect(result.keycloakId).toBe('kc-existing');
       expect(result.email).toBe('new@example.com');
-      expect(result.name).toBe('New Name');
+      expect(result.name).toBe('Original Name');
+      expect(result.picture).toBe('https://lh3.googleusercontent.com/original.jpg');
 
-      // Verify only one row exists
       const allUsers = await db.select().from(users);
       expect(allUsers).toHaveLength(1);
     });

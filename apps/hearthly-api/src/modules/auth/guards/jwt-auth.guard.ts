@@ -73,12 +73,16 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Token missing required email claim');
     }
 
+    const claims = payload as Record<string, unknown>;
+    const picture = typeof claims.picture === 'string' ? claims.picture : undefined;
+
     const jwtPayload: JwtPayload = {
       sub: payload.sub!,
       email,
-      name: this.extractName(payload as Record<string, unknown>),
+      name: this.extractName(claims),
+      picture,
       roles:
-        ((payload as Record<string, unknown>).realm_access as { roles?: string[] })
+        (claims.realm_access as { roles?: string[] })
           ?.roles ?? [],
     };
 

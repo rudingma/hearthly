@@ -23,6 +23,7 @@ export class AuthService {
     if (parts.length === 1) return parts[0][0].toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   });
+  readonly pictureUrl = computed(() => this.currentUser()?.picture ?? null);
 
   async init(): Promise<void> {
     this.oauthService.configure(authConfig);

@@ -14,12 +14,14 @@ function createMockAuthService(user: User | null = { name: 'Matthias Rudingsdorf
     if (parts.length === 1) return parts[0][0].toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   });
+  const pictureUrl = computed(() => currentUser()?.picture ?? null);
   return {
     currentUser,
     isAuthenticated: computed(() => currentUser() !== null),
     isLoading: signal(false),
     error: signal<string | null>(null),
     initials,
+    pictureUrl,
     login: vi.fn(),
     logout: vi.fn(),
     retry: vi.fn(),
@@ -69,5 +71,51 @@ describe('HeaderComponent', () => {
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
     expect(fixture.componentInstance.initials()).toBe('');
+  });
+
+  it('should expose pictureUrl from auth service', async () => {
+    const mockAuth = createMockAuthService({
+      name: 'Alice',
+      email: 'alice@example.com',
+      id: '1',
+      picture: 'https://lh3.googleusercontent.com/photo.jpg',
+    });
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent],
+      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.pictureUrl()).toBe('https://lh3.googleusercontent.com/photo.jpg');
+  });
+
+  it('should return null pictureUrl when user has no picture', async () => {
+    const mockAuth = createMockAuthService({ name: 'Alice', email: 'alice@example.com', id: '1' });
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent],
+      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.pictureUrl()).toBeNull();
+  });
+
+  it('should fall back to initials when image fails to load', async () => {
+    const mockAuth = createMockAuthService({
+      name: 'Alice',
+      email: 'alice@example.com',
+      id: '1',
+      picture: 'https://lh3.googleusercontent.com/broken.jpg',
+    });
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent],
+      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.imageError()).toBe(false);
+    fixture.componentInstance.onImageError();
+    expect(fixture.componentInstance.imageError()).toBe(true);
   });
 });

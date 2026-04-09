@@ -14,6 +14,7 @@ export class UserResolver {
       sub: jwt.sub,
       email: jwt.email,
       name: jwt.name,
+      picture: jwt.picture,
     });
   }
 }

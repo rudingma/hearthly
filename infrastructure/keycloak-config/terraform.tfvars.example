@@ -6,3 +6,15 @@
 
 keycloak_url        = "https://auth.hearthly.dev"
 keycloak_admin_user = "admin"
+
+# Google Identity Provider
+# Create OAuth 2.0 credentials at https://console.cloud.google.com/apis/credentials
+# Authorized redirect URIs:
+#   Production: https://auth.hearthly.dev/realms/hearthly/broker/google/endpoint
+#   Local:      http://localhost:8180/realms/hearthly/broker/google/endpoint
+#
+# Set the secret via environment variable:
+#   export TF_VAR_google_client_secret="your-secret"
+# Store production credentials in Infisical.
+
+google_client_id = "940613733500-to8n5v9vql8jfp0kufptrorbmgf8cbja.apps.googleusercontent.com"
