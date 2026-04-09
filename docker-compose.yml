@@ -39,6 +39,7 @@ services:
     restart: unless-stopped
     command: >
       bash -c "
+        mkdir -p /opt/keycloak/data/import &&
         sed 's/GOOGLE_CLIENT_SECRET_PLACEHOLDER/'\"$$GOOGLE_CLIENT_SECRET\"'/' /opt/keycloak/data/import-template/realm-hearthly.json > /opt/keycloak/data/import/realm-hearthly.json &&
         /opt/keycloak/bin/kc.sh start-dev --import-realm
       "
