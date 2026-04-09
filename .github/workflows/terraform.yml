@@ -11,12 +11,16 @@ on:
     paths:
       - "infrastructure/cluster/**/*.tf"
       - "infrastructure/keycloak-config/**/*.tf"
-  workflow_dispatch:
 
 permissions:
   contents: read
   pull-requests: write
   id-token: write
+
+env:
+  INFISICAL_IDENTITY_ID: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
+  INFISICAL_DOMAIN: "https://secrets.hearthly.dev"
+  INFISICAL_PROJECT_SLUG: "hearthly-uv-ci"
 
 jobs:
   changes:
@@ -53,10 +57,10 @@ jobs:
         uses: Infisical/secrets-action@v1.0.15
         with:
           method: "oidc"
-          identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
-          domain: "https://secrets.hearthly.dev"
+          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
+          domain: ${{ env.INFISICAL_DOMAIN }}
           env-slug: "prod"
-          project-slug: "hearthly-uv-ci"
+          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
           secret-path: "/"
 
       - name: Configure backend
@@ -117,10 +121,10 @@ jobs:
         uses: Infisical/secrets-action@v1.0.15
         with:
           method: "oidc"
-          identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
-          domain: "https://secrets.hearthly.dev"
+          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
+          domain: ${{ env.INFISICAL_DOMAIN }}
           env-slug: "prod"
-          project-slug: "hearthly-uv-ci"
+          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
           secret-path: "/"
 
       - name: Configure backend
@@ -166,10 +170,10 @@ jobs:
         uses: Infisical/secrets-action@v1.0.15
         with:
           method: "oidc"
-          identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
-          domain: "https://secrets.hearthly.dev"
+          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
+          domain: ${{ env.INFISICAL_DOMAIN }}
           env-slug: "prod"
-          project-slug: "hearthly-uv-ci"
+          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
           secret-path: "/"
 
       - name: Configure backend
@@ -225,10 +229,10 @@ jobs:
         uses: Infisical/secrets-action@v1.0.15
         with:
           method: "oidc"
-          identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
-          domain: "https://secrets.hearthly.dev"
+          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
+          domain: ${{ env.INFISICAL_DOMAIN }}
           env-slug: "prod"
-          project-slug: "hearthly-uv-ci"
+          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
           secret-path: "/"
 
       - name: Configure backend
