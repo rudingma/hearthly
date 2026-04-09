@@ -5,6 +5,8 @@ export interface JwtPayload {
   email: string;
   /** User display name */
   name: string;
+  /** Profile picture URL (from Google IdP) */
+  picture?: string;
   /** Keycloak realm roles (e.g. ['user', 'admin']) */
   roles: string[];
 }

@@ -66,8 +66,8 @@ describe('UserService', () => {
 
   describe('findOrCreateByKeycloakId', () => {
     it('delegates to repository', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
+      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
       repo.findOrCreateByKeycloakId.mockResolvedValue(mockUser);
 
       const result = await service.findOrCreateByKeycloakId(claims);
@@ -77,9 +77,9 @@ describe('UserService', () => {
   });
 
   describe('getOrSyncByKeycloakId', () => {
-    it('returns existing user when data matches', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice' };
+    it('returns existing user when email matches (no sync needed)', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'New Name', picture: 'https://new.jpg' };
+      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://old.jpg' };
       repo.findByKeycloakId.mockResolvedValue(mockUser);
 
       const result = await service.getOrSyncByKeycloakId(claims);
@@ -88,9 +88,19 @@ describe('UserService', () => {
       expect(repo.findOrCreateByKeycloakId).not.toHaveBeenCalled();
     });
 
+    it('does not overwrite name or picture when they differ', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Google Name', picture: 'https://google.jpg' };
+      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Custom Name', picture: 'https://custom.jpg' };
+      repo.findByKeycloakId.mockResolvedValue(mockUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(mockUser);
+      expect(repo.findOrCreateByKeycloakId).not.toHaveBeenCalled();
+    });
+
     it('upserts when user not found (first login)', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
+      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
       repo.findByKeycloakId.mockResolvedValue(null);
       repo.findOrCreateByKeycloakId.mockResolvedValue(mockUser);
 
@@ -99,22 +109,10 @@ describe('UserService', () => {
       expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
     });
 
-    it('upserts when email has changed (profile drift)', async () => {
+    it('syncs when email has changed', async () => {
       const claims = { sub: 'kc-1', email: 'new@b.com', name: 'Alice' };
-      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'old@b.com', name: 'Alice' };
-      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'new@b.com', name: 'Alice' };
-      repo.findByKeycloakId.mockResolvedValue(existingUser);
-      repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
-
-      const result = await service.getOrSyncByKeycloakId(claims);
-      expect(result).toEqual(updatedUser);
-      expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
-    });
-
-    it('upserts when name has changed (profile drift)', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'New Name' };
-      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Old Name' };
-      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'New Name' };
+      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'old@b.com', name: 'Alice', picture: null };
+      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'new@b.com', name: 'Alice', picture: null };
       repo.findByKeycloakId.mockResolvedValue(existingUser);
       repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
 

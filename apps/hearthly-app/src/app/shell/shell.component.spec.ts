@@ -26,6 +26,7 @@ describe('ShellComponent', () => {
       isLoading: signal(false),
       error: signal<string | null>(null),
       initials: computed(() => 'TU'),
+      pictureUrl: computed(() => null as string | null),
       login: vi.fn(),
       logout: vi.fn(),
       retry: vi.fn(),

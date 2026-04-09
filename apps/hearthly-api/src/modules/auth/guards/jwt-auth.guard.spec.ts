@@ -87,8 +87,44 @@ describe('JwtAuthGuard', () => {
       sub: 'kc-123',
       email: 'alice@example.com',
       name: 'Alice Smith',
+      picture: undefined,
       roles: ['user'],
     });
+  });
+
+  it('extracts picture claim from token when present', async () => {
+    const token = await signTestToken(keys.privateKey, {
+      sub: 'kc-123',
+      email: 'alice@example.com',
+      name: 'Alice Smith',
+      picture: 'https://lh3.googleusercontent.com/photo.jpg',
+      realm_access: { roles: ['user'] },
+    });
+    const { context, request } = createMockExecutionContext(token);
+
+    await guard.canActivate(context);
+
+    expect(request.user).toEqual({
+      sub: 'kc-123',
+      email: 'alice@example.com',
+      name: 'Alice Smith',
+      picture: 'https://lh3.googleusercontent.com/photo.jpg',
+      roles: ['user'],
+    });
+  });
+
+  it('sets picture to undefined when claim is absent', async () => {
+    const token = await signTestToken(keys.privateKey, {
+      sub: 'kc-123',
+      email: 'alice@example.com',
+      name: 'Alice Smith',
+      realm_access: { roles: ['user'] },
+    });
+    const { context, request } = createMockExecutionContext(token);
+
+    await guard.canActivate(context);
+
+    expect(request.user.picture).toBeUndefined();
   });
 
   it('throws UnauthorizedException when no token provided', async () => {

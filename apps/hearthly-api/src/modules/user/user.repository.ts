@@ -27,19 +27,24 @@ export class UserRepository {
     return user ?? null;
   }
 
-  async findOrCreateByKeycloakId(claims: { sub: string; email: string; name: string }) {
+  async findOrCreateByKeycloakId(claims: {
+    sub: string;
+    email: string;
+    name: string;
+    picture?: string;
+  }) {
     const [user] = await this.txHost.tx
       .insert(users)
       .values({
         keycloakId: claims.sub,
         email: claims.email,
         name: claims.name,
+        picture: claims.picture ?? null,
       })
       .onConflictDoUpdate({
         target: users.keycloakId,
         set: {
           email: claims.email,
-          name: claims.name,
           updatedAt: sql`now()`,
         },
       })

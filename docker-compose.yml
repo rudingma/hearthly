@@ -37,7 +37,13 @@ services:
     image: quay.io/keycloak/keycloak:26.3.3
     container_name: hearthly-keycloak
     restart: unless-stopped
-    command: start-dev --import-realm
+    command: >
+      bash -c "
+        mkdir -p /opt/keycloak/data/import &&
+        sed 's/GOOGLE_CLIENT_SECRET_PLACEHOLDER/'\"$$GOOGLE_CLIENT_SECRET\"'/' /opt/keycloak/data/import-template/realm-hearthly.json > /opt/keycloak/data/import/realm-hearthly.json &&
+        /opt/keycloak/bin/kc.sh start-dev --import-realm
+      "
+    entrypoint: []
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -46,10 +52,11 @@ services:
       KC_DB_USERNAME: ${KC_POSTGRES_USER:-keycloak}
       KC_DB_PASSWORD: ${KC_POSTGRES_PASSWORD:-keycloak_local}
       KC_HEALTH_ENABLED: "true"
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-placeholder}
     ports:
       - "8180:8080"
     volumes:
-      - ./infrastructure/keycloak-config/local/realm-hearthly.json:/opt/keycloak/data/import/realm-hearthly.json:ro
+      - ./infrastructure/keycloak-config/local/realm-hearthly.json:/opt/keycloak/data/import-template/realm-hearthly.json:ro
       - ./infrastructure/cluster-services/keycloak/deploy/themes/hearthly:/opt/keycloak/themes/hearthly:ro
     depends_on:
       keycloak-postgres:
