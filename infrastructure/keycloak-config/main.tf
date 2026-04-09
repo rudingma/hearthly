@@ -32,4 +32,6 @@ provider "keycloak" {
   url       = var.keycloak_url
   username  = var.keycloak_admin_user
   password  = var.keycloak_admin_password
+
+  # Secrets managed via Infisical OIDC (no stored credentials in CI)
 }
