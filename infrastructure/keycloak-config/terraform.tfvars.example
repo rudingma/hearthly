@@ -17,4 +17,4 @@ keycloak_admin_user = "admin"
 #   export TF_VAR_google_client_secret="your-secret"
 # Store production credentials in Infisical.
 
-google_client_id = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+google_client_id = "940613733500-to8n5v9vql8jfp0kufptrorbmgf8cbja.apps.googleusercontent.com"

@@ -58,8 +58,8 @@
       "trustEmail": true,
       "firstBrokerLoginFlowAlias": "first-broker-auto-link",
       "config": {
-        "clientId": "YOUR_GOOGLE_CLIENT_ID",
-        "clientSecret": "YOUR_GOOGLE_CLIENT_SECRET",
+        "clientId": "940613733500-to8n5v9vql8jfp0kufptrorbmgf8cbja.apps.googleusercontent.com",
+        "clientSecret": "GOOGLE_CLIENT_SECRET_PLACEHOLDER",
         "defaultScope": "openid email profile",
         "syncMode": "FORCE",
         "useJwksUrl": "true"
