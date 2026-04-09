@@ -29,21 +29,21 @@
   "authenticationFlows": [
     {
       "alias": "first-broker-auto-link",
-      "description": "Auto-link social login accounts by email",
+      "description": "Create new user or auto-link to existing user by email",
       "providerId": "basic-flow",
       "topLevel": true,
       "builtIn": false,
       "authenticationExecutions": [
         {
-          "authenticator": "idp-detect-existing-broker-user",
+          "authenticator": "idp-create-user-if-unique",
           "authenticatorFlow": false,
-          "requirement": "REQUIRED",
+          "requirement": "ALTERNATIVE",
           "priority": 10
         },
         {
           "authenticator": "idp-auto-link",
           "authenticatorFlow": false,
-          "requirement": "REQUIRED",
+          "requirement": "ALTERNATIVE",
           "priority": 20
         }
       ]

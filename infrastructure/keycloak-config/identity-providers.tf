@@ -1,26 +1,30 @@
 # --- Auto-Link Authentication Flow ---
-# Automatically links social login to existing accounts with matching email.
-# Used as the first-broker-login flow for all social IdPs.
+# Handles first broker login for social IdPs:
+# 1. Create user if email is unique (new user) — ALTERNATIVE
+# 2. Auto-link to existing user with same email — ALTERNATIVE
+#
+# Per Keycloak docs: idp-create-user-if-unique sets the existing user in
+# context when it fails, so idp-auto-link can link without a detect step.
 
 resource "keycloak_authentication_flow" "auto_link" {
   realm_id = keycloak_realm.hearthly.id
   alias    = "first-broker-auto-link"
 }
 
-resource "keycloak_authentication_execution" "detect_existing" {
+resource "keycloak_authentication_execution" "create_unique_user" {
   realm_id          = keycloak_realm.hearthly.id
   parent_flow_alias = keycloak_authentication_flow.auto_link.alias
-  authenticator     = "idp-detect-existing-broker-user"
-  requirement       = "REQUIRED"
+  authenticator     = "idp-create-user-if-unique"
+  requirement       = "ALTERNATIVE"
 }
 
 resource "keycloak_authentication_execution" "auto_link" {
   realm_id          = keycloak_realm.hearthly.id
   parent_flow_alias = keycloak_authentication_flow.auto_link.alias
   authenticator     = "idp-auto-link"
-  requirement       = "REQUIRED"
+  requirement       = "ALTERNATIVE"
 
-  depends_on = [keycloak_authentication_execution.detect_existing]
+  depends_on = [keycloak_authentication_execution.create_unique_user]
 }
 
 # --- Google Identity Provider ---
