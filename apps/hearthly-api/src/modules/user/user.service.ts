@@ -16,7 +16,7 @@ export class UserService {
   async findOrCreateByKeycloakId(claims: {
     sub: string;
     email: string;
-    name: string;
+    name?: string;
     picture?: string;
   }) {
     return this.userRepo.findOrCreateByKeycloakId(claims);
@@ -25,11 +25,16 @@ export class UserService {
   async getOrSyncByKeycloakId(claims: {
     sub: string;
     email: string;
-    name: string;
+    name?: string;
     picture?: string;
   }) {
     const existing = await this.userRepo.findByKeycloakId(claims.sub);
-    if (!existing || existing.email !== claims.email) {
+    if (
+      !existing ||
+      existing.email !== claims.email ||
+      (!existing.name && claims.name) ||
+      (!existing.picture && claims.picture)
+    ) {
       return this.userRepo.findOrCreateByKeycloakId(claims);
     }
     return existing;

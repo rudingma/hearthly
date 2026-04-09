@@ -19,7 +19,7 @@ import { AuthService } from '../auth/auth.service';
 export class AccountComponent {
   private readonly authService = inject(AuthService);
 
-  readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
+  readonly userName = this.authService.displayName;
   readonly userEmail = computed(() => this.authService.currentUser()?.email ?? '');
   readonly initials = this.authService.initials;
   readonly pictureUrl = this.authService.pictureUrl;

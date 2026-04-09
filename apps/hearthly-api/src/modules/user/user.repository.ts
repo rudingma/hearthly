@@ -30,7 +30,7 @@ export class UserRepository {
   async findOrCreateByKeycloakId(claims: {
     sub: string;
     email: string;
-    name: string;
+    name?: string;
     picture?: string;
   }) {
     const [user] = await this.txHost.tx
@@ -38,13 +38,15 @@ export class UserRepository {
       .values({
         keycloakId: claims.sub,
         email: claims.email,
-        name: claims.name,
+        name: claims.name ?? null,
         picture: claims.picture ?? null,
       })
       .onConflictDoUpdate({
         target: users.keycloakId,
         set: {
           email: claims.email,
+          name: sql`coalesce(${users.name}, ${claims.name})`,
+          picture: sql`coalesce(${users.picture}, ${claims.picture ?? null})`,
           updatedAt: sql`now()`,
         },
       })

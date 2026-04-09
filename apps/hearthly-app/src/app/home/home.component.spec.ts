@@ -10,12 +10,21 @@ describe('HomeComponent', () => {
     isAuthenticated: computed(() => true),
     isLoading: signal(false),
     error: signal<string | null>(null),
+    displayName: computed(() => {
+      const user = currentUser();
+      if (!user) return '';
+      return user.name || user.email.split('@')[0];
+    }),
     initials: computed(() => {
       const name = currentUser()?.name;
-      if (!name) return '';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length === 1) return parts[0][0].toUpperCase();
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      if (name) {
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0][0].toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      const email = currentUser()?.email;
+      if (email) return email[0].toUpperCase();
+      return '';
     }),
     login: vi.fn(),
     logout: vi.fn(),
