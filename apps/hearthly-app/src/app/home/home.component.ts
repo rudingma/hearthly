@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/angular/standalone';
 import { AuthService } from '../auth/auth.service';
 
@@ -18,5 +18,5 @@ export class HomeComponent {
     return 'Good evening';
   }
 
-  readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
+  readonly userName = this.authService.displayName;
 }

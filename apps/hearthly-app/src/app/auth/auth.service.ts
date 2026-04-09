@@ -16,12 +16,21 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly displayName = computed(() => {
+    const user = this.currentUser();
+    if (!user) return '';
+    return user.name || user.email.split('@')[0];
+  });
   readonly initials = computed(() => {
     const name = this.currentUser()?.name;
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    if (name) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0][0].toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    const email = this.currentUser()?.email;
+    if (email) return email[0].toUpperCase();
+    return '';
   });
   readonly pictureUrl = computed(() => this.currentUser()?.picture ?? null);
 

@@ -86,7 +86,45 @@ describe('UserRepository (integration)', () => {
       expect(result.picture).toBeNull();
     });
 
-    it('updates only email on conflict — does not overwrite name or picture', async () => {
+    it('backfills null picture on conflict', async () => {
+      await db.insert(users).values({
+        keycloakId: 'kc-existing',
+        email: 'user@example.com',
+        name: 'Existing Name',
+        picture: null,
+      });
+
+      const result = await repo.findOrCreateByKeycloakId({
+        sub: 'kc-existing',
+        email: 'user@example.com',
+        name: 'Existing Name',
+        picture: 'https://lh3.googleusercontent.com/photo.jpg',
+      });
+
+      expect(result.picture).toBe('https://lh3.googleusercontent.com/photo.jpg');
+      expect(result.name).toBe('Existing Name');
+    });
+
+    it('backfills null name on conflict', async () => {
+      await db.insert(users).values({
+        keycloakId: 'kc-existing',
+        email: 'user@example.com',
+        name: null,
+        picture: null,
+      });
+
+      const result = await repo.findOrCreateByKeycloakId({
+        sub: 'kc-existing',
+        email: 'user@example.com',
+        name: 'Name From Google',
+        picture: 'https://lh3.googleusercontent.com/photo.jpg',
+      });
+
+      expect(result.name).toBe('Name From Google');
+      expect(result.picture).toBe('https://lh3.googleusercontent.com/photo.jpg');
+    });
+
+    it('preserves existing name and picture on conflict', async () => {
       await db.insert(users).values({
         keycloakId: 'kc-existing',
         email: 'old@example.com',
