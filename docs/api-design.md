@@ -40,9 +40,9 @@
 **Schema approach:** Code-first
 
 - Define schema via TypeScript decorators (`@ObjectType()`, `@Field()`, `@Query()`, `@Mutation()`)
-- NestJS auto-generates `schema.gql` at startup
+- `autoSchemaFile: true` keeps the schema in memory at runtime (avoids file-watcher restart loops in dev)
 - Each module defines its own types and resolvers — no shared SDL files to coordinate
-- `autoSchemaFile` writes the schema to disk for codegen consumption
+- A separate `generate-schema` Nx target writes `schema.gql` to disk for codegen (see Section 6)
 
 **Setup:**
 
@@ -50,14 +50,13 @@
 // app.module.ts
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
 
 GraphQLModule.forRootAsync<ApolloDriverConfig>({
   driver: ApolloDriver,
   imports: [DataLoaderModule],
   inject: [DataLoaderRegistryFactory],
   useFactory: (loaderFactory: DataLoaderRegistryFactory) => ({
-    autoSchemaFile: join(process.cwd(), 'apps/hearthly-api/src/schema.gql'),
+    autoSchemaFile: true, // in-memory — file-based causes dev server restart loops
     sortSchema: true,
     playground: false, // use Apollo Sandbox instead
     context: ({ req, res }) => ({
@@ -71,7 +70,7 @@ GraphQLModule.forRootAsync<ApolloDriverConfig>({
 
 **Security:** Query depth limiting (`graphql-depth-limit`, max 7) and complexity analysis (`graphql-query-complexity`, max 1000) are configured as `validationRules` in the GraphQL module. Introspection is disabled in production. CORS is configured via `app.enableCors()` in `main.ts`.
 
-**Schema generation for codegen:** NestJS code-first generates `schema.gql` at runtime. For CI builds (where the API isn't running), create an Nx target that bootstraps a minimal NestJS context to generate the schema file. See Section 6 for the codegen dependency chain.
+**Schema generation for codegen:** The running server keeps the schema in memory only (`autoSchemaFile: true`). The `generate-schema` Nx target bootstraps a minimal NestJS context via `GraphQLSchemaBuilderModule` to write `schema.gql` to disk for codegen and CI. See Section 6 for the dependency chain.
 
 **Dependencies (backend):**
 
