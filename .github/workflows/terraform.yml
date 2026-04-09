@@ -56,7 +56,7 @@ jobs:
           identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
           domain: "https://secrets.hearthly.dev"
           env-slug: "prod"
-          project-slug: "8e2b05b0-c7e7-4e4c-89a7-90bba3e8c705"
+          project-slug: "hearthly-uv-ci"
           secret-path: "/"
 
       - name: Configure backend
@@ -120,7 +120,7 @@ jobs:
           identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
           domain: "https://secrets.hearthly.dev"
           env-slug: "prod"
-          project-slug: "8e2b05b0-c7e7-4e4c-89a7-90bba3e8c705"
+          project-slug: "hearthly-uv-ci"
           secret-path: "/"
 
       - name: Configure backend
@@ -169,7 +169,7 @@ jobs:
           identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
           domain: "https://secrets.hearthly.dev"
           env-slug: "prod"
-          project-slug: "8e2b05b0-c7e7-4e4c-89a7-90bba3e8c705"
+          project-slug: "hearthly-uv-ci"
           secret-path: "/"
 
       - name: Configure backend
@@ -228,7 +228,7 @@ jobs:
           identity-id: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
           domain: "https://secrets.hearthly.dev"
           env-slug: "prod"
-          project-slug: "8e2b05b0-c7e7-4e4c-89a7-90bba3e8c705"
+          project-slug: "hearthly-uv-ci"
           secret-path: "/"
 
       - name: Configure backend
