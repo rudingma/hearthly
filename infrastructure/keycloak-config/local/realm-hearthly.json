@@ -12,47 +12,6 @@
   "accessTokenLifespan": 36000,
   "ssoSessionIdleTimeout": 2592000,
   "ssoSessionMaxLifespan": 2592000,
-  "userProfile": {
-    "attributes": [
-      {
-        "name": "username",
-        "displayName": "${username}",
-        "permissions": { "view": ["admin", "user"], "edit": ["admin", "user"] },
-        "validations": {
-          "length": { "min": 3, "max": 255 },
-          "username-prohibited-characters": {},
-          "up-username-not-idn-homograph": {}
-        }
-      },
-      {
-        "name": "email",
-        "displayName": "${email}",
-        "required": { "roles": ["user"] },
-        "permissions": { "view": ["admin", "user"], "edit": ["admin", "user"] },
-        "validations": { "email": {}, "length": { "max": 255 } }
-      },
-      {
-        "name": "firstName",
-        "displayName": "${firstName}",
-        "required": { "roles": ["user"] },
-        "permissions": { "view": ["admin", "user"], "edit": ["admin", "user"] },
-        "validations": { "length": { "max": 255 }, "person-name-prohibited-characters": {} }
-      },
-      {
-        "name": "lastName",
-        "displayName": "${lastName}",
-        "required": { "roles": ["user"] },
-        "permissions": { "view": ["admin", "user"], "edit": ["admin", "user"] },
-        "validations": { "length": { "max": 255 }, "person-name-prohibited-characters": {} }
-      },
-      {
-        "name": "picture",
-        "displayName": "Profile Picture",
-        "permissions": { "view": ["admin", "user"], "edit": ["admin"] },
-        "validations": { "uri": {}, "length": { "max": 2048 } }
-      }
-    ]
-  },
   "roles": {
     "realm": [
       {
@@ -64,7 +23,11 @@
   "defaultRole": {
     "name": "default-roles-hearthly",
     "composites": {
-      "realm": ["offline_access", "uma_authorization", "user"]
+      "realm": [
+        "offline_access",
+        "uma_authorization",
+        "user"
+      ]
     }
   },
   "authenticationFlows": [
@@ -187,7 +150,11 @@
           "temporary": false
         }
       ],
-      "realmRoles": ["user", "offline_access", "uma_authorization"]
+      "realmRoles": [
+        "user",
+        "offline_access",
+        "uma_authorization"
+      ]
     }
   ]
 }

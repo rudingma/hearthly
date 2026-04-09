@@ -8,8 +8,8 @@ export class User {
   @Field()
   email!: string;
 
-  @Field()
-  name!: string;
+  @Field(() => String, { nullable: true })
+  name?: string | null;
 
   @Field(() => String, { nullable: true })
   picture?: string | null;

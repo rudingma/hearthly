@@ -109,6 +109,30 @@ describe('UserService', () => {
       expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
     });
 
+    it('syncs when picture is null but JWT has one', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://google.jpg' };
+      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: null };
+      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://google.jpg' };
+      repo.findByKeycloakId.mockResolvedValue(existingUser);
+      repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(updatedUser);
+      expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
+    });
+
+    it('syncs when name is null but JWT has one', async () => {
+      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: null, picture: null };
+      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: null };
+      repo.findByKeycloakId.mockResolvedValue(existingUser);
+      repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
+
+      const result = await service.getOrSyncByKeycloakId(claims);
+      expect(result).toEqual(updatedUser);
+      expect(repo.findOrCreateByKeycloakId).toHaveBeenCalledWith(claims);
+    });
+
     it('syncs when email has changed', async () => {
       const claims = { sub: 'kc-1', email: 'new@b.com', name: 'Alice' };
       const existingUser = { id: '1', keycloakId: 'kc-1', email: 'old@b.com', name: 'Alice', picture: null };
