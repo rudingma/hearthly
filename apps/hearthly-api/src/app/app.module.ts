@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -37,9 +36,7 @@ const gqlLogger = new Logger('GraphQLSecurity');
       useFactory: (config: ConfigService) => {
         const isProd = config.get<string>('app.nodeEnv') === 'production';
         return {
-          autoSchemaFile: isProd
-            ? true
-            : join(process.cwd(), 'apps/hearthly-api/src/schema.gql'),
+          autoSchemaFile: true,
           sortSchema: true,
           playground: false,
           introspection: !isProd,
