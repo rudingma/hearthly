@@ -4,11 +4,11 @@ resource "keycloak_realm" "hearthly" {
   display_name = "Hearthly"
 
   # Login settings
-  registration_allowed           = true
+  registration_allowed           = false
   registration_email_as_username = true
   login_with_email_allowed       = true
   duplicate_emails_allowed       = false
-  reset_password_allowed         = true
+  reset_password_allowed         = false
   remember_me                    = false
 
   # Login theme
