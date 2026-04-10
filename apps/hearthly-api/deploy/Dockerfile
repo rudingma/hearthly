@@ -24,7 +24,9 @@ FROM node:24-alpine
 LABEL org.opencontainers.image.source=https://github.com/rudingma/hearthly
 
 # Pull Alpine security patches (base image may lag behind)
-RUN apk upgrade --no-cache && addgroup -S hearthly && adduser -S hearthly -G hearthly
+USER root
+RUN apk upgrade --no-cache
+RUN addgroup -S hearthly && adduser -S hearthly -G hearthly
 
 WORKDIR /app
 
