@@ -57,11 +57,16 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # K8s API server (ClusterIP before DNAT + node IP after DNAT)
     - to:
         - ipBlock:
             cidr: {{ .Values.apiServer.clusterIP }}/32
+        - ipBlock:
+            cidr: {{ .Values.apiServer.nodeIP }}/32
       ports:
         - port: 443
+          protocol: TCP
+        - port: 6443
           protocol: TCP
 ---
 # CNPG operator: allow ingress from Prometheus (metrics on 8080)

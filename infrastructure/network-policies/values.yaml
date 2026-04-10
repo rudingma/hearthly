@@ -7,4 +7,9 @@ namespaces:
   - infisical
 
 apiServer:
+  # kube-router (k3s NetworkPolicy controller) evaluates egress AFTER kube-proxy
+  # DNAT, so the ClusterIP (10.43.0.1:443) is rewritten to the control plane
+  # node IP (10.255.0.101:6443) before the policy check. Both are needed for
+  # compatibility with different CNI behaviors.
   clusterIP: 10.43.0.1
+  nodeIP: 10.255.0.101
