@@ -25,8 +25,73 @@
   margin: 0 0 48px;
 }
 
-ion-button {
+.welcome-buttons {
   width: 100%;
   max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Google Sign-In button — follows Google Branding Guidelines
+// https://developers.google.com/identity/branding-guidelines
+.google-sign-in {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #dadce0;
+  border-radius: var(--hearthly-radius-button);
+  background: #ffffff;
+  color: #3c4043;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: #f7f8f8;
+    border-color: #c4c7c5;
+  }
+
+  &:active {
+    background: #e8eaed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+// Dev-only fallback button
+ion-button {
   --border-radius: var(--hearthly-radius-button);
+}
+
+// Dark mode — Google brand colors for dark theme
+@media (prefers-color-scheme: dark) {
+  .google-sign-in {
+    background: #131314;
+    border-color: #8e918f;
+    color: #e3e3e3;
+
+    &:hover {
+      background: #1f1f20;
+      border-color: #a1a3a0;
+    }
+
+    &:active {
+      background: #2a2a2b;
+    }
+  }
 }

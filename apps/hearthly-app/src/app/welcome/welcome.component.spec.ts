@@ -3,6 +3,7 @@ import { signal, computed } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { WelcomeComponent } from './welcome.component';
 import { AuthService } from '../auth/auth.service';
+import { environment } from '../../environments/environment';
 
 describe('WelcomeComponent', () => {
   const mockAuthService = {
@@ -11,6 +12,8 @@ describe('WelcomeComponent', () => {
     isLoading: signal(false),
     error: signal<string | null>(null),
     initials: computed(() => ''),
+    displayName: computed(() => ''),
+    pictureUrl: computed(() => null),
     login: vi.fn(),
     logout: vi.fn(),
     retry: vi.fn(),
@@ -33,12 +36,52 @@ describe('WelcomeComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should call authService.login() when sign in is clicked', () => {
+  it('should call authService.login("google") when Google sign-in is clicked', () => {
     const fixture = TestBed.createComponent(WelcomeComponent);
     fixture.detectChanges();
-    const button: HTMLElement = fixture.nativeElement.querySelector('ion-button[data-testid="sign-in-button"]');
+    const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-google"]');
     button.click();
-    expect(mockAuthService.login).toHaveBeenCalled();
+    expect(mockAuthService.login).toHaveBeenCalledWith('google');
+  });
+
+  it('should show dev fallback button when enablePasswordAuth is true', () => {
+    const original = environment.enablePasswordAuth;
+    (environment as any).enablePasswordAuth = true;
+    try {
+      const fixture = TestBed.createComponent(WelcomeComponent);
+      fixture.detectChanges();
+      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      expect(button).toBeTruthy();
+    } finally {
+      (environment as any).enablePasswordAuth = original;
+    }
+  });
+
+  it('should hide dev fallback button when enablePasswordAuth is false', () => {
+    const original = environment.enablePasswordAuth;
+    (environment as any).enablePasswordAuth = false;
+    try {
+      const fixture = TestBed.createComponent(WelcomeComponent);
+      fixture.detectChanges();
+      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      expect(button).toBeFalsy();
+    } finally {
+      (environment as any).enablePasswordAuth = original;
+    }
+  });
+
+  it('should call authService.login() without args when dev fallback is clicked', () => {
+    const original = environment.enablePasswordAuth;
+    (environment as any).enablePasswordAuth = true;
+    try {
+      const fixture = TestBed.createComponent(WelcomeComponent);
+      fixture.detectChanges();
+      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      button.click();
+      expect(mockAuthService.login).toHaveBeenCalledWith();
+    } finally {
+      (environment as any).enablePasswordAuth = original;
+    }
   });
 
   it('should redirect to /app/home if already authenticated', () => {
@@ -48,6 +91,8 @@ describe('WelcomeComponent', () => {
       isLoading: signal(false),
       error: signal<string | null>(null),
       initials: computed(() => 'T'),
+      displayName: computed(() => 'Test'),
+      pictureUrl: computed(() => null),
       login: vi.fn(),
       logout: vi.fn(),
       retry: vi.fn(),
