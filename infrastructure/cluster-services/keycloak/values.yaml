@@ -35,3 +35,14 @@ keycloak:
     username: "admin"
     existingSecret: "keycloak-admin-credentials"
     passwordKey: "admin-password"
+
+backup:
+  enabled: true
+  schedule: "0 3 * * *"  # Daily at 03:00 UTC (1h after app backup)
+  images:
+    dump: postgres:18-alpine
+    upload: amazon/aws-cli:2.27.31
+  s3:
+    bucket: hearthly-backups
+    endpoint: https://nbg1.your-objectstorage.com
+    region: nbg1

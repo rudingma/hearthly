@@ -1,0 +1,138 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Chart.Name }}-db-backup
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            {{- include "keycloak.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: db-backup
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-data
+              emptyDir: {}
+            - name: tmp
+              emptyDir: {}
+          initContainers:
+            # Step 1: pg_dump with custom format (supports parallel restore)
+            - name: dump
+              image: {{ .Values.backup.images.dump }}
+              securityContext:
+                runAsUser: 70
+                runAsGroup: 70
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: keycloak-db-app
+                      key: uri
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eo pipefail
+                  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+                  echo "${TIMESTAMP}" > /backup/timestamp
+                  FILENAME="keycloak-db-${TIMESTAMP}.dump"
+
+                  echo "Dumping database: ${FILENAME}"
+                  pg_dump "${DATABASE_URL}" --format=custom > "/backup/${FILENAME}"
+
+                  FILESIZE=$(stat -c%s "/backup/${FILENAME}" 2>/dev/null || echo 0)
+                  if [ "$FILESIZE" -lt 100 ]; then
+                    echo "ERROR: Backup file too small (${FILESIZE} bytes). Aborting."
+                    exit 1
+                  fi
+                  echo "Dump complete: $(du -h /backup/${FILENAME} | cut -f1)"
+
+                  echo "Generating checksum"
+                  sha256sum "/backup/${FILENAME}" > "/backup/${FILENAME}.sha256"
+                  cat "/backup/${FILENAME}.sha256"
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+          containers:
+            # Step 2: Upload to S3 (lifecycle policy handles retention)
+            - name: upload
+              image: {{ .Values.backup.images.upload }}
+              securityContext:
+                runAsUser: 1000
+                runAsGroup: 1000
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: keycloak-s3-credentials
+                      key: S3_ACCESS_KEY
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: keycloak-s3-credentials
+                      key: S3_SECRET_KEY
+                - name: S3_BUCKET
+                  value: {{ .Values.backup.s3.bucket | quote }}
+                - name: S3_ENDPOINT
+                  value: {{ .Values.backup.s3.endpoint | quote }}
+                - name: S3_REGION
+                  value: {{ .Values.backup.s3.region | quote }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(cat /backup/timestamp)
+                  FILENAME="keycloak-db-${TIMESTAMP}.dump"
+
+                  echo "Uploading /backup/${FILENAME} to s3://${S3_BUCKET}/"
+                  aws s3 cp "/backup/${FILENAME}" "s3://${S3_BUCKET}/${FILENAME}" \
+                    --endpoint-url "${S3_ENDPOINT}" \
+                    --region "${S3_REGION}"
+                  aws s3 cp "/backup/${FILENAME}.sha256" "s3://${S3_BUCKET}/${FILENAME}.sha256" \
+                    --endpoint-url "${S3_ENDPOINT}" \
+                    --region "${S3_REGION}"
+                  echo "Upload complete (backup + checksum)"
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+{{- end }}
