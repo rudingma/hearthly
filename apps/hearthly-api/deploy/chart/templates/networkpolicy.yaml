@@ -3,12 +3,12 @@ kind: NetworkPolicy
 metadata:
   name: {{ .Chart.Name }}
   labels:
-    {{- include "keycloak.labels" . | nindent 4 }}
+    {{- include "hearthly-api.labels" . | nindent 4 }}
 spec:
-  # Also covers backup CronJob pods (keycloak-db-backup) which share these labels
+  # Also covers backup CronJob pods (hearthly-api-db-backup) which share these labels
   podSelector:
     matchLabels:
-      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+      {{- include "hearthly-api.selectorLabels" . | nindent 6 }}
   policyTypes:
     - Ingress
     - Egress
@@ -19,34 +19,26 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: traefik
       ports:
-        - port: http
+        - port: {{ .Values.service.port }}
           protocol: TCP
-    # Allow traffic from Prometheus (metrics on management port)
+    # Allow traffic from Prometheus (metrics scraping)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: monitoring
       ports:
-        - port: management
+        - port: {{ .Values.service.port }}
           protocol: TCP
   egress:
-    # Allow DNS resolution
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - port: 53
-          protocol: UDP
-        - port: 53
-          protocol: TCP
-    # Allow traffic to keycloak-db (same namespace)
+    # Allow traffic to hearthly-db (PostgreSQL)
     - to:
         - podSelector:
             matchLabels:
-              cnpg.io/cluster: keycloak-db
+              cnpg.io/cluster: hearthly-db
       ports:
         - port: 5432
           protocol: TCP
-    # Allow HTTPS to external identity providers (Google, Apple)
+    # Allow external HTTPS (Keycloak JWKS via auth.hearthly.dev, S3 backups)
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
