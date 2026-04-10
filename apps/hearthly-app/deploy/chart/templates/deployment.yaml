@@ -27,6 +27,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CSP_API_ORIGIN
+              value: {{ .Values.csp.apiOrigin | quote }}
+            - name: CSP_AUTH_ORIGIN
+              value: {{ .Values.csp.authOrigin | quote }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

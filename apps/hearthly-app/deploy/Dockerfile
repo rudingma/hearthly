@@ -23,8 +23,17 @@ FROM nginxinc/nginx-unprivileged:alpine
 
 LABEL org.opencontainers.image.source=https://github.com/rudingma/hearthly
 
-# Copy nginx config and built static files
-COPY apps/hearthly-app/deploy/nginx.conf /etc/nginx/nginx.conf
+# envsubst template config:
+# - NGINX_ENVSUBST_OUTPUT_DIR: process template to /etc/nginx/ (replaces main nginx.conf)
+# - NGINX_ENVSUBST_FILTER: only substitute CSP_* vars (protects nginx vars like $uri)
+# - CSP defaults: safety net if Helm env vars are misconfigured
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx \
+    NGINX_ENVSUBST_FILTER="^CSP_" \
+    CSP_API_ORIGIN="https://api.hearthly.dev" \
+    CSP_AUTH_ORIGIN="https://auth.hearthly.dev"
+
+# Copy nginx template and built static files
+COPY apps/hearthly-app/deploy/nginx.conf.template /etc/nginx/templates/nginx.conf.template
 COPY --from=builder /app/dist/apps/hearthly-app/browser/ /usr/share/nginx/html/
 
 EXPOSE 8080
