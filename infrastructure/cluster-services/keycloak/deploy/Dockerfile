@@ -1,5 +1,5 @@
 # Build stage — runs kc.sh build to pre-compile Quarkus augmentation
-FROM quay.io/keycloak/keycloak:26.3.3 AS builder
+FROM quay.io/keycloak/keycloak:26.5.5 AS builder
 
 WORKDIR /opt/keycloak
 
@@ -13,7 +13,7 @@ ENV KC_CACHE=local
 RUN /opt/keycloak/bin/kc.sh build
 
 # Production stage — contains pre-built optimized artifacts
-FROM quay.io/keycloak/keycloak:26.3.3
+FROM quay.io/keycloak/keycloak:26.5.5
 
 LABEL org.opencontainers.image.source=https://github.com/rudingma/hearthly
 
