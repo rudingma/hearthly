@@ -34,8 +34,8 @@ resource "keycloak_oidc_google_identity_provider" "google" {
   client_id     = var.google_client_id
   client_secret = var.google_client_secret
 
-  trust_email   = true
-  sync_mode     = "FORCE"
+  trust_email = true
+  sync_mode   = "FORCE"
 
   default_scopes = "openid email profile"
 

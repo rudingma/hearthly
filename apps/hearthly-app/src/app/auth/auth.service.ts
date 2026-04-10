@@ -47,8 +47,12 @@ export class AuthService {
     this.oauthService.setupAutomaticSilentRefresh();
   }
 
-  login(): void {
-    this.oauthService.initCodeFlow();
+  login(idpHint?: string): void {
+    if (idpHint) {
+      this.oauthService.initCodeFlow('', { kc_idp_hint: idpHint });
+    } else {
+      this.oauthService.initCodeFlow();
+    }
   }
 
   logout(): void {
