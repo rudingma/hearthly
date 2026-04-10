@@ -1,0 +1,10 @@
+namespaces:
+  - hearthly
+  - keycloak
+  - argocd
+  - monitoring
+  - cnpg-system
+  - infisical
+
+apiServer:
+  clusterIP: 10.43.0.1

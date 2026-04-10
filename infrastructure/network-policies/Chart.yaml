@@ -1,0 +1,4 @@
+apiVersion: v2
+name: network-policies
+version: 0.1.0
+description: Baseline and infrastructure NetworkPolicies for Hearthly cluster

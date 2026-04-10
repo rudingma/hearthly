@@ -1,0 +1,74 @@
+# Infisical: allow intra-namespace communication
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-infisical-intra-namespace
+  namespace: infisical
+  labels:
+    {{- include "network-policies.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: {}
+  egress:
+    - to:
+        - podSelector: {}
+---
+# Infisical app: allow ingress from Traefik
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-infisical-traefik-ingress
+  namespace: infisical
+  labels:
+    {{- include "network-policies.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: infisical-standalone
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+      ports:
+        - port: 8080
+          protocol: TCP
+---
+# Infisical: allow egress to K8s API server and external HTTPS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-infisical-egress
+  namespace: infisical
+  labels:
+    {{- include "network-policies.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # K8s API server
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.apiServer.clusterIP }}/32
+      ports:
+        - port: 443
+          protocol: TCP
+    # External HTTPS
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP

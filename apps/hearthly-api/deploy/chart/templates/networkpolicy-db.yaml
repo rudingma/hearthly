@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hearthly-db
+  labels:
+    {{- include "hearthly-api.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: hearthly-db
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow traffic from hearthly-api (PostgreSQL queries)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ .Chart.Name }}
+      ports:
+        - port: 5432
+          protocol: TCP
+    # Allow traffic from CNPG operator (management + status)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - port: 5432
+          protocol: TCP
+        - port: 8000
+          protocol: TCP
+    # Allow traffic from Prometheus (metrics)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 9187
+          protocol: TCP
