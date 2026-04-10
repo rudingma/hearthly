@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "hearthly-api.labels" . | nindent 4 }}
 spec:
+  # Also covers backup CronJob pods (hearthly-api-db-backup) which share these labels
   podSelector:
     matchLabels:
       {{- include "hearthly-api.selectorLabels" . | nindent 6 }}

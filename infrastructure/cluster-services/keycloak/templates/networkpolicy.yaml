@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
 spec:
+  # Also covers backup CronJob pods (keycloak-db-backup) which share these labels
   podSelector:
     matchLabels:
       {{- include "keycloak.selectorLabels" . | nindent 6 }}
