@@ -96,6 +96,18 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Restore:** `aws s3 cp s3://hearthly-backups/<filename>.dump . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && pg_restore -d "$(kubectl get secret hearthly-db-app -n hearthly -o jsonpath='{.data.uri}' | base64 -d)" <filename>.dump`
 - **Verify checksum:** `aws s3 cp s3://hearthly-backups/<filename>.dump.sha256 . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && sha256sum -c <filename>.dump.sha256`
 
+## Database — Keycloak
+
+- **Cluster:** keycloak-db in keycloak namespace, PostgreSQL (same operator as hearthly-db)
+- **Storage:** 5Gi Hetzner Volume
+- **Credentials:** Auto-generated in K8s Secret `keycloak-db-app`
+- **Connection URI:** `kubectl get secret keycloak-db-app -n keycloak -o jsonpath='{.data.uri}' | base64 -d`
+- **Backups:** Daily pg_dump CronJob at 03:00 UTC → same `hearthly-backups` bucket, prefix `keycloak-db-`
+- **S3 credentials:** Infisical → `keycloak-s3-credentials` K8s Secret in keycloak namespace
+- **Restore:** `aws s3 cp s3://hearthly-backups/<filename>.dump . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && pg_restore -d "$(kubectl get secret keycloak-db-app -n keycloak -o jsonpath='{.data.uri}' | base64 -d)" <filename>.dump`
+- **Verify checksum:** `aws s3 cp s3://hearthly-backups/<filename>.dump.sha256 . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && sha256sum -c <filename>.dump.sha256`
+- **Manual trigger:** `kubectl create job --from=cronjob/keycloak-db-backup manual-keycloak-backup -n keycloak`
+
 ## Build & Run Commands
 
 ```bash
