@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: keycloak-db-backup
+  name: {{ .Chart.Name }}-db-backup
   labels:
     {{- include "keycloak.labels" . | nindent 4 }}
 spec:
