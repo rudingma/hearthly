@@ -47,38 +47,41 @@ describe('WelcomeComponent', () => {
   it('should show dev fallback button when enablePasswordAuth is true', () => {
     const original = environment.enablePasswordAuth;
     (environment as any).enablePasswordAuth = true;
-
-    const fixture = TestBed.createComponent(WelcomeComponent);
-    fixture.detectChanges();
-    const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
-    expect(button).toBeTruthy();
-
-    (environment as any).enablePasswordAuth = original;
+    try {
+      const fixture = TestBed.createComponent(WelcomeComponent);
+      fixture.detectChanges();
+      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      expect(button).toBeTruthy();
+    } finally {
+      (environment as any).enablePasswordAuth = original;
+    }
   });
 
   it('should hide dev fallback button when enablePasswordAuth is false', () => {
     const original = environment.enablePasswordAuth;
     (environment as any).enablePasswordAuth = false;
-
-    const fixture = TestBed.createComponent(WelcomeComponent);
-    fixture.detectChanges();
-    const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
-    expect(button).toBeFalsy();
-
-    (environment as any).enablePasswordAuth = original;
+    try {
+      const fixture = TestBed.createComponent(WelcomeComponent);
+      fixture.detectChanges();
+      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      expect(button).toBeFalsy();
+    } finally {
+      (environment as any).enablePasswordAuth = original;
+    }
   });
 
   it('should call authService.login() without args when dev fallback is clicked', () => {
     const original = environment.enablePasswordAuth;
     (environment as any).enablePasswordAuth = true;
-
-    const fixture = TestBed.createComponent(WelcomeComponent);
-    fixture.detectChanges();
-    const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
-    button.click();
-    expect(mockAuthService.login).toHaveBeenCalledWith();
-
-    (environment as any).enablePasswordAuth = original;
+    try {
+      const fixture = TestBed.createComponent(WelcomeComponent);
+      fixture.detectChanges();
+      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      button.click();
+      expect(mockAuthService.login).toHaveBeenCalledWith();
+    } finally {
+      (environment as any).enablePasswordAuth = original;
+    }
   });
 
   it('should redirect to /app/home if already authenticated', () => {
