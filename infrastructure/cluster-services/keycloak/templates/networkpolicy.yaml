@@ -20,6 +20,14 @@ spec:
       ports:
         - port: http
           protocol: TCP
+    # Allow traffic from Prometheus (metrics on management port)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: management
+          protocol: TCP
   egress:
     # Allow DNS resolution
     - to:
