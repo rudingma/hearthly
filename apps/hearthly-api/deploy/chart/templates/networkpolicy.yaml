@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    {{- include "hearthly-api.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "hearthly-api.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from Traefik ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+      ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+    # Allow traffic from Prometheus (metrics scraping)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+  egress:
+    # Allow traffic to hearthly-db (PostgreSQL)
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: hearthly-db
+      ports:
+        - port: 5432
+          protocol: TCP
+    # Allow external HTTPS (Keycloak JWKS via auth.hearthly.dev, S3 backups)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
