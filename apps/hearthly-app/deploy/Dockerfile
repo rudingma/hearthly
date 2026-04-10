@@ -23,6 +23,11 @@ FROM nginxinc/nginx-unprivileged:alpine
 
 LABEL org.opencontainers.image.source=https://github.com/rudingma/hearthly
 
+# Pull Alpine security patches (base image may lag behind)
+USER root
+RUN apk upgrade --no-cache
+USER nginx
+
 # envsubst template config:
 # - NGINX_ENVSUBST_OUTPUT_DIR: process template to /etc/nginx/ (replaces main nginx.conf)
 # - NGINX_ENVSUBST_FILTER: only substitute CSP_* vars (protects nginx vars like $uri)
