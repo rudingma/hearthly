@@ -27,12 +27,13 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      cluster: ${{ steps.filter.outputs.cluster }}
-      keycloak-config: ${{ steps.filter.outputs.keycloak-config }}
+      cluster: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.cluster }}
+      keycloak-config: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.keycloak-config }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: dorny/paths-filter@v4
+        if: github.event_name != 'workflow_dispatch'
         id: filter
         with:
           filters: |
@@ -108,7 +109,7 @@ jobs:
 
   apply-cluster:
     needs: [changes, plan-cluster]
-    if: github.event_name == 'push' && needs.changes.outputs.cluster == 'true'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.cluster == 'true'
     runs-on: ubuntu-latest
     concurrency:
       group: terraform-cluster
@@ -216,7 +217,7 @@ jobs:
 
   apply-keycloak-config:
     needs: [changes, plan-keycloak-config]
-    if: github.event_name == 'push' && needs.changes.outputs.keycloak-config == 'true'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && needs.changes.outputs.keycloak-config == 'true'
     runs-on: ubuntu-latest
     concurrency:
       group: terraform-keycloak-config
