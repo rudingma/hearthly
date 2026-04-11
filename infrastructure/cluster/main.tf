@@ -1,15 +1,3 @@
-# Import blocks: fix state drift — LB exists in Hetzner but is missing
-# from Terraform state. Remove these blocks after a successful apply.
-import {
-  to = module.kube-hetzner.hcloud_load_balancer.cluster[0]
-  id = "6058860"
-}
-
-import {
-  to = module.kube-hetzner.hcloud_load_balancer_network.cluster[0]
-  id = "6058860-12063857"
-}
-
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
