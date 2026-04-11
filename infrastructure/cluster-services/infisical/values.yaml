@@ -1,6 +1,10 @@
 ## Infisical self-hosted secrets management
 ## Umbrella chart: infisical-standalone + secrets-operator
 
+# Gateway API HTTPRoute (templates/httproute.yaml)
+httproute:
+  enabled: true
+
 # --- Infisical application (standalone with bundled PG/Redis) ---
 infisical-standalone:
   # Override the generated resource names to get clean service names

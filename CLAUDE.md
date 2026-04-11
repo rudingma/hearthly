@@ -50,7 +50,7 @@ All external traffic routes through Kubernetes Gateway API (HTTPRoute), replacin
 
 - **Gateway:** `traefik-gateway` in `traefik` namespace, managed by Traefik Helm chart
 - **GatewayClass:** `traefik` (auto-created by chart)
-- **TLS:** Per-hostname HTTPS listeners on port 8443. cert-manager auto-provisions TLS certs via `cert-manager.io/cluster-issuer: letsencrypt-prod` annotation on the Gateway.
+- **TLS:** Per-hostname HTTPS listeners on port 8443 (container port, exposed as 443 via LoadBalancer). cert-manager auto-provisions TLS certs via `cert-manager.io/cluster-issuer: letsencrypt-prod` annotation on the Gateway.
 - **Listeners:** `websecure-app` (hearthly.dev), `websecure-api` (api.hearthly.dev), `websecure-auth` (auth.hearthly.dev), `websecure-argocd` (argocd.hearthly.dev), `websecure-grafana` (grafana.hearthly.dev), `websecure-secrets` (secrets.hearthly.dev)
 - **Cross-namespace:** All listeners have `namespacePolicy: {from: All}`. HTTPRoutes in any namespace can attach.
 - **Config:** Gateway listeners defined in `infrastructure/cluster/main.tf` (`traefik_merge_values`). HTTPRoutes in each app's Helm chart.

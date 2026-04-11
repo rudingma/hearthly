@@ -17,6 +17,10 @@ kube-prometheus-stack:
             sectionName: websecure-grafana
         hostnames:
           - grafana.hearthly.dev
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
 
     # Default admin: admin / prom-operator — change on first login.
     # Grafana stores the new password in its SQLite DB (PVC-backed).

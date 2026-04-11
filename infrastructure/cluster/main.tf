@@ -100,9 +100,6 @@ gateway:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   listeners:
-    web:
-      namespacePolicy:
-        from: All
     websecure-app:
       port: 8443
       hostname: hearthly.dev
