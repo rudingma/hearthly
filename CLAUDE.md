@@ -25,7 +25,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Frontend:** Angular + Ionic + Capacitor
 - **Backend:** NestJS + Drizzle ORM + PostgreSQL
 - **Infrastructure:** Hetzner Cloud, k3s via kube-hetzner, ARM nodes (CAX11)
-- **Ingress:** Traefik (bundled by kube-hetzner)
+- **Ingress:** Traefik via Gateway API (HTTPRoute), cert-manager for TLS
 - **GitOps:** ArgoCD 3.x, app-of-apps pattern
 - **Secrets:** Infisical (self-hosted, K8s operator)
 - **Monitoring:** Prometheus + Grafana
@@ -40,8 +40,22 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Traefik LB IP:** 46.225.42.23 (IPv4), 2a01:4f8:1c1f:72d7::1 (IPv6)
 - **Module:** kube-hetzner v2.18.5, hcloud provider v1.60.1
 - **Terraform state:** Hetzner Object Storage (S3 backend, bucket: hearthly-tfstate)
+- **Gateway API:** Traefik Gateway `traefik-gateway` in `traefik` namespace. Per-hostname HTTPS listeners, cert-manager auto-provisions TLS certs. GatewayClass: `traefik`.
 - **Bundled services:** Traefik, cert-manager, hcloud CSI/CCM, metrics-server, kured
 - **DNS:** Cloudflare (registrar locks NS, can't use Hetzner DNS). A records: @, api, argocd, auth, grafana, secrets → LB IP. DNS only (no proxy).
+
+## Routing (Gateway API)
+
+All external traffic routes through Kubernetes Gateway API (HTTPRoute), replacing legacy Ingress resources.
+
+- **Gateway:** `traefik-gateway` in `traefik` namespace, managed by Traefik Helm chart
+- **GatewayClass:** `traefik` (auto-created by chart)
+- **TLS:** Per-hostname HTTPS listeners on port 8443 (container port, exposed as 443 via LoadBalancer). cert-manager auto-provisions TLS certs via `cert-manager.io/cluster-issuer: letsencrypt-prod` annotation on the Gateway.
+- **Listeners:** `websecure-app` (hearthly.dev), `websecure-api` (api.hearthly.dev), `websecure-auth` (auth.hearthly.dev), `websecure-argocd` (argocd.hearthly.dev), `websecure-grafana` (grafana.hearthly.dev), `websecure-secrets` (secrets.hearthly.dev)
+- **Cross-namespace:** All listeners have `namespacePolicy: {from: All}`. HTTPRoutes in any namespace can attach.
+- **Config:** Gateway listeners defined in `infrastructure/cluster/main.tf` (`traefik_merge_values`). HTTPRoutes in each app's Helm chart.
+- **Adding a new service:** Add a `websecure-*` listener in `traefik_merge_values` (with hostname, certificateRefs), then create an HTTPRoute in the service's Helm chart referencing the listener via `sectionName`.
+- **Verify:** `kubectl get httproutes -A` (routes), `kubectl get gateways -A` (gateway), `kubectl get certificates -n traefik` (TLS certs)
 
 ## ArgoCD
 
@@ -313,7 +327,7 @@ Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 3
 ## Known Issues
 
 - **WSL2 + kube-hetzner CRLF:** Terraform module files download with CRLF line endings on WSL2, breaking heredoc provisioners. Fix: `find .terraform/modules/kube-hetzner -name "*.tf" -exec sed -i 's/\r$//' {} +` (also .sh, .yaml, .tpl). Must re-run after `terraform init` downloads modules.
-- **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_values` override in main.tf. If Traefik install fails after a fresh apply, patch the HelmChart resource in-cluster.
+- **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_merge_values` in main.tf (deep-merges into defaults instead of replacing them).
 - **Hetzner firewall blocks outbound SSH:** ArgoCD cannot use SSH Git access. Use HTTPS + token instead. If other services need outbound SSH, add `extra_firewall_rules` in Terraform main.tf.
 - **Docker + postinstall scripts:** Both Dockerfiles copy `scripts/` before `npm ci` because the Ionic ESM patch runs as a postinstall hook. If you add new postinstall scripts that reference files outside `package.json`, ensure those files are `COPY`'d in the Dockerfile before the `RUN npm ci` layer.
 - **k3s NetworkPolicy + API server DNAT:** kube-router (k3s NetworkPolicy controller) evaluates egress rules AFTER kube-proxy DNAT. Traffic to the kubernetes service ClusterIP (`10.43.0.1:443`) is rewritten to the control plane node IP (`10.255.0.101:6443`) before policy evaluation. An `ipBlock` rule targeting only the ClusterIP will not match. Fix: include both the ClusterIP and the node IP in API server egress rules (see `infrastructure/network-policies/values.yaml`).

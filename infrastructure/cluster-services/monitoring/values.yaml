@@ -7,18 +7,20 @@ kube-prometheus-stack:
   # --- Grafana ---
   grafana:
     ingress:
-      enabled: true
-      ingressClassName: traefik
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.tls: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-      hosts:
-        - grafana.hearthly.dev
-      tls:
-        - secretName: grafana-hearthly-dev-tls
-          hosts:
-            - grafana.hearthly.dev
+      enabled: false
+    route:
+      main:
+        enabled: true
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+            sectionName: websecure-grafana
+        hostnames:
+          - grafana.hearthly.dev
+        matches:
+          - path:
+              type: PathPrefix
+              value: /
 
     # Default admin: admin / prom-operator — change on first login.
     # Grafana stores the new password in its SQLite DB (PVC-backed).

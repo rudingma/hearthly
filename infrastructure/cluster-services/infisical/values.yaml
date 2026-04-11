@@ -1,6 +1,10 @@
 ## Infisical self-hosted secrets management
 ## Umbrella chart: infisical-standalone + secrets-operator
 
+# Gateway API HTTPRoute (templates/httproute.yaml)
+httproute:
+  enabled: true
+
 # --- Infisical application (standalone with bundled PG/Redis) ---
 infisical-standalone:
   # Override the generated resource names to get clean service names
@@ -22,21 +26,11 @@ infisical-standalone:
         cpu: "1"
         memory: 1Gi
 
-  # Traefik ingress for the web UI at secrets.hearthly.dev
+  # Ingress disabled — routing via Gateway API HTTPRoute (templates/httproute.yaml)
   ingress:
-    enabled: true
-    hostName: "secrets.hearthly.dev"
-    ingressClassName: traefik
+    enabled: false
     nginx:
-      enabled: false  # Don't install bundled nginx — we use Traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    tls:
-      - secretName: secrets-hearthly-dev-tls
-        hosts:
-          - secrets.hearthly.dev
+      enabled: false
 
   # Bundled PostgreSQL for Infisical's own data (isolated from app DB)
   postgresql:

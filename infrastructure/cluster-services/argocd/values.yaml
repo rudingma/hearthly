@@ -34,13 +34,15 @@ server:
       cpu: 200m
       memory: 256Mi
   ingress:
+    enabled: false
+  httproute:
     enabled: true
-    ingressClassName: traefik
-    annotations:
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    tls: true
+    parentRefs:
+      - name: traefik-gateway
+        namespace: traefik
+        sectionName: websecure-argocd
+    hostnames:
+      - argocd.hearthly.dev
 
 repoServer:
   env:
