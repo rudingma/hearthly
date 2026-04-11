@@ -158,12 +158,12 @@ kubectl get pods -A                  # All pods across namespaces
 - **GraphQL:** `POST /graphql` (Apollo Server 5, code-first schema, Apollo Sandbox in dev)
 - GraphQL requires `@as-integrations/express5` — must be in both root and app `package.json` for npm workspace hoisting
 
-**Production verification endpoints** (use after deploy to verify services are healthy):
-- `curl -sI https://hearthly.dev/` — frontend (expect 200 + security headers)
-- `curl -sI https://api.hearthly.dev/health` — API (expect 200)
-- `curl -sI https://auth.hearthly.dev/` — Keycloak (expect 302 redirect)
-- `curl -sI https://grafana.hearthly.dev/` — Grafana (expect 302 redirect)
-- `curl -sI https://argocd.hearthly.dev/` — ArgoCD (expect 200)
+**Production health checks** (baseline — verify services are alive after deploy):
+- `curl -sI https://hearthly.dev/` — frontend (200)
+- `curl -sI https://api.hearthly.dev/health` — API (200)
+- `curl -sI https://auth.hearthly.dev/` — Keycloak (302)
+- `curl -sI https://grafana.hearthly.dev/` — Grafana (302)
+- `curl -sI https://argocd.hearthly.dev/` — ArgoCD (200)
 
 ## GraphQL (Code-First)
 
