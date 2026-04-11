@@ -80,10 +80,14 @@ module "kube-hetzner" {
   # Use stable k3s release channel
   initial_k3s_channel = "stable"
 
-  # Fix Traefik Helm values for chart v34+ (kube-hetzner defaults use deprecated schema).
-  # Removed: globalArguments (no longer in schema).
-  # Changed: ports.web.redirections → ports.web.http.redirections.
-  traefik_values = <<-EOT
+  # Gateway API: enable Traefik's kubernetesGateway provider.
+  # CRDs are bundled by the Traefik Helm chart; cert-manager Gateway API
+  # support is enabled automatically by kube-hetzner when this flag is set.
+  traefik_provider_kubernetes_gateway_enabled = true
+
+  # Deep-merge into defaults (preserves LB annotations, proxy protocol,
+  # resource limits, PDB that traefik_values would silently drop).
+  traefik_merge_values = <<-EOT
 ports:
   web:
     http:
@@ -92,5 +96,66 @@ ports:
           to: websecure
           scheme: https
           permanent: true
+gateway:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  listeners:
+    web:
+      namespacePolicy:
+        from: All
+    websecure-app:
+      port: 8443
+      hostname: hearthly.dev
+      protocol: HTTPS
+      mode: Terminate
+      namespacePolicy:
+        from: All
+      certificateRefs:
+        - name: hearthly-app-tls
+    websecure-api:
+      port: 8443
+      hostname: api.hearthly.dev
+      protocol: HTTPS
+      mode: Terminate
+      namespacePolicy:
+        from: All
+      certificateRefs:
+        - name: hearthly-api-tls
+    websecure-auth:
+      port: 8443
+      hostname: auth.hearthly.dev
+      protocol: HTTPS
+      mode: Terminate
+      namespacePolicy:
+        from: All
+      certificateRefs:
+        - name: keycloak-tls
+    websecure-argocd:
+      port: 8443
+      hostname: argocd.hearthly.dev
+      protocol: HTTPS
+      mode: Terminate
+      namespacePolicy:
+        from: All
+      certificateRefs:
+        - name: argocd-tls
+    websecure-grafana:
+      port: 8443
+      hostname: grafana.hearthly.dev
+      protocol: HTTPS
+      mode: Terminate
+      namespacePolicy:
+        from: All
+      certificateRefs:
+        - name: grafana-tls
+    websecure-secrets:
+      port: 8443
+      hostname: secrets.hearthly.dev
+      protocol: HTTPS
+      mode: Terminate
+      namespacePolicy:
+        from: All
+      certificateRefs:
+        - name: infisical-tls
 EOT
 }
