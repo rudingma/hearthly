@@ -11,6 +11,10 @@ service:
 route:
   enabled: true
   host: api.hearthly.dev
+  sectionName: websecure-api
+  gateway:
+    name: traefik-gateway
+    namespace: traefik
 
 resources:
   requests:
