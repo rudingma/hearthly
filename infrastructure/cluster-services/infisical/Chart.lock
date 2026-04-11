@@ -1,0 +1,9 @@
+dependencies:
+- name: infisical-standalone
+  repository: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
+  version: 1.7.5
+- name: secrets-operator
+  repository: https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/
+  version: 0.10.29
+digest: sha256:a41a2005db1aa86e99d3534bdca827ca9baa8ce1f28ab0f84a6089cd7835c385
+generated: "2026-04-11T12:45:44.633851+02:00"
