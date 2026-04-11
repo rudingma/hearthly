@@ -48,7 +48,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **UI:** argocd.hearthly.dev (or `kubectl port-forward svc/argocd-server -n argocd 8080:443`)
 - **Admin password:** `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
 - **Repo access:** HTTPS + GitHub token (SSH blocked by Hetzner firewall outbound). Token in K8s Secret `hearthly-repo` in argocd namespace.
-- **Applications:** hearthly-api, hearthly-app, keycloak, keycloak-db (auto-sync, self-heal), argocd (self-managing)
+- **Applications:** hearthly-api, hearthly-app, keycloak, keycloak-db, network-policies (auto-sync, self-heal), argocd (self-managing)
 - **Firewall note:** Hetzner firewall blocks outbound SSH (port 22). Only 80, 443, 53, 123 allowed outbound.
 
 ## Keycloak (Identity Provider)
@@ -67,7 +67,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Chart:** `infrastructure/cluster-services/keycloak/` (custom Helm chart, own templates)
 - **Upgrade:** Change `FROM` tag in Dockerfile → CI rebuilds → auto-deploys
 - **Resources:** 250m/512Mi request, 1/1Gi limit. Runtime ~374Mi.
-- **NetworkPolicy:** Ingress from Traefik only, egress to DB + DNS + HTTPS (443, for external IdPs)
+- **NetworkPolicy:** Ingress from Traefik + Prometheus (metrics on port 9000), egress to DB + DNS + HTTPS (443, for external IdPs). Separate `keycloak-db` policy for DB pod ingress.
 - **Secrets:** Admin password via Infisical (cross-namespace ref to `hearthly` ns machine identity), DB password via CloudNativePG auto-generated secret
 - **Note:** Bitnami images paywalled since Aug 2025 — do NOT use `bitnami/keycloak`
 
@@ -197,6 +197,7 @@ modules/user/
 - **Routing:** `ShellComponent` eagerly imported (Ionic tabs need routes at resolution time). Tab pages lazy-loaded via `loadComponent`.
 - **Icons:** Ionicons, registered per-component via `addIcons()` in constructor
 - **Ionic ESM patch:** `scripts/patch-ionic-esm.mjs` (postinstall) fixes `@ionic/core` exports for Vitest
+- **Security headers:** nginx serves CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy. CSP origins (`connect-src`) are configurable per environment via `CSP_API_ORIGIN` and `CSP_AUTH_ORIGIN` env vars (envsubst template mechanism in the Dockerfile).
 - **Design doc:** `docs/frontend-design.md` (navigation, theming, component conventions, testing patterns)
 
 ### Frontend Structure
@@ -238,6 +239,17 @@ app/
 - **Integration tests:** PGlite (in-memory Postgres), shared helper at `test/support/test-db.ts`
 - **DB column conventions:** `text` over `varchar`, `timestamptz` over `timestamp`
 - **Pattern guide:** `docs/data-layer-design.md` Section 4
+
+## NetworkPolicies
+
+Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 31 policies across 6 namespaces.
+
+- **Covered:** `hearthly`, `keycloak`, `argocd`, `monitoring`, `cnpg-system`, `infisical`
+- **Skipped:** `kube-system` (risk of breaking CNI/DNS), `traefik` (ingress controller needs broad egress)
+- **Baseline policies:** `infrastructure/network-policies/` (centralized Helm chart, ArgoCD app `network-policies`). Deploys `default-deny-all` + `allow-dns` to each namespace, plus infra namespace allow rules (intra-namespace, Traefik ingress, API server egress, Prometheus scraping).
+- **Per-app policies:** In each app's Helm chart templates (`networkpolicy.yaml`, `networkpolicy-db.yaml`). Deployed by the app's own ArgoCD application.
+- **API server egress:** Uses both ClusterIP (`10.43.0.1:443`) and control plane node IP (`10.255.0.101:6443`) — see Known Issues for why.
+- **Control plane IP:** Configured in `infrastructure/network-policies/values.yaml` as `apiServer.nodeIP`. Must be updated if the control plane node is replaced.
 
 ## Code Conventions
 
@@ -292,4 +304,5 @@ app/
 - **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_values` override in main.tf. If Traefik install fails after a fresh apply, patch the HelmChart resource in-cluster.
 - **Hetzner firewall blocks outbound SSH:** ArgoCD cannot use SSH Git access. Use HTTPS + token instead. If other services need outbound SSH, add `extra_firewall_rules` in Terraform main.tf.
 - **Docker + postinstall scripts:** Both Dockerfiles copy `scripts/` before `npm ci` because the Ionic ESM patch runs as a postinstall hook. If you add new postinstall scripts that reference files outside `package.json`, ensure those files are `COPY`'d in the Dockerfile before the `RUN npm ci` layer.
+- **k3s NetworkPolicy + API server DNAT:** kube-router (k3s NetworkPolicy controller) evaluates egress rules AFTER kube-proxy DNAT. Traffic to the kubernetes service ClusterIP (`10.43.0.1:443`) is rewritten to the control plane node IP (`10.255.0.101:6443`) before policy evaluation. An `ipBlock` rule targeting only the ClusterIP will not match. Fix: include both the ClusterIP and the node IP in API server egress rules (see `infrastructure/network-policies/values.yaml`).
 - **Keycloak DB reset breaks app login:** Wiping the Keycloak DB (`docker volume rm hearthly_keycloak-pgdata`) assigns new UUIDs to users. The app DB still has old `keycloak_id` values, causing upsert failures on login. Fix: wipe both databases together: `docker compose down && docker volume rm hearthly_keycloak-pgdata hearthly_pgdata && docker compose up -d`.
