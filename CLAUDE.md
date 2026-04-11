@@ -30,6 +30,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Secrets:** Infisical (self-hosted, K8s operator)
 - **Monitoring:** Prometheus + Grafana
 - **Database:** CloudNativePG (self-hosted PostgreSQL)
+- **Environments:** Production only (no staging). Single k3s cluster, ArgoCD auto-deploys on merge to main.
 
 ## Cluster
 
@@ -110,6 +111,8 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 
 ## Build & Run Commands
 
+**Quality gates (run before every commit):** `npx nx lint <app>` + `npx nx test <app>` + `npx nx build <app>` for affected apps. Helm charts: `helm template <name> <path>` to verify rendering.
+
 ```bash
 # Local development
 npx nx serve hearthly-api        # Backend (hot reload)
@@ -154,6 +157,13 @@ kubectl get pods -A                  # All pods across namespaces
 - **Health:** `GET /health` (Terminus, used by K8s probes and Dockerfile HEALTHCHECK)
 - **GraphQL:** `POST /graphql` (Apollo Server 5, code-first schema, Apollo Sandbox in dev)
 - GraphQL requires `@as-integrations/express5` — must be in both root and app `package.json` for npm workspace hoisting
+
+**Production verification endpoints** (use after deploy to verify services are healthy):
+- `curl -sI https://hearthly.dev/` — frontend (expect 200 + security headers)
+- `curl -sI https://api.hearthly.dev/health` — API (expect 200)
+- `curl -sI https://auth.hearthly.dev/` — Keycloak (expect 302 redirect)
+- `curl -sI https://grafana.hearthly.dev/` — Grafana (expect 302 redirect)
+- `curl -sI https://argocd.hearthly.dev/` — ArgoCD (expect 200)
 
 ## GraphQL (Code-First)
 
@@ -290,6 +300,8 @@ Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 3
 **Small changes** (docs, config, CLAUDE.md updates) not tied to an issue can be committed directly to main without a branch or PR.
 
 **Commit messages:** Use `type(scope): description (#issue)` — e.g., `feat(api): add helmet for security headers (#25)`. The `(#issue)` suffix auto-links to the GitHub issue.
+
+**Docs to update before shipping:** Check whether `CLAUDE.md` needs updates for new architecture, config, endpoints, commands, known issues, or environment changes. Docs ship with the PR, not as a post-merge afterthought.
 
 ## Key Versions to Pin
 
