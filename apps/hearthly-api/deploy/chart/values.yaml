@@ -8,7 +8,7 @@ image:
 service:
   port: 3000
 
-ingress:
+route:
   enabled: true
   host: api.hearthly.dev
 

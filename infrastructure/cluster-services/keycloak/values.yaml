@@ -12,7 +12,7 @@ service:
   httpPort: 8080
   managementPort: 9000
 
-ingress:
+route:
   enabled: true
   host: auth.hearthly.dev
 

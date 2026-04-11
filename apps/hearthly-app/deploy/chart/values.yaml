@@ -8,7 +8,7 @@ image:
 service:
   port: 8080
 
-ingress:
+route:
   enabled: true
   host: hearthly.dev
 
