@@ -293,7 +293,7 @@ Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 3
 
 - **CI (PR checks):** `ci.yml` — lint, test, build affected (x86 runner, Node.js 24)
 - **Deploy:** `deploy.yml` — builds API, App, and Keycloak images on native ARM64 runners (`ubuntu-24.04-arm`), Trivy scan before push, single commit for all tag updates. Keycloak build conditional on `infrastructure/cluster-services/keycloak/deploy/**` changes, or manual via `workflow_dispatch` with `force_keycloak` input.
-- **Terraform:** `terraform.yml` — plan on PR (posted as comment), apply on merge. Covers `infrastructure/cluster/` and `infrastructure/keycloak-config/`
+- **Terraform:** `terraform.yml` — plan on PR (posted as comment), apply on merge. Also supports `workflow_dispatch` for manual runs (state recovery, re-apply). Covers `infrastructure/cluster/` and `infrastructure/keycloak-config/`
 - **ARM64 runners require public repo** — if repo goes private, Docker build jobs fail
 - **Scan-before-push:** images are built locally, scanned by Trivy, pushed to GHCR only if clean
 - **Terraform concurrency:** serialized per module (`cancel-in-progress: false`) — Hetzner S3 has no state locking

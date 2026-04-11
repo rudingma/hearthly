@@ -7,9 +7,9 @@ metadata:
     {{- include "keycloak.labels" . | nindent 4 }}
 spec:
   parentRefs:
-    - name: traefik-gateway
-      namespace: traefik
-      sectionName: websecure-auth
+    - name: {{ .Values.route.gateway.name }}
+      namespace: {{ .Values.route.gateway.namespace }}
+      sectionName: {{ .Values.route.sectionName }}
   hostnames:
     - {{ .Values.route.host }}
   rules:

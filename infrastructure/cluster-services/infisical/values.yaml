@@ -2,13 +2,19 @@
 ## Umbrella chart: infisical-standalone + secrets-operator
 
 # Gateway API HTTPRoute (templates/httproute.yaml)
-httproute:
+route:
   enabled: true
+  host: secrets.hearthly.dev
+  sectionName: websecure-secrets
+  gateway:
+    name: traefik-gateway
+    namespace: traefik
 
 # --- Infisical application (standalone with bundled PG/Redis) ---
 infisical-standalone:
-  # Override the generated resource names to get clean service names
-  # Without this, Helm generates "infisical-infisical-standalone" (ugly)
+  # Overrides pod/deployment resource names (NOT service names).
+  # Service name remains "infisical-infisical-standalone-infisical"
+  # (upstream sub-chart naming convention).
   fullnameOverride: "infisical"
 
   infisical:
