@@ -59,6 +59,33 @@ spec:
     - to:
         - namespaceSelector: {}
 ---
+# Grafana: allow egress to K8s API server (sidecars watch ConfigMaps/Secrets)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-grafana-api-egress
+  namespace: monitoring
+  labels:
+    {{- include "network-policies.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  policyTypes:
+    - Egress
+  egress:
+    # K8s API server (ClusterIP before DNAT + node IP after DNAT)
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.apiServer.clusterIP }}/32
+        - ipBlock:
+            cidr: {{ .Values.apiServer.nodeIP }}/32
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 6443
+          protocol: TCP
+---
 # Prometheus operator: allow egress to K8s API server
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
