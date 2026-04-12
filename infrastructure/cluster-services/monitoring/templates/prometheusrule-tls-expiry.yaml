@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: tls-certificate-expiry
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: tls-expiry
+      rules:
+        - alert: TLSCertExpiringSoon
+          expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 86400 < 14
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              TLS certificate {{ "{{" }} $labels.name {{ "}}" }} in namespace
+              {{ "{{" }} $labels.exported_namespace {{ "}}" }} expires in
+              {{ "{{" }} $value | printf "%.0f" {{ "}}" }} days
+            description: >-
+              cert-manager should auto-renew at 30 days. If this alert fires
+              (< 14 days remaining), renewal has failed. Check cert-manager
+              logs and Certificate status.
