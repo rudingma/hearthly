@@ -176,12 +176,12 @@ kube-prometheus-stack:
         group_interval: 5m
         repeat_interval: 4h
         routes:
-          # Silence Watchdog (deadman's switch) — fires continuously when
-          # everything is healthy. Without this route, it would spam ntfy
-          # every repeat_interval.
+          # Silence internal sentinel alerts — these are not actionable:
+          # - Watchdog: deadman's switch, fires continuously when healthy
+          # - InfoInhibitor: exists only to suppress info-level alerts
           - receiver: 'null'
             matchers:
-              - alertname = "Watchdog"
+              - alertname =~ "Watchdog|InfoInhibitor"
           - receiver: ntfy
             matchers:
               - severity = critical
