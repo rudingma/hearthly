@@ -1,0 +1,50 @@
+name: Healthcheck
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check production endpoints
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          FAILED=""
+
+          check_endpoint() {
+            local url="$1"
+            local expected="$2"
+            local actual
+            actual=$(curl -sI -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 15 "$url" 2>/dev/null || echo "000")
+            if [ "$actual" != "$expected" ]; then
+              FAILED="${FAILED}${url} (expected ${expected}, got ${actual})\n"
+            fi
+          }
+
+          check_endpoint "https://hearthly.dev/" "200"
+          check_endpoint "https://api.hearthly.dev/health" "200"
+          check_endpoint "https://auth.hearthly.dev/" "302"
+          check_endpoint "https://grafana.hearthly.dev/" "302"
+          check_endpoint "https://argocd.hearthly.dev/" "200"
+          check_endpoint "https://secrets.hearthly.dev/" "200"
+
+          if [ -n "$FAILED" ]; then
+            MESSAGE=$(printf "Production endpoints DOWN:\n${FAILED}")
+            curl -s \
+              -H "Title: Hearthly: endpoints down" \
+              -H "Priority: urgent" \
+              -H "Tags: skull" \
+              -d "$MESSAGE" \
+              "https://ntfy.sh/${NTFY_TOPIC}"
+            echo "::error::Endpoints failed: ${FAILED}"
+            exit 1
+          fi
+
+          echo "All endpoints healthy"
