@@ -247,15 +247,12 @@ kube-prometheus-stack:
 
   # --- Prometheus Operator ---
   prometheusOperator:
-    # Admission webhooks validate PrometheusRule CRDs at apply time,
-    # catching PromQL syntax errors before they silently fail at runtime.
-    # Using deployment mode (not patch/hook mode) to avoid ArgoCD PreSync blocks.
+    # Admission webhooks disabled — deployment mode has a TLS cert SAN
+    # mismatch (cert generated for operator service name, not webhook
+    # service name), and hook mode blocks ArgoCD PreSync. PrometheusRule
+    # validation is done locally via helm template instead.
     admissionWebhooks:
-      enabled: true
-      patch:
-        enabled: false
-      deployment:
-        enabled: true
+      enabled: false
     resources:
       requests:
         cpu: 50m
