@@ -82,9 +82,146 @@ kube-prometheus-stack:
               requests:
                 storage: 10Gi
 
-  # --- Alertmanager (disabled until custom alerting rules are needed) ---
+      # Discover ALL PrometheusRules and ServiceMonitors, not just those
+      # with a release label matching this Helm chart. Required for custom
+      # rules in wrapper chart templates and cross-namespace ServiceMonitors.
+      ruleSelectorNilUsesHelmValues: false
+      serviceMonitorSelectorNilUsesHelmValues: false
+
+  # --- Alertmanager → ntfy.sh via alertmanager-ntfy sidecar ---
   alertmanager:
-    enabled: false
+    enabled: true
+
+    alertmanagerSpec:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: hcloud-volumes
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+
+      # alertmanager-ntfy sidecar — transforms Alertmanager webhooks into
+      # clean ntfy.sh notifications with priority mapping and emoji tags.
+      containers:
+        - name: ntfy-proxy
+          image: ghcr.io/alexbakker/alertmanager-ntfy:1.2.1
+          args:
+            - "--configs"
+            - "/config/config.yml"
+            - "--ntfy-topic"
+            - "$(NTFY_TOPIC)"
+          env:
+            - name: NTFY_TOPIC
+              valueFrom:
+                secretKeyRef:
+                  name: ntfy-topic
+                  key: NTFY_TOPIC
+          ports:
+            - name: ntfy-hook
+              containerPort: 8000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: ntfy-config
+              mountPath: /config
+              readOnly: true
+
+      volumes:
+        - name: ntfy-config
+          configMap:
+            name: alertmanager-ntfy-config
+
+    config:
+      global:
+        resolve_timeout: 5m
+
+      route:
+        receiver: ntfy
+        group_by: ['alertname', 'namespace']
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+        routes:
+          # Silence Watchdog (deadman's switch) — fires continuously when
+          # everything is healthy. Without this route, it would spam ntfy
+          # every repeat_interval.
+          - receiver: 'null'
+            matchers:
+              - alertname = "Watchdog"
+          - receiver: ntfy
+            matchers:
+              - severity = critical
+            group_interval: 5m
+            repeat_interval: 1h
+
+      inhibit_rules:
+        # Default severity cascading — prevent duplicate critical + warning
+        # notifications for the same alert.
+        - source_matchers:
+            - 'severity = critical'
+          target_matchers:
+            - 'severity =~ warning|info'
+          equal: ['namespace', 'alertname']
+        - source_matchers:
+            - 'severity = warning'
+          target_matchers:
+            - 'severity = info'
+          equal: ['namespace', 'alertname']
+        - source_matchers:
+            - 'alertname = InfoInhibitor'
+          target_matchers:
+            - 'severity = info'
+          equal: ['namespace']
+        - target_matchers:
+            - 'alertname = InfoInhibitor'
+        # Node-down cascade — suppress pod/target alerts when the node itself
+        # is unreachable (one root-cause notification instead of 10+).
+        - source_matchers:
+            - alertname = NodeNotReady
+          target_matchers:
+            - alertname =~ "KubePodCrashLooping|KubePodNotReady|TargetDown"
+          equal: ['node']
+
+      receivers:
+        - name: ntfy
+          webhook_configs:
+            - url: 'http://localhost:8000/hook'
+              send_resolved: true
+        - name: 'null'
 
   # --- k3s: disable components that bind to 127.0.0.1 ---
   # k3s runs controller-manager, scheduler, and proxy inside the
@@ -108,13 +245,15 @@ kube-prometheus-stack:
 
   # --- Prometheus Operator ---
   prometheusOperator:
-    # Disable admission webhooks.
-    # The chart's webhook hook resources (Jobs, RBAC) use Helm hook
-    # annotations that ArgoCD translates to PreSync hooks, blocking
-    # the entire sync. Webhooks only validate PrometheusRule CRDs —
-    # not needed until we write custom alerting rules.
+    # Admission webhooks validate PrometheusRule CRDs at apply time,
+    # catching PromQL syntax errors before they silently fail at runtime.
+    # Using deployment mode (not patch/hook mode) to avoid ArgoCD PreSync blocks.
     admissionWebhooks:
-      enabled: false
+      enabled: true
+      patch:
+        enabled: false
+      deployment:
+        enabled: true
     resources:
       requests:
         cpu: 50m
