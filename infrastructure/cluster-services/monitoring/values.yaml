@@ -153,6 +153,8 @@ kube-prometheus-stack:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
             capabilities:
               drop: ["ALL"]
           volumeMounts:
@@ -206,6 +208,8 @@ kube-prometheus-stack:
           target_matchers:
             - 'severity = info'
           equal: ['namespace']
+        # Suppress InfoInhibitor alerts unconditionally — these are sentinel
+        # alerts used only to inhibit info-level alerts, not meant for ntfy.
         - target_matchers:
             - 'alertname = InfoInhibitor'
         # Node-down cascade — suppress pod/target alerts when the node itself
