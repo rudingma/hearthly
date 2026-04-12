@@ -1,0 +1,82 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backup-failures
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: backup-monitoring
+      rules:
+        - alert: BackupJobFailed
+          expr: kube_job_status_failed{job_name=~"hearthly-api-db-backup.*|keycloak-db-backup.*"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Backup job {{ "{{" }} $labels.job_name {{ "}}" }} in namespace
+              {{ "{{" }} $labels.namespace {{ "}}" }} has failed
+            description: >-
+              Database backup CronJob produced a failed Job. Check job logs:
+              kubectl logs -n {{ "{{" }} $labels.namespace {{ "}}" }}
+              job/{{ "{{" }} $labels.job_name {{ "}}" }}
+
+        - alert: HearthlyBackupMissing
+          expr: >-
+            (time() - max by (namespace) (
+              kube_job_status_completion_time{job_name=~"hearthly-api-db-backup.*"}
+            )) > 90000
+          labels:
+            severity: warning
+            database: hearthly
+          annotations:
+            summary: >-
+              hearthly-db backup in namespace {{ "{{" }} $labels.namespace {{ "}}" }}
+              has not completed in over 25 hours
+            description: >-
+              The daily database backup CronJob has not produced a successful
+              Job in over 25 hours. The CronJob may be suspended, deleted,
+              or failing to schedule.
+
+        - alert: KeycloakBackupMissing
+          expr: >-
+            (time() - max by (namespace) (
+              kube_job_status_completion_time{job_name=~"keycloak-db-backup.*"}
+            )) > 90000
+          labels:
+            severity: warning
+            database: keycloak
+          annotations:
+            summary: >-
+              keycloak-db backup in namespace {{ "{{" }} $labels.namespace {{ "}}" }}
+              has not completed in over 25 hours
+            description: >-
+              The daily database backup CronJob has not produced a successful
+              Job in over 25 hours. The CronJob may be suspended, deleted,
+              or failing to schedule.
+
+        - alert: HearthlyBackupNeverRan
+          expr: absent(kube_job_status_completion_time{job_name=~"hearthly-api-db-backup.*"}) == 1
+          for: 1h
+          labels:
+            severity: warning
+            database: hearthly
+          annotations:
+            summary: No completed hearthly-db backup job found
+            description: >-
+              No completed Job object exists for the hearthly-db backup
+              CronJob. Either the CronJob was never created, or all
+              historical Job objects have been garbage-collected.
+
+        - alert: KeycloakBackupNeverRan
+          expr: absent(kube_job_status_completion_time{job_name=~"keycloak-db-backup.*"}) == 1
+          for: 1h
+          labels:
+            severity: warning
+            database: keycloak
+          annotations:
+            summary: No completed keycloak-db backup job found
+            description: >-
+              No completed Job object exists for the keycloak-db backup
+              CronJob. Either the CronJob was never created, or all
+              historical Job objects have been garbage-collected.
