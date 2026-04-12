@@ -16,7 +16,13 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "::error::NTFY_TOPIC secret is not set"
+            exit 1
+          fi
+
           FAILED=""
+          NL=$'\n'
 
           check_endpoint() {
             local url="$1"
@@ -24,7 +30,7 @@ jobs:
             local actual
             actual=$(curl -sI -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 15 "$url" 2>/dev/null || echo "000")
             if [ "$actual" != "$expected" ]; then
-              FAILED="${FAILED}${url} (expected ${expected}, got ${actual})\n"
+              FAILED="${FAILED}${url} (expected ${expected}, got ${actual})${NL}"
             fi
           }
 
@@ -36,7 +42,7 @@ jobs:
           check_endpoint "https://secrets.hearthly.dev/" "200"
 
           if [ -n "$FAILED" ]; then
-            MESSAGE=$(printf "Production endpoints DOWN:\n${FAILED}")
+            MESSAGE="Production endpoints DOWN:${NL}${FAILED}"
             curl -s \
               -H "Title: Hearthly: endpoints down" \
               -H "Priority: urgent" \
