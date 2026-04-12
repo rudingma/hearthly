@@ -123,6 +123,22 @@ All external traffic routes through Kubernetes Gateway API (HTTPRoute), replacin
 - **Verify checksum:** `aws s3 cp s3://hearthly-backups/<filename>.dump.sha256 . --endpoint-url https://nbg1.your-objectstorage.com --region nbg1 && sha256sum -c <filename>.dump.sha256`
 - **Manual trigger:** `kubectl create job --from=cronjob/keycloak-db-backup manual-keycloak-backup -n keycloak`
 
+## Alerting
+
+Two independent alerting paths push notifications to phone via public ntfy.sh:
+
+- **In-cluster:** Prometheus → Alertmanager → `alexbakker/alertmanager-ntfy` v1.2.1 sidecar → ntfy.sh. Covers ~30 kube-prometheus-stack default alerts (pod crashes, OOM, node pressure, API errors, PVC usage) plus custom rules.
+- **External:** GitHub Actions healthcheck (`.github/workflows/healthcheck.yml`, every 5 min) curls all 6 production endpoints. Independent of cluster — alerts even when k8s is down.
+- **ntfy topic:** Infisical (`NTFY_TOPIC`, synced to `ntfy-topic` Secret in monitoring namespace) + GitHub Actions secret (intentionally decoupled from cluster).
+- **Sidecar config:** ConfigMap `alertmanager-ntfy-config` (priority mapping, tags, templates) + Secret `ntfy-topic` key `topic.yml` (topic value as YAML). Merged via `--configs /config/config.yml,/secret/topic.yml`.
+- **Routing:** Watchdog + InfoInhibitor → null receiver. Critical alerts → 1h repeat. Default → 4h repeat. Severity cascading + NodeNotReady inhibition rules suppress alert storms.
+- **Custom PrometheusRules:** `TLSCertExpiringSoon` (< 14 days, warning), `BackupJobFailed` (critical), `HearthlyBackupMissing` / `KeycloakBackupMissing` (> 25h, warning), `HearthlyBackupNeverRan` / `KeycloakBackupNeverRan` (1h grace).
+- **ServiceMonitor:** `cert-manager` in monitoring namespace, scrapes port `tcp-prometheus-servicemonitor` (9402).
+- **NetworkPolicy:** `allow-alertmanager-ntfy-egress` — Alertmanager pods → external HTTPS (443) for ntfy.sh.
+- **Admission webhooks:** Disabled. Deployment mode has a TLS cert SAN mismatch; hook mode blocks ArgoCD PreSync. Validate PrometheusRules locally via `helm template`.
+- **CRD selectors:** `ruleSelectorNilUsesHelmValues: false` + `serviceMonitorSelectorNilUsesHelmValues: false` — Prometheus discovers all custom rules/monitors without requiring release labels.
+- **Verify:** `kubectl get prometheusrules -n monitoring` (rules), `kubectl get servicemonitor -n monitoring` (monitors), `kubectl logs -n monitoring -l app.kubernetes.io/name=alertmanager -c ntfy-proxy --tail=10` (sidecar logs)
+
 ## Build & Run Commands
 
 **Quality gates (run before every commit):** `npx nx lint <app>` + `npx nx test <app>` + `npx nx build <app>` for affected apps. Helm charts: `helm template <name> <path>` to verify rendering.
