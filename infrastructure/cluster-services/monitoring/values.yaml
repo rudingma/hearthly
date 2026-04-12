@@ -118,15 +118,7 @@ kube-prometheus-stack:
           image: ghcr.io/alexbakker/alertmanager-ntfy:1.2.1
           args:
             - "--configs"
-            - "/config/config.yml"
-            - "--ntfy-topic"
-            - "$(NTFY_TOPIC)"
-          env:
-            - name: NTFY_TOPIC
-              valueFrom:
-                secretKeyRef:
-                  name: ntfy-topic
-                  key: NTFY_TOPIC
+            - "/config/config.yml,/secret/topic.yml"
           ports:
             - name: ntfy-hook
               containerPort: 8000
@@ -161,11 +153,17 @@ kube-prometheus-stack:
             - name: ntfy-config
               mountPath: /config
               readOnly: true
+            - name: ntfy-secret
+              mountPath: /secret
+              readOnly: true
 
       volumes:
         - name: ntfy-config
           configMap:
             name: alertmanager-ntfy-config
+        - name: ntfy-secret
+          secret:
+            secretName: ntfy-topic
 
     config:
       global:
