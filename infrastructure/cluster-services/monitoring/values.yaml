@@ -261,7 +261,6 @@ kube-prometheus-stack:
     # by the k3s API server's webhook proxy. Use 8443 instead.
     tls:
       internalPort: 8443
-      tlsMinVersion: VersionTLS12
     resources:
       requests:
         cpu: 50m
