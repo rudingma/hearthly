@@ -86,7 +86,7 @@ kube-prometheus-stack ships 23 generic dashboards. Replaced with 1 custom "Heart
 
 ### Admission webhooks via cert-manager
 
-kube-prometheus-stack admission webhooks validate PrometheusRule and AlertmanagerConfig CRDs at apply time (catches PromQL syntax errors). The default patch-Job approach was incompatible with ArgoCD (Helm hooks block PreSync). Resolved by using the chart's cert-manager integration (`certManager.enabled: true`) — cert-manager issues the webhook TLS cert and auto-injects the CA bundle, with no Helm hooks involved.
+kube-prometheus-stack admission webhooks validate PrometheusRule and AlertmanagerConfig CRDs at apply time (catches PromQL syntax errors). The default patch-Job approach was incompatible with ArgoCD (Helm hooks block PreSync). Resolved by using the chart's cert-manager integration (`certManager.enabled: true`) — cert-manager issues the webhook TLS cert and auto-injects the CA bundle, with no Helm hooks involved. Three k3s-specific overrides were needed to make the API server actually reach the webhook: move the operator off the kubelet port (`tls.internalPort: 8443`), lower the TLS minimum (`tls.tlsMinVersion: VersionTLS12`), and allow webhook ingress from any source IP (the k3s API server's source IP for webhook calls is not stable enough to target with an `ipBlock`).
 
 ### ArgoCD controller memory (2Gi)
 
