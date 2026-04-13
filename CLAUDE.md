@@ -135,9 +135,9 @@ Two independent alerting paths push notifications to phone via public ntfy.sh:
 - **Custom PrometheusRules:** `TLSCertExpiringSoon` (< 14 days, warning), `BackupJobFailed` (critical), `HearthlyBackupMissing` / `KeycloakBackupMissing` (> 25h, warning), `HearthlyBackupNeverRan` / `KeycloakBackupNeverRan` (1h grace).
 - **ServiceMonitor:** `cert-manager` in monitoring namespace, scrapes port `tcp-prometheus-servicemonitor` (9402).
 - **NetworkPolicy:** `allow-alertmanager-ntfy-egress` — Alertmanager pods → external HTTPS (443) for ntfy.sh.
-- **Admission webhooks:** Disabled. Deployment mode has a TLS cert SAN mismatch; hook mode blocks ArgoCD PreSync. Validate PrometheusRules locally via `helm template`.
+- **Admission webhooks:** Enabled via cert-manager (`certManager.enabled: true`). cert-manager issues the webhook TLS cert and auto-injects the CA bundle, bypassing both the patch-Job SAN mismatch and ArgoCD PreSync hook issues. `failurePolicy: Fail` rejects invalid PrometheusRules at apply time. On first sync, a brief window exists between webhook config creation and cert issuance; ArgoCD self-heal resolves any transient PrometheusRule apply failures automatically.
 - **CRD selectors:** `ruleSelectorNilUsesHelmValues: false` + `serviceMonitorSelectorNilUsesHelmValues: false` — Prometheus discovers all custom rules/monitors without requiring release labels.
-- **Verify:** `kubectl get prometheusrules -n monitoring` (rules), `kubectl get servicemonitor -n monitoring` (monitors), `kubectl logs -n monitoring -l app.kubernetes.io/name=alertmanager -c ntfy-proxy --tail=10` (sidecar logs)
+- **Verify:** `kubectl get prometheusrules -n monitoring` (rules), `kubectl get servicemonitor -n monitoring` (monitors), `kubectl logs -n monitoring -l app.kubernetes.io/name=alertmanager -c ntfy-proxy --tail=10` (sidecar logs), `kubectl get validatingwebhookconfigurations monitoring-kube-prometheus-admission` (webhook), `kubectl get certificate -n monitoring` (webhook cert)
 
 ## Build & Run Commands
 
@@ -282,7 +282,7 @@ app/
 
 ## NetworkPolicies
 
-Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 31 policies across 6 namespaces.
+Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 35 policies across 6 namespaces.
 
 - **Covered:** `hearthly`, `keycloak`, `argocd`, `monitoring`, `cnpg-system`, `infisical`
 - **Skipped:** `kube-system` (risk of breaking CNI/DNS), `traefik` (ingress controller needs broad egress)

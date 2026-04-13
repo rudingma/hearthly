@@ -84,9 +84,9 @@ kube-prometheus-stack ships 23 generic dashboards. Replaced with 1 custom "Heart
 - Saturation signals predict problems before outages (CPU throttling, memory-vs-limit)
 - Node rootfs disk monitoring (not just PVCs) — disk full triggers pod eviction
 
-### ArgoCD admission webhooks disabled
+### Admission webhooks via cert-manager
 
-kube-prometheus-stack's Helm hook annotations for admission webhook creation block ArgoCD sync permanently (PreSync hooks never complete). Webhooks only validate PrometheusRule CRDs — not needed until custom alerting rules are written (Observability milestone).
+kube-prometheus-stack admission webhooks validate PrometheusRule and AlertmanagerConfig CRDs at apply time (catches PromQL syntax errors). The default patch-Job approach was incompatible with ArgoCD (Helm hooks block PreSync). Resolved by using the chart's cert-manager integration (`certManager.enabled: true`) — cert-manager issues the webhook TLS cert and auto-injects the CA bundle, with no Helm hooks involved.
 
 ### ArgoCD controller memory (2Gi)
 
