@@ -257,10 +257,10 @@ kube-prometheus-stack:
         enabled: true
       patch:
         enabled: false
-    # The operator's TLS server (port 10250) defaults to TLS 1.3 minimum,
-    # but the k3s API server's webhook client uses TLS 1.2 — handshake fails
-    # and webhook calls return 502 Bad Gateway. Lower to TLS 1.2 minimum.
+    # Default port (10250) collides with the kubelet port and isn't reachable
+    # by the k3s API server's webhook proxy. Use 8443 instead.
     tls:
+      internalPort: 8443
       tlsMinVersion: VersionTLS12
     resources:
       requests:
