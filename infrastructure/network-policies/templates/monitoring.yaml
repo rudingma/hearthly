@@ -128,14 +128,11 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    # API server → operator webhook (port 8443)
-    # ClusterIP before DNAT + node IP after DNAT
-    - from:
-        - ipBlock:
-            cidr: {{ .Values.apiServer.clusterIP }}/32
-        - ipBlock:
-            cidr: {{ .Values.apiServer.nodeIP }}/32
-      ports:
+    # API server → operator webhook (port 8443).
+    # Source IP restriction omitted on purpose: the k3s API server's
+    # source IP for webhook calls is not a stable, target-able address
+    # (this matches the pattern used for cnpg's webhook ingress policy).
+    - ports:
         - port: 8443
           protocol: TCP
 ---
