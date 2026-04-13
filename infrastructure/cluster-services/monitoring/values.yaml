@@ -247,12 +247,16 @@ kube-prometheus-stack:
 
   # --- Prometheus Operator ---
   prometheusOperator:
-    # Admission webhooks disabled — deployment mode has a TLS cert SAN
-    # mismatch (cert generated for operator service name, not webhook
-    # service name), and hook mode blocks ArgoCD PreSync. PrometheusRule
-    # validation is done locally via helm template instead.
+    # Admission webhooks validate PrometheusRule/AlertmanagerConfig CRDs
+    # at apply time (catches PromQL syntax errors before they reach Prometheus).
+    # cert-manager issues the webhook TLS cert and injects the CA bundle,
+    # avoiding both the patch-Job SAN mismatch and ArgoCD PreSync blocks.
     admissionWebhooks:
-      enabled: false
+      enabled: true
+      certManager:
+        enabled: true
+      patch:
+        enabled: false
     resources:
       requests:
         cpu: 50m
