@@ -128,7 +128,7 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    # API server → operator webhook (port 10250)
+    # API server → operator webhook (port 8443)
     # ClusterIP before DNAT + node IP after DNAT
     - from:
         - ipBlock:
@@ -136,7 +136,7 @@ spec:
         - ipBlock:
             cidr: {{ .Values.apiServer.nodeIP }}/32
       ports:
-        - port: 10250
+        - port: 8443
           protocol: TCP
 ---
 # Alertmanager: allow egress to external HTTPS (ntfy.sh via sidecar)
