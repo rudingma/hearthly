@@ -38,7 +38,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Nodes:** 1x CAX11 control plane + 3x CAX11 workers (ARM, 4 GB each)
 - **k3s:** v1.34.5 (stable channel, auto-upgrades enabled)
 - **Traefik LB IP:** 46.225.42.23 (IPv4), 2a01:4f8:1c1f:72d7::1 (IPv6)
-- **Module:** kube-hetzner v2.18.5, hcloud provider v1.60.1
+- **Module:** kube-hetzner v2.19.2, hcloud provider v1.60.1
 - **Terraform state:** Hetzner Object Storage (S3 backend, bucket: hearthly-tfstate)
 - **Gateway API:** Traefik Gateway `traefik-gateway` in `traefik` namespace. Per-hostname HTTPS listeners, cert-manager auto-provisions TLS certs. GatewayClass: `traefik`.
 - **Bundled services:** Traefik, cert-manager, hcloud CSI/CCM, metrics-server, kured
@@ -335,7 +335,7 @@ Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 3
 
 ## Key Versions to Pin
 
-- kube-hetzner: >= v2.18.1 (v2.18.0 broken)
+- kube-hetzner: >= v2.19.1 (v2.18.x generates deprecated Traefik values, v2.19.0 fixes)
 - hcloud provider: >= v1.58.0 (DNS support, datacenter deprecation)
 - ArgoCD Helm chart: >= v9.4 (3.x series)
 - Drizzle ORM: SQL-first, schema in TypeScript, migrations via drizzle-kit
@@ -343,7 +343,7 @@ Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 3
 ## Known Issues
 
 - **WSL2 + kube-hetzner CRLF:** Terraform module files download with CRLF line endings on WSL2, breaking heredoc provisioners. Fix: `find .terraform/modules/kube-hetzner -name "*.tf" -exec sed -i 's/\r$//' {} +` (also .sh, .yaml, .tpl). Must re-run after `terraform init` downloads modules.
-- **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_merge_values` in main.tf (deep-merges into defaults instead of replacing them).
+- **Traefik chart v34+ schema:** Resolved by upgrading kube-hetzner to v2.19.x. Previous issue: v2.18.x generated deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`) that Traefik chart v39+ rejects via JSON schema validation.
 - **Hetzner firewall blocks outbound SSH:** ArgoCD cannot use SSH Git access. Use HTTPS + token instead. If other services need outbound SSH, add `extra_firewall_rules` in Terraform main.tf.
 - **Docker + postinstall scripts:** Both Dockerfiles copy `scripts/` before `bun install` because the Ionic ESM patch runs as a postinstall hook. If you add new postinstall scripts that reference files outside `package.json`, ensure those files are `COPY`'d in the Dockerfile before the `RUN bun install` layer.
 - **Bun runtime (API only):** The API production image uses `oven/bun:1.2.20-alpine` as runtime. NestJS is not officially supported on Bun — upgrade Bun versions intentionally after 4-6 weeks of community validation, not automatically. Frontend still runs on nginx (no runtime change).
