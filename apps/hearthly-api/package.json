@@ -28,8 +28,7 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/apps/hearthly-api/dist/package.json",
-          "{workspaceRoot}/apps/hearthly-api/dist/package-lock.json"
+          "{workspaceRoot}/apps/hearthly-api/dist/package.json"
         ],
         "options": {
           "buildTarget": "build"

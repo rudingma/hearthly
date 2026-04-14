@@ -41,10 +41,10 @@ jobs:
           filters: |
             api:
               - 'apps/hearthly-api/**'
-              - 'package-lock.json'
+              - 'bun.lock'
             app:
               - 'apps/hearthly-app/**'
-              - 'package-lock.json'
+              - 'bun.lock'
             keycloak:
               - 'infrastructure/cluster-services/keycloak/deploy/**'
 
