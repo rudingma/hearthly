@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: control-plane-health
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: control-plane
+      rules:
+        - alert: ControlPlaneOOMKill
+          expr: >-
+            increase(node_vmstat_oom_kill[1h]) > 0
+            and on(instance)
+            node_uname_info{nodename=~"k3s-control-plane.*"}
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              OOM kill detected on control plane node
+              {{ "{{" }} $labels.nodename {{ "}}" }}
+            description: >-
+              The kernel OOM killer was invoked on the control plane node
+              in the last hour. This may indicate the node needs more
+              memory (upgrade from CAX11 to CAX21).
+
+        - alert: ControlPlaneHighMemory
+          expr: >-
+            (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9
+            and on(instance)
+            node_uname_info{nodename=~"k3s-control-plane.*"}
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Control plane memory usage above 90%
+              ({{ "{{" }} $value | humanizePercentage {{ "}}" }})
+            description: >-
+              Memory usage on control plane node
+              {{ "{{" }} $labels.nodename {{ "}}" }} has been above 90%
+              for 10 minutes. Sustained pressure increases OOM kill risk.
+              Consider upgrading to a larger node (CAX21).
