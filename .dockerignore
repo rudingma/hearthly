@@ -37,6 +37,7 @@ infrastructure
 **/*.spec.ts
 **/*.test.ts
 apps/*-e2e
+!apps/*-e2e/package.json
 
 # Docker
 docker-compose.yml

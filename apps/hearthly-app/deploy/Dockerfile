@@ -1,15 +1,20 @@
 # Build stage
 FROM node:24-alpine AS builder
 
+# Install Bun (package manager only — Node.js runs builds)
+COPY --from=oven/bun:1.2.20-alpine /usr/local/bin/bun /usr/local/bin/bun
+
 WORKDIR /app
 
 # Copy package files first for layer caching. All workspace member package.json
-# files must be present before npm ci so npm resolves workspace dependencies.
+# files must be present before bun install so it resolves workspace dependencies.
 # Add a COPY line here for each new workspace package that has a package.json.
-COPY package.json package-lock.json ./
+COPY package.json bun.lock ./
 COPY apps/hearthly-api/package.json ./apps/hearthly-api/
+COPY apps/hearthly-api-e2e/package.json ./apps/hearthly-api-e2e/
+COPY apps/hearthly-app-e2e/package.json ./apps/hearthly-app-e2e/
 COPY scripts/ ./scripts/
-RUN npm ci
+RUN bun install --frozen-lockfile
 
 # Copy workspace source
 COPY . .
