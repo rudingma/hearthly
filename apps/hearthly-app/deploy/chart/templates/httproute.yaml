@@ -7,7 +7,9 @@ metadata:
     {{- include "hearthly-app.labels" . | nindent 4 }}
 spec:
   parentRefs:
-    - name: {{ .Values.route.gateway.name }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ .Values.route.gateway.name }}
       namespace: {{ .Values.route.gateway.namespace }}
       sectionName: {{ .Values.route.sectionName }}
   hostnames:
