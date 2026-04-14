@@ -566,7 +566,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "increase(node_vmstat_oom_kill[1h]) and on(instance) node_uname_info{nodename=~\"k3s-control-plane.*\"} or vector(0)",
+          "expr": "ceil(increase(node_vmstat_oom_kill[1h]) * on(instance) group_left(nodename) node_uname_info{nodename=~\"k3s-control-plane.*\"} or vector(0))",
           "instant": true,
           "legendFormat": "",
           "refId": "A"
