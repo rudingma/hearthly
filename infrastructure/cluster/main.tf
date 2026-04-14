@@ -37,7 +37,7 @@ module "kube-hetzner" {
   }
 
   source  = "kube-hetzner/kube-hetzner/hcloud"
-  version = "~> 2.18.1"
+  version = "~> 2.19.1"
 
   hcloud_token = var.hcloud_token
 
@@ -87,15 +87,9 @@ module "kube-hetzner" {
 
   # Deep-merge into defaults (preserves LB annotations, proxy protocol,
   # resource limits, PDB that traefik_values would silently drop).
+  # v2.19+ defaults are v39-compatible (no globalArguments, correct
+  # ports.web.http.redirections path), so merge-only is sufficient.
   traefik_merge_values = <<-EOT
-ports:
-  web:
-    http:
-      redirections:
-        entryPoint:
-          to: websecure
-          scheme: https
-          permanent: true
 gateway:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
