@@ -6,6 +6,11 @@ kube-prometheus-stack:
 
   # --- Grafana ---
   grafana:
+    # ArgoCD renders Helm in its own namespace (argocd), so
+    # .Release.Namespace ≠ the destination namespace (monitoring).
+    # Without this override, the Grafana HTTPRoute renders with
+    # namespace: argocd, causing persistent OutOfSync drift.
+    namespaceOverride: monitoring
     ingress:
       enabled: false
     route:
