@@ -1,24 +1,13 @@
 # Reviewed and accepted CVEs for a private family app.
 # Grouped by ecosystem. Review on dependency/base image upgrades.
 
-# --- Node.js / npm ---
+# --- Node.js / Application ---
 
 # path-to-regexp in @nestjs/core — DoS via regex, awaiting NestJS patch
 CVE-2026-4926
 
-# minimatch — DoS via unbounded backtracking, in npm/tar transitive dep
-CVE-2026-27903
-CVE-2026-27904
-
-# tar — path traversal via symlinks, in npm internals
-CVE-2026-29786
-CVE-2026-31802
-
-# picomatch — ReDoS via extglob, bundled in node:24-alpine's npm (not app code)
-CVE-2026-33671
-
 # lodash — arbitrary code execution via untrusted input, pinned at 4.17.23 by @nestjs/config
-# Fixed in 4.18.0 but @nestjs/config@4.0.3 pins exact 4.17.23; npm overrides don't force workspace transitive deps
+# Fixed in 4.18.0 but @nestjs/config@4.0.3 pins exact 4.17.23; overrides don't force workspace transitive deps
 # Remove when @nestjs/config updates lodash dependency
 CVE-2026-4800
 

@@ -10,8 +10,8 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 
 ## Environment
 
-- **Runtime:** Node.js 24 LTS (Krypton) via nvm
-- **Package manager:** npm 11
+- **Runtime:** Node.js 24 LTS (Krypton) via nvm (builds/tests), Bun 1.2.20 (API production runtime)
+- **Package manager:** Bun (`bun install`, replaces npm — pinned to 1.2.20)
 - **Monorepo:** Nx (use `npx nx` — not installed globally)
 - **Data access:** Drizzle ORM (SQL-first, type-safe query builder)
 - **Containers:** Docker 28 + Docker Buildx (multi-platform: amd64 + arm64)
@@ -186,7 +186,7 @@ kubectl get pods -A                  # All pods across namespaces
 - **No global prefix** — the `api.hearthly.dev` subdomain handles routing, so no `/api` prefix on routes
 - **Health:** `GET /health` (Terminus, used by K8s probes and Dockerfile HEALTHCHECK)
 - **GraphQL:** `POST /graphql` (Apollo Server 5, code-first schema, Apollo Sandbox in dev)
-- GraphQL requires `@as-integrations/express5` — must be in both root and app `package.json` for npm workspace hoisting
+- GraphQL requires `@as-integrations/express5` — must be in both root and app `package.json` for workspace hoisting
 
 **Production health checks** (baseline — verify services are alive after deploy):
 - `curl -sI https://hearthly.dev/` — frontend (200)
@@ -345,6 +345,7 @@ Default-deny both ingress and egress per namespace (NSA/CISA + CIS compliant). 3
 - **WSL2 + kube-hetzner CRLF:** Terraform module files download with CRLF line endings on WSL2, breaking heredoc provisioners. Fix: `find .terraform/modules/kube-hetzner -name "*.tf" -exec sed -i 's/\r$//' {} +` (also .sh, .yaml, .tpl). Must re-run after `terraform init` downloads modules.
 - **Traefik chart v34+ schema:** kube-hetzner v2.18.x generates deprecated Traefik Helm values (`globalArguments`, `ports.web.redirections`). Fix applied via `traefik_merge_values` in main.tf (deep-merges into defaults instead of replacing them).
 - **Hetzner firewall blocks outbound SSH:** ArgoCD cannot use SSH Git access. Use HTTPS + token instead. If other services need outbound SSH, add `extra_firewall_rules` in Terraform main.tf.
-- **Docker + postinstall scripts:** Both Dockerfiles copy `scripts/` before `npm ci` because the Ionic ESM patch runs as a postinstall hook. If you add new postinstall scripts that reference files outside `package.json`, ensure those files are `COPY`'d in the Dockerfile before the `RUN npm ci` layer.
+- **Docker + postinstall scripts:** Both Dockerfiles copy `scripts/` before `bun install` because the Ionic ESM patch runs as a postinstall hook. If you add new postinstall scripts that reference files outside `package.json`, ensure those files are `COPY`'d in the Dockerfile before the `RUN bun install` layer.
+- **Bun runtime (API only):** The API production image uses `oven/bun:1.2.20-alpine` as runtime. NestJS is not officially supported on Bun — upgrade Bun versions intentionally after 4-6 weeks of community validation, not automatically. Frontend still runs on nginx (no runtime change).
 - **k3s NetworkPolicy + API server DNAT:** kube-router (k3s NetworkPolicy controller) evaluates egress rules AFTER kube-proxy DNAT. Traffic to the kubernetes service ClusterIP (`10.43.0.1:443`) is rewritten to the control plane node IP (`10.255.0.101:6443`) before policy evaluation. An `ipBlock` rule targeting only the ClusterIP will not match. Fix: include both the ClusterIP and the node IP in API server egress rules (see `infrastructure/network-policies/values.yaml`).
 - **Keycloak DB reset breaks app login:** Wiping the Keycloak DB (`docker volume rm hearthly_keycloak-pgdata`) assigns new UUIDs to users. The app DB still has old `keycloak_id` values, causing upsert failures on login. Fix: wipe both databases together: `docker compose down && docker volume rm hearthly_keycloak-pgdata hearthly_pgdata && docker compose up -d`.

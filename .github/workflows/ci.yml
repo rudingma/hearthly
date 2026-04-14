@@ -22,9 +22,13 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
 
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.20
+          cache: true
+
+      - run: bun install --frozen-lockfile
 
       - uses: nrwl/nx-set-shas@v5
 
@@ -37,6 +41,4 @@ jobs:
       - name: Build affected
         run: npx nx affected --target=build
 
-      - name: Audit dependencies
-        run: npm audit --audit-level=high
-        continue-on-error: true
+      # Dependency audit handled by Trivy in deploy pipeline
