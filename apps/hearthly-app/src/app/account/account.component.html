@@ -10,7 +10,7 @@
 <ion-content class="ion-padding">
   <div class="profile-section">
     @if (pictureUrl() && !imageError()) {
-      <img class="profile-avatar profile-avatar-img" [src]="pictureUrl()" (error)="onImageError()" alt="Profile">
+      <img class="profile-avatar-img" [src]="pictureUrl()" (error)="onImageError()" alt="Profile">
     } @else {
       <div class="profile-avatar">{{ initials() }}</div>
     }
