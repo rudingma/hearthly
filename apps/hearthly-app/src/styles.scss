@@ -10,3 +10,47 @@
 @import '@ionic/angular/css/text-alignment.css';
 @import '@ionic/angular/css/flex-utils.css';
 @import '@ionic/angular/css/display.css';
+
+// Card styling — warm border + whisper shadow replaces Ionic's heavy Material shadow
+// Uses --box-shadow (Ionic CSS variable) to reliably override shadow DOM :host styles
+ion-card {
+  --box-shadow: rgba(0, 0, 0, 0.03) 0px 2px 8px;
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--hearthly-radius-card);
+}
+
+// Pill badge — tinted background with colored text
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.33;
+
+  &--primary {
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    color: var(--ion-color-primary);
+  }
+
+  &--neutral {
+    background: rgba(var(--ion-text-color-rgb), 0.06);
+    color: var(--hearthly-text-muted);
+  }
+
+  &--success {
+    background: rgba(var(--ion-color-success-rgb), 0.12);
+    color: var(--ion-color-success);
+  }
+
+  &--danger {
+    background: rgba(var(--ion-color-danger-rgb), 0.12);
+    color: var(--ion-color-danger);
+  }
+
+  &--warning {
+    background: rgba(var(--ion-color-warning-rgb), 0.12);
+    color: var(--ion-color-warning);
+  }
+}

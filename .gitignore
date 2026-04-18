@@ -39,6 +39,7 @@ infrastructure/cluster-services/*/charts/
 # Claude Code
 .claude/settings.local.json
 docs/superpowers/
+.superpowers/
 
 .angular
 
@@ -53,3 +54,8 @@ apps/hearthly-app/src/generated/
 
 # Playwright CLI snapshots
 .playwright-cli/
+
+# Scratch / research workspace — task-scoped temporary files.
+# Create tmp/<task-name>/ as needed for reference downloads, screenshots, notes.
+# Delete after the PR merges. Never commit.
+tmp/

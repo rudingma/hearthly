@@ -314,16 +314,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px 16px;
   border: 1px solid var(--hearthly-border);
   border-radius: var(--hearthly-radius);
   background: var(--hearthly-surface);
   color: var(--hearthly-text);
   font-family: var(--hearthly-font);
   font-size: 14px;
+  font-weight: 500;
   text-decoration: none;
-  transition: border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .hearthly-social-button:hover,
@@ -334,6 +335,45 @@ body {
 .hearthly-social-button:focus-visible {
   outline: 2px solid var(--hearthly-primary);
   outline-offset: 2px;
+}
+
+.hearthly-social-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Google Brand Guidelines — exact colors for Google Sign-In button */
+.hearthly-social-button--google {
+  border-color: #dadce0;
+  background: #ffffff;
+  color: #3c4043;
+}
+
+.hearthly-social-button--google:hover {
+  background: #f7f8f8;
+  border-color: #c4c7c5;
+}
+
+.hearthly-social-button--google:active {
+  background: #e8eaed;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hearthly-social-button--google {
+    background: #131314;
+    border-color: #8e918f;
+    color: #e3e3e3;
+  }
+
+  .hearthly-social-button--google:hover {
+    background: #1f1f20;
+    border-color: #a1a3a0;
+  }
+
+  .hearthly-social-button--google:active {
+    background: #2a2a2b;
+  }
 }
 
 /* Try another way link */
