@@ -1,7 +1,9 @@
-// Hearthly design tokens
 @use './theme/variables.scss';
 
-// Ionic global styles
+@import 'tailwindcss';
+@import './styles/theme.css';
+
+// Ionic global styles — still needed until Phase 5
 @import '@ionic/angular/css/core.css';
 @import '@ionic/angular/css/normalize.css';
 @import '@ionic/angular/css/structure.css';
@@ -10,6 +12,30 @@
 @import '@ionic/angular/css/text-alignment.css';
 @import '@ionic/angular/css/flex-utils.css';
 @import '@ionic/angular/css/display.css';
+
+html,
+body,
+app-root {
+  height: 100%;
+  background: var(--color-warm-stone);
+  color: var(--color-warm-dark);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+
+// (Leave the existing `.badge` / `ion-card` override blocks in place below here;
+// they are removed by Phase 5 Task 26 once the last Ionic consumer migrates.)
 
 // Card styling — warm border + whisper shadow replaces Ionic's heavy Material shadow
 // Uses --box-shadow (Ionic CSS variable) to reliably override shadow DOM :host styles
