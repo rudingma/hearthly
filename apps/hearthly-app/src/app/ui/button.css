@@ -1,0 +1,68 @@
+@layer components {
+  .app-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--radius-button);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 10px 20px;
+    min-height: 48px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms ease, transform 100ms ease;
+  }
+  .app-button:focus-visible {
+    outline: 2px solid var(--color-hearth-terracotta);
+    outline-offset: 2px;
+  }
+  .app-button--full-width {
+    width: 100%;
+  }
+
+  .app-button--primary {
+    background: var(--color-hearth-terracotta);
+    color: var(--color-terracotta-contrast);
+    border: none;
+  }
+  .app-button--primary:hover {
+    background: var(--color-terracotta-shade);
+  }
+  .app-button--primary:active {
+    transform: scale(0.98);
+  }
+
+  .app-button--secondary {
+    background: transparent;
+    color: var(--color-warm-dark);
+    border: 1px solid var(--color-warm-divider);
+  }
+  .app-button--secondary:hover {
+    background: color-mix(in srgb, var(--color-warm-divider) 40%, transparent);
+  }
+
+  .app-button--ghost {
+    background: transparent;
+    color: var(--color-stone-muted);
+    border: none;
+    min-height: 40px;
+    padding: 8px;
+  }
+  .app-button--ghost:hover {
+    color: var(--color-warm-dark);
+  }
+
+  .app-button--destructive {
+    background: var(--color-warm-danger);
+    color: #ffffff;
+    border: none;
+  }
+
+  .app-button[disabled],
+  .app-button[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
