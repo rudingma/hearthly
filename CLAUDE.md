@@ -13,7 +13,7 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 - **Runtime:** Node.js 24 LTS via nvm (builds/tests), Bun 1.2.20 (API production runtime)
 - **Package manager:** Bun (`bun install` — pinned to 1.2.20)
 - **Monorepo:** Nx (use `npx nx` — not installed globally)
-- **Frontend:** Angular + Ionic (Capacitor planned for mobile)
+- **Frontend:** Angular + Capacitor + Angular CDK + Tailwind CSS v4 + Lucide icons (custom components implementing `DESIGN.md`)
 - **Backend:** NestJS + Drizzle ORM + PostgreSQL
 - **Infrastructure:** Hetzner Cloud, k3s, Traefik (Gateway API), ArgoCD GitOps
 - **Secrets:** Infisical (self-hosted, K8s operator)
