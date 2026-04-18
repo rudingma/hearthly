@@ -12,7 +12,7 @@ async function bootstrap() {
   app.use(
     helmet({
       contentSecurityPolicy: config.nodeEnv === 'production',
-    }),
+    })
   );
   app.enableCors({
     origin: config.corsOrigin,

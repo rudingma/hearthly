@@ -4,13 +4,13 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "infrastructure/cluster/**/*.tf"
-      - "infrastructure/keycloak-config/**/*.tf"
+      - 'infrastructure/cluster/**/*.tf'
+      - 'infrastructure/keycloak-config/**/*.tf'
   push:
     branches: [main]
     paths:
-      - "infrastructure/cluster/**/*.tf"
-      - "infrastructure/keycloak-config/**/*.tf"
+      - 'infrastructure/cluster/**/*.tf'
+      - 'infrastructure/keycloak-config/**/*.tf'
   workflow_dispatch:
 
 permissions:
@@ -19,9 +19,9 @@ permissions:
   id-token: write
 
 env:
-  INFISICAL_IDENTITY_ID: "2a105da8-c31f-4244-b1f0-a72d5379bf4f"
-  INFISICAL_DOMAIN: "https://secrets.hearthly.dev"
-  INFISICAL_PROJECT_SLUG: "hearthly-uv-ci"
+  INFISICAL_IDENTITY_ID: '2a105da8-c31f-4244-b1f0-a72d5379bf4f'
+  INFISICAL_DOMAIN: 'https://secrets.hearthly.dev'
+  INFISICAL_PROJECT_SLUG: 'hearthly-uv-ci'
 
 jobs:
   changes:
@@ -58,12 +58,12 @@ jobs:
       - name: Fetch secrets from Infisical
         uses: Infisical/secrets-action@v1.0.15
         with:
-          method: "oidc"
+          method: 'oidc'
           identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
           domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: "prod"
+          env-slug: 'prod'
           project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: "/"
+          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/cluster
@@ -122,12 +122,12 @@ jobs:
       - name: Fetch secrets from Infisical
         uses: Infisical/secrets-action@v1.0.15
         with:
-          method: "oidc"
+          method: 'oidc'
           identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
           domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: "prod"
+          env-slug: 'prod'
           project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: "/"
+          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/cluster
@@ -171,12 +171,12 @@ jobs:
       - name: Fetch secrets from Infisical
         uses: Infisical/secrets-action@v1.0.15
         with:
-          method: "oidc"
+          method: 'oidc'
           identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
           domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: "prod"
+          env-slug: 'prod'
           project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: "/"
+          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/keycloak-config
@@ -230,12 +230,12 @@ jobs:
       - name: Fetch secrets from Infisical
         uses: Infisical/secrets-action@v1.0.15
         with:
-          method: "oidc"
+          method: 'oidc'
           identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
           domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: "prod"
+          env-slug: 'prod'
           project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: "/"
+          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/keycloak-config

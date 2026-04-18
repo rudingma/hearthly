@@ -15,7 +15,7 @@ infisical-standalone:
   # Overrides pod/deployment resource names (NOT service names).
   # Service name remains "infisical-infisical-standalone-infisical"
   # (upstream sub-chart naming convention).
-  fullnameOverride: "infisical"
+  fullnameOverride: 'infisical'
 
   infisical:
     enabled: true
@@ -23,13 +23,13 @@ infisical-standalone:
     # References a manually-created K8s Secret with ENCRYPTION_KEY,
     # AUTH_SECRET, and SITE_URL. This secret must exist before deployment.
     # See bootstrap instructions in the project plan.
-    kubeSecretRef: "infisical-secrets"
+    kubeSecretRef: 'infisical-secrets'
     resources:
       requests:
         cpu: 200m
         memory: 512Mi
       limits:
-        cpu: "1"
+        cpu: '1'
         memory: 1Gi
 
   # Ingress disabled — routing via Gateway API HTTPRoute (templates/httproute.yaml)
@@ -73,7 +73,7 @@ infisical-standalone:
 # --- Secrets Operator (syncs Infisical secrets → K8s Secrets) ---
 secrets-operator:
   # Point operator at the in-cluster Infisical service
-  hostAPI: "http://infisical-infisical-standalone-infisical.infisical.svc.cluster.local:8080/api"
+  hostAPI: 'http://infisical-infisical-standalone-infisical.infisical.svc.cluster.local:8080/api'
   controllerManager:
     manager:
       resources:

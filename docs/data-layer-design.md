@@ -18,12 +18,12 @@
 
 **Why not the others:**
 
-| Tool | Rejection reason |
-|---|---|
-| **Prisma** | Proprietary DSL lock-in. Complex queries escape-hatch to `$queryRaw` losing type safety. Doesn't teach SQL. Trades one opaque abstraction (Hibernate) for another. |
-| **TypeORM** | Declining community. Performance issues at scale. Decorator-heavy API has known bugs with migrations. |
+| Tool         | Rejection reason                                                                                                                                                                  |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Prisma**   | Proprietary DSL lock-in. Complex queries escape-hatch to `$queryRaw` losing type safety. Doesn't teach SQL. Trades one opaque abstraction (Hibernate) for another.                |
+| **TypeORM**  | Declining community. Performance issues at scale. Decorator-heavy API has known bugs with migrations.                                                                             |
 | **MikroORM** | Closest to Hibernate (Unit of Work, Identity Map, Data Mapper) — but that's the problem. We'd recreate the Spring comfort zone without learning anything new. Smallest community. |
-| **Kysely** | Pure query builder, no schema management. Would need a separate migration tool. Drizzle offers the same SQL-closeness plus schema + migrations in one package. |
+| **Kysely**   | Pure query builder, no schema management. Would need a separate migration tool. Drizzle offers the same SQL-closeness plus schema + migrations in one package.                    |
 
 **Version note:** The project uses Drizzle ORM 0.45.x (current stable). Drizzle v1.0 is in beta with breaking changes (relations API v2, migration folder structure v3, unified driver API). Stay on 0.45.x until v1 reaches stable, then run `drizzle-kit up` to migrate.
 
@@ -99,8 +99,12 @@ export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 ```
 
@@ -139,7 +143,9 @@ import type { DrizzleDB } from '../../database/database.service';
 @Injectable()
 export class UserRepository {
   constructor(
-    private readonly txHost: TransactionHost<TransactionalAdapterDrizzleOrm<DrizzleDB>>,
+    private readonly txHost: TransactionHost<
+      TransactionalAdapterDrizzleOrm<DrizzleDB>
+    >
   ) {}
 
   async findById(id: string) {
@@ -159,10 +165,7 @@ export class UserRepository {
   }
 
   async create(data: { email: string; name: string }) {
-    const [user] = await this.txHost.tx
-      .insert(users)
-      .values(data)
-      .returning();
+    const [user] = await this.txHost.tx.insert(users).values(data).returning();
     return user;
   }
 }
@@ -203,7 +206,7 @@ When `OrderService` needs user data, it injects `UserService` (the public API), 
 export class OrderService {
   constructor(
     private readonly orderRepo: OrderRepository,
-    private readonly userService: UserService, // public API, not repo
+    private readonly userService: UserService // public API, not repo
   ) {}
 }
 ```
@@ -222,9 +225,9 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './src/database/schema.ts',     // barrel file
+  schema: './src/database/schema.ts', // barrel file
   out: './migrations',
-  prefix: 'timestamp',                    // auto date-prefix on folders
+  prefix: 'timestamp', // auto date-prefix on folders
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
@@ -334,10 +337,7 @@ describe('UserService', () => {
     };
 
     const module = await Test.createTestingModule({
-      providers: [
-        UserService,
-        { provide: UserRepository, useValue: repo },
-      ],
+      providers: [UserService, { provide: UserRepository, useValue: repo }],
     }).compile();
 
     service = module.get(UserService);
@@ -415,11 +415,14 @@ describe('UserRepository (integration)', () => {
   });
 
   it('creates and finds a user', async () => {
-    const [inserted] = await db.insert(users).values({
-      keycloakId: 'kc-1',
-      email: 'alice@example.com',
-      name: 'Alice',
-    }).returning();
+    const [inserted] = await db
+      .insert(users)
+      .values({
+        keycloakId: 'kc-1',
+        email: 'alice@example.com',
+        name: 'Alice',
+      })
+      .returning();
 
     const result = await repo.findById(inserted.id);
     expect(result).not.toBeNull();
@@ -433,6 +436,7 @@ describe('UserRepository (integration)', () => {
 When creating a new module (e.g., `family`), follow this pattern:
 
 1. **Integration tests** (`family.repository.integration.spec.ts`):
+
    - Import `createTestDb` and `TestDb` from `test/support/test-db`
    - Create a `createMockTxHost(db)` helper that returns `{ tx: db } as any`
    - Use `beforeAll` to create the DB and repository instance (shared across tests for speed)
@@ -440,6 +444,7 @@ When creating a new module (e.g., `family`), follow this pattern:
    - Test each repository method: null case, found case, edge cases (conflicts, etc.)
 
 2. **Unit tests** (`family.service.spec.ts`):
+
    - Mock each repository method with `vi.fn()`
    - Wire up via `Test.createTestingModule` with `{ provide: FamilyRepository, useValue: repo }`
    - Test business logic: delegation, error handling, conditional behavior
@@ -480,11 +485,11 @@ export async function startTestPostgres() {
 
 ### Testing Pyramid Summary
 
-| Level | What | Tool | Speed | When |
-|---|---|---|---|---|
-| Unit | Service logic | Vitest mocks | ~ms | Every test run |
-| Integration | Queries & repos | PGlite | ~50ms setup | Every test run |
-| E2E | Full API | Testcontainers | ~5-10s setup | CI pipeline |
+| Level       | What            | Tool           | Speed        | When           |
+| ----------- | --------------- | -------------- | ------------ | -------------- |
+| Unit        | Service logic   | Vitest mocks   | ~ms          | Every test run |
+| Integration | Queries & repos | PGlite         | ~50ms setup  | Every test run |
+| E2E         | Full API        | Testcontainers | ~5-10s setup | CI pipeline    |
 
 ---
 
@@ -563,14 +568,14 @@ export class OrderService {
   constructor(
     private readonly orderRepo: OrderRepository,
     private readonly productService: ProductService,
-    private readonly paymentService: PaymentService,
+    private readonly paymentService: PaymentService
   ) {}
 
   @Transactional()
   async placeOrder(userId: string, items: CartItem[]) {
     const order = await this.orderRepo.create({ userId });
-    await this.productService.deductInventory(items);   // same tx automatically
-    await this.paymentService.createCharge(order.id);    // same tx automatically
+    await this.productService.deductInventory(items); // same tx automatically
+    await this.paymentService.createCharge(order.id); // same tx automatically
     return order;
   }
 }
@@ -590,13 +595,13 @@ Wrapping every read in a transaction holds a connection from the pool for the du
 
 **When to use transactions in Drizzle:**
 
-| Scenario | What to do |
-|---|---|
-| Single read | No transaction. Just query. |
-| Single write in one repo | No transaction at service level. The repo method is atomic on its own. |
-| Multiple writes, same or cross-module | `@Transactional()` |
-| Multiple reads that must be consistent (e.g., reports) | `@Transactional({ accessMode: 'read only' })` |
-| Read + write mix in one operation | `@Transactional()` |
+| Scenario                                               | What to do                                                             |
+| ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Single read                                            | No transaction. Just query.                                            |
+| Single write in one repo                               | No transaction at service level. The repo method is atomic on its own. |
+| Multiple writes, same or cross-module                  | `@Transactional()`                                                     |
+| Multiple reads that must be consistent (e.g., reports) | `@Transactional({ accessMode: 'read only' })`                          |
+| Read + write mix in one operation                      | `@Transactional()`                                                     |
 
 This is a philosophical shift from the Spring world: transactions are a tool you use when you need atomicity or consistency guarantees, not a default container for everything.
 
@@ -604,16 +609,16 @@ This is a philosophical shift from the Spring world: transactions are a tool you
 
 ## Key Dependencies
 
-| Package | Purpose |
-|---|---|
-| `drizzle-orm` | Query builder + schema definition |
-| `drizzle-kit` | Migration generation (dev dependency) |
-| `postgres` | PostgreSQL driver (postgres.js — auto-pooling, simple API) |
-| `nestjs-cls` | Async Local Storage for NestJS |
-| `@nestjs-cls/transactional` | Transaction management plugin |
-| `@nestjs-cls/transactional-adapter-drizzle-orm` | Drizzle adapter for nestjs-cls |
-| `@electric-sql/pglite` | In-memory Postgres for integration tests (dev dependency) |
-| `@testcontainers/postgresql` | Real Postgres containers for E2E tests (dev dependency) |
+| Package                                         | Purpose                                                    |
+| ----------------------------------------------- | ---------------------------------------------------------- |
+| `drizzle-orm`                                   | Query builder + schema definition                          |
+| `drizzle-kit`                                   | Migration generation (dev dependency)                      |
+| `postgres`                                      | PostgreSQL driver (postgres.js — auto-pooling, simple API) |
+| `nestjs-cls`                                    | Async Local Storage for NestJS                             |
+| `@nestjs-cls/transactional`                     | Transaction management plugin                              |
+| `@nestjs-cls/transactional-adapter-drizzle-orm` | Drizzle adapter for nestjs-cls                             |
+| `@electric-sql/pglite`                          | In-memory Postgres for integration tests (dev dependency)  |
+| `@testcontainers/postgresql`                    | Real Postgres containers for E2E tests (dev dependency)    |
 
 ---
 

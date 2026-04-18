@@ -17,32 +17,32 @@ Hearthly is a family management app. It starts as a Haushaltsbuch (household bud
 
 ## Milestones
 
-| Milestone | Focus | Status |
-|---|---|---|
-| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups | Complete |
-| **Data Layer Foundation** | Drizzle module, repository pattern, transactions, test infra | Next |
-| **Authentication** | Keycloak, OIDC in NestJS + Angular | Planned |
-| **App Shell** | Angular layout, navigation, routing, theming | Planned |
-| **Family & Household Model** | Data model, multi-tenancy | Planned |
-| **Observability** | OpenTelemetry, Tempo, Loki, app dashboards | Planned |
-| *Future* | Business features (budget, groceries, schedules) | — |
+| Milestone                          | Focus                                                        | Status   |
+| ---------------------------------- | ------------------------------------------------------------ | -------- |
+| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups         | Complete |
+| **Data Layer Foundation**          | Drizzle module, repository pattern, transactions, test infra | Next     |
+| **Authentication**                 | Keycloak, OIDC in NestJS + Angular                           | Planned  |
+| **App Shell**                      | Angular layout, navigation, routing, theming                 | Planned  |
+| **Family & Household Model**       | Data model, multi-tenancy                                    | Planned  |
+| **Observability**                  | OpenTelemetry, Tempo, Loki, app dashboards                   | Planned  |
+| _Future_                           | Business features (budget, groceries, schedules)             | —        |
 
 ## Tech Stack
 
-| Layer | Choice | Why |
-|---|---|---|
-| Frontend | Angular + Ionic + Capacitor | Existing Angular skills. Ionic for mobile-first UI components (tabs, gestures, split-pane). Capacitor wraps web for iOS/Android. |
-| Backend | NestJS + Drizzle ORM | NestJS mirrors Angular (decorators, modules, DI). Drizzle is SQL-first, type-safe — chosen over Prisma (too much abstraction) and TypeORM (declining). |
-| Database | PostgreSQL (CloudNativePG) | Self-hosted on K8s. Hetzner has no managed database. |
-| Architecture | Modular monolith | No microservices. Clean module boundaries via service interfaces. Extract only when there's a real reason. |
-| Hosting | Hetzner Cloud (k3s) | 2-3x cheaper than DigitalOcean/Civo/Scaleway. Self-managed k3s via kube-hetzner Terraform module. |
-| Nodes | ARM (CAX11) | Cheaper than x86. 1 CP + 3 workers, 4GB each. ~€32/month total. |
-| Ingress | Traefik | Bundled by kube-hetzner. ingress-nginx retired March 2026. Gateway API migration planned (see GitHub Issues). |
-| GitOps | ArgoCD (app-of-apps) | Everything deployed via Git commits. CI never needs cluster credentials. |
-| CI/CD | GitHub Actions → GHCR | PR: lint+test. Push to main: build → push → ArgoCD syncs. ARM-only builds (cluster is ARM-only). |
-| Secrets | Infisical (self-hosted) | Chosen over Sealed Secrets (less learning value), Vault (unsealing complexity without cloud KMS), ESO (less mature UI). |
-| Monitoring | Prometheus + Grafana | Infrastructure monitoring live. App-level observability (OpenTelemetry) tracked in Observability milestone. |
-| Backups | pg_dump CronJob → S3 | Daily, custom format, SHA256 checksums, 30-day S3 lifecycle policy. |
+| Layer        | Choice                      | Why                                                                                                                                                    |
+| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Frontend     | Angular + Ionic + Capacitor | Existing Angular skills. Ionic for mobile-first UI components (tabs, gestures, split-pane). Capacitor wraps web for iOS/Android.                       |
+| Backend      | NestJS + Drizzle ORM        | NestJS mirrors Angular (decorators, modules, DI). Drizzle is SQL-first, type-safe — chosen over Prisma (too much abstraction) and TypeORM (declining). |
+| Database     | PostgreSQL (CloudNativePG)  | Self-hosted on K8s. Hetzner has no managed database.                                                                                                   |
+| Architecture | Modular monolith            | No microservices. Clean module boundaries via service interfaces. Extract only when there's a real reason.                                             |
+| Hosting      | Hetzner Cloud (k3s)         | 2-3x cheaper than DigitalOcean/Civo/Scaleway. Self-managed k3s via kube-hetzner Terraform module.                                                      |
+| Nodes        | ARM (CAX11)                 | Cheaper than x86. 1 CP + 3 workers, 4GB each. ~€32/month total.                                                                                        |
+| Ingress      | Traefik                     | Bundled by kube-hetzner. ingress-nginx retired March 2026. Gateway API migration planned (see GitHub Issues).                                          |
+| GitOps       | ArgoCD (app-of-apps)        | Everything deployed via Git commits. CI never needs cluster credentials.                                                                               |
+| CI/CD        | GitHub Actions → GHCR       | PR: lint+test. Push to main: build → push → ArgoCD syncs. ARM-only builds (cluster is ARM-only).                                                       |
+| Secrets      | Infisical (self-hosted)     | Chosen over Sealed Secrets (less learning value), Vault (unsealing complexity without cloud KMS), ESO (less mature UI).                                |
+| Monitoring   | Prometheus + Grafana        | Infrastructure monitoring live. App-level observability (OpenTelemetry) tracked in Observability milestone.                                            |
+| Backups      | pg_dump CronJob → S3        | Daily, custom format, SHA256 checksums, 30-day S3 lifecycle policy.                                                                                    |
 
 ## Key Decisions
 
@@ -51,6 +51,7 @@ Non-obvious choices and their rationale. Updated as decisions are made.
 ### Hetzner trade-offs
 
 Hetzner is the cheapest EU provider for this workload but has real limitations:
+
 - **No CSI VolumeSnapshots** — blocks CNPG native backups and Velero. No fix expected soon (open since Jan 2025).
 - **S3 restore bug with barman** — backups succeed but restores fail (byte-count mismatch). Barman team closed as "not planned."
 - **Firewall blocks outbound SSH** — ArgoCD must use HTTPS + GitHub token instead of SSH.
@@ -60,6 +61,7 @@ If budget grows to ~€55/month, IONOS is the migration target (managed K8s, wor
 ### pg_dump over CNPG native backups
 
 CloudNativePG has built-in backup via the Barman Cloud Plugin, which provides point-in-time recovery (PITR). We evaluated it thoroughly and chose pg_dump instead because:
+
 - The Barman Cloud Plugin is pre-1.0 (v0.11.0) with active memory leak and resource consumption issues
 - Hetzner S3 has a documented restore byte-count mismatch bug — backups work but restores can fail
 - The deprecated in-tree barmanObjectStore has the same Hetzner bug
@@ -71,6 +73,7 @@ CloudNativePG has built-in backup via the Barman Cloud Plugin, which provides po
 ### Infra monitoring only (initial setup)
 
 The Project Setup & Infrastructure milestone deployed Prometheus + Grafana for cluster health. App-level observability (request metrics, traces, logs) deferred because:
+
 - No app logic to observe yet
 - OpenTelemetry SDK + Collector + Tempo + Loki is too much to absorb alongside K8s/Terraform/ArgoCD
 - Significant resource footprint on small nodes
@@ -80,6 +83,7 @@ The Project Setup & Infrastructure milestone deployed Prometheus + Grafana for c
 ### Custom Grafana dashboard over bundled
 
 kube-prometheus-stack ships 23 generic dashboards. Replaced with 1 custom "Hearthly Cluster Health" dashboard designed from SRE first principles:
+
 - Emergency row answers "is something broken?" in 2 seconds (OOMKills, CrashLoops, node readiness, failed backups)
 - Saturation signals predict problems before outages (CPU throttling, memory-vs-limit)
 - Node rootfs disk monitoring (not just PVCs) — disk full triggers pod eviction

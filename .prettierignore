@@ -4,3 +4,20 @@
 /.nx/cache
 /.nx/workspace-data
 .angular
+
+# Helm chart templates — Go template syntax ({{ .Values... }}) breaks Prettier's YAML parser
+infrastructure/**/templates/
+apps/*/deploy/chart/templates/
+
+# Generated code
+apps/hearthly-app/src/generated/
+
+# Lockfiles
+bun.lock
+
+# Mirror of .gitignore — Terraform state and local cluster artifacts
+.terraform/
+*.tfstate
+*.tfstate.backup
+infrastructure/cluster/k3s_kubeconfig.yaml
+infrastructure/cluster/k3s_kustomization_backup.yaml

@@ -31,30 +31,30 @@ Family management app. Infrastructure is live on Kubernetes (Project Setup & Inf
 
 ## URLs
 
-| Service | URL | Purpose |
-|---|---|---|
-| Frontend | https://hearthly.dev | Angular app |
-| API | https://api.hearthly.dev | NestJS backend (health: `/health`, GraphQL: `/graphql`) |
-| ArgoCD | https://argocd.hearthly.dev | GitOps deployment dashboard |
-| Grafana | https://grafana.hearthly.dev | Cluster monitoring dashboard |
-| Infisical | https://secrets.hearthly.dev | Secrets management UI |
+| Service   | URL                          | Purpose                                                 |
+| --------- | ---------------------------- | ------------------------------------------------------- |
+| Frontend  | https://hearthly.dev         | Angular app                                             |
+| API       | https://api.hearthly.dev     | NestJS backend (health: `/health`, GraphQL: `/graphql`) |
+| ArgoCD    | https://argocd.hearthly.dev  | GitOps deployment dashboard                             |
+| Grafana   | https://grafana.hearthly.dev | Cluster monitoring dashboard                            |
+| Infisical | https://secrets.hearthly.dev | Secrets management UI                                   |
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | Angular 21 + Capacitor (future mobile) |
-| Backend | NestJS 11 + Drizzle ORM |
-| Database | PostgreSQL 18.1 (CloudNativePG on K8s) |
-| Cluster | k3s v1.34 on Hetzner Cloud (4x CAX11 ARM) |
-| Ingress | Traefik (bundled by kube-hetzner) |
-| TLS | Let's Encrypt via cert-manager |
-| GitOps | ArgoCD 3.x (app-of-apps pattern) |
-| CI/CD | GitHub Actions → GHCR → ArgoCD auto-sync |
-| Secrets | Infisical (self-hosted, K8s operator sync) |
+| Layer      | Technology                                   |
+| ---------- | -------------------------------------------- |
+| Frontend   | Angular 21 + Capacitor (future mobile)       |
+| Backend    | NestJS 11 + Drizzle ORM                      |
+| Database   | PostgreSQL 18.1 (CloudNativePG on K8s)       |
+| Cluster    | k3s v1.34 on Hetzner Cloud (4x CAX11 ARM)    |
+| Ingress    | Traefik (bundled by kube-hetzner)            |
+| TLS        | Let's Encrypt via cert-manager               |
+| GitOps     | ArgoCD 3.x (app-of-apps pattern)             |
+| CI/CD      | GitHub Actions → GHCR → ArgoCD auto-sync     |
+| Secrets    | Infisical (self-hosted, K8s operator sync)   |
 | Monitoring | Prometheus + Grafana (kube-prometheus-stack) |
-| IaC | Terraform + kube-hetzner module |
-| Backups | Daily pg_dump → Hetzner Object Storage (S3) |
+| IaC        | Terraform + kube-hetzner module              |
+| Backups    | Daily pg_dump → Hetzner Object Storage (S3)  |
 
 ## Development
 
@@ -85,6 +85,7 @@ No manual deployment steps. Everything is Git-driven.
 ## Secrets Management
 
 Application secrets are managed in Infisical (https://secrets.hearthly.dev):
+
 1. Add/edit secrets in the Infisical web UI (Production environment)
 2. The K8s operator syncs them into `hearthly-managed-secrets` in the `hearthly` namespace (every 60s)
 3. Pods reference the K8s Secret — no secrets in Git
@@ -96,6 +97,7 @@ Bootstrap secrets and credentials are in `.secrets/` (gitignored): Infisical boo
 **Grafana dashboard:** https://grafana.hearthly.dev → "Hearthly Cluster Health"
 
 The dashboard shows:
+
 - Emergency signals (OOMKills, CrashLoops, node readiness, failed backups)
 - Per-node CPU/memory utilization
 - Saturation (CPU throttling, memory vs limits)
@@ -113,6 +115,7 @@ Prometheus scrapes cluster targets every 30s. 10-day retention on 10Gi storage.
 **Process:** `pg_dump --format=custom` → SHA256 checksum → upload to Hetzner Object Storage (`hearthly-backups` bucket). S3 lifecycle policy auto-deletes backups older than 30 days.
 
 **Restore:**
+
 ```bash
 # Download backup
 aws s3 cp s3://hearthly-backups/<filename>.dump . \
@@ -187,6 +190,7 @@ hearthly/
 ## What's Next
 
 Tracked via [GitHub Milestones](https://github.com/rudingma/hearthly/milestones):
+
 - **Data Layer Foundation** — Drizzle module, repository pattern, test infrastructure
 - **Authentication** — Keycloak, OIDC across the stack
 - **App Shell** — Angular layout, navigation, theming

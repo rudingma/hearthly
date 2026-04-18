@@ -28,6 +28,7 @@ Root module: `src/app/app.module.ts`. Each domain module lives under `src/module
 - `schema/index.ts` — Barrel re-export
 
 **Key conventions:**
+
 - Services return plain TypeScript types, NOT GraphQL types
 - Repositories use `TransactionHost` (never direct `@Inject(DRIZZLE)`). `TransactionHost` requires a CLS context — do not call repository methods from cron jobs or startup code without wrapping in `ClsService.run()`.
 - New schemas must be re-exported from `src/database/schema.ts`
@@ -69,6 +70,7 @@ Run from `apps/hearthly-api/` (not repo root):
 ## Environment Variables
 
 Copy `.env.example` to `.env` at the monorepo root. Key variables:
+
 - `DATABASE_URL` — local PostgreSQL (port 5434, not default 5432)
 - `KEYCLOAK_ISSUER_URL` — local Keycloak realm URL
 - `KEYCLOAK_CLIENT_ID` — OIDC client ID (`hearthly-app`)

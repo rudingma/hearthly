@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  NX_IGNORE_UNSUPPORTED_TS_SETUP: "true"
+  NX_IGNORE_UNSUPPORTED_TS_SETUP: 'true'
 
 permissions:
   actions: read
@@ -34,6 +34,9 @@ jobs:
 
       - name: Lint affected
         run: npx nx affected --target=lint
+
+      - name: Prettier check
+        run: bun run format:check
 
       - name: Test affected
         run: npx nx affected --target=test

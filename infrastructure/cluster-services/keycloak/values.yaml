@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/rudingma/hearthly-keycloak
-  tag: "26.5.5-sha-74bd012"
+  tag: '26.5.5-sha-74bd012'
   pullPolicy: IfNotPresent
 
 service:
@@ -25,24 +25,24 @@ resources:
     cpu: 250m
     memory: 512Mi
   limits:
-    cpu: "1"
+    cpu: '1'
     memory: 1Gi
 
 keycloak:
-  hostname: "https://auth.hearthly.dev"
+  hostname: 'https://auth.hearthly.dev'
   db:
-    host: "keycloak-db-rw.keycloak.svc.cluster.local"
-    port: "5432"
-    database: "keycloak"
-    existingSecret: "keycloak-db-app"
+    host: 'keycloak-db-rw.keycloak.svc.cluster.local'
+    port: '5432'
+    database: 'keycloak'
+    existingSecret: 'keycloak-db-app'
   admin:
-    username: "admin"
-    existingSecret: "keycloak-admin-credentials"
-    passwordKey: "admin-password"
+    username: 'admin'
+    existingSecret: 'keycloak-admin-credentials'
+    passwordKey: 'admin-password'
 
 backup:
   enabled: true
-  schedule: "0 3 * * *"  # Daily at 03:00 UTC (1h after app backup)
+  schedule: '0 3 * * *' # Daily at 03:00 UTC (1h after app backup)
   images:
     dump: postgres:18-alpine
     upload: amazon/aws-cli:2.27.31

@@ -8,7 +8,10 @@ import type { JwtPayload } from '../../auth';
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => User, { nullable: false, description: 'Returns the currently authenticated user' })
+  @Query(() => User, {
+    nullable: false,
+    description: 'Returns the currently authenticated user',
+  })
   async me(@CurrentUser() jwt: JwtPayload): Promise<User> {
     return this.userService.getOrSyncByKeycloakId({
       sub: jwt.sub,
