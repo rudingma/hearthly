@@ -27,7 +27,7 @@
 
 .welcome-buttons {
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -73,9 +73,34 @@
   flex-shrink: 0;
 }
 
-// Dev-only fallback button
+// Divider — matches Keycloak "Or sign in with" pattern
+.welcome-divider {
+  display: flex;
+  align-items: center;
+  color: var(--hearthly-text-muted);
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.welcome-divider::before,
+.welcome-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ion-border-color);
+}
+
+.welcome-divider span {
+  padding: 0 12px;
+}
+
+// Dev-only fallback button — matches Keycloak Sign In button styling
 ion-button {
   --border-radius: var(--hearthly-radius-button);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 // Dark mode — Google brand colors for dark theme

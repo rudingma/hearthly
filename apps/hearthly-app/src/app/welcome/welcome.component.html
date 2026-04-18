@@ -1,4 +1,4 @@
-<ion-content class="ion-padding">
+<ion-content>
   <div class="welcome-container">
     <div class="welcome-logo">
       <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,8 +23,10 @@
       </button>
 
       @if (showPasswordAuth) {
-        <ion-button expand="block" fill="outline" size="small" data-testid="sign-in-password" (click)="signIn()">
-          Sign in with email (dev)
+        <div class="welcome-divider"><span>Or sign in with email</span></div>
+
+        <ion-button expand="block" data-testid="sign-in-password" (click)="signIn()">
+          Sign In
         </ion-button>
       }
     </div>
