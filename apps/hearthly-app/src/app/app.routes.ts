@@ -1,6 +1,6 @@
 import type { Route } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
-import { ShellComponent } from './shell/shell.component';
+import { ResponsiveShellComponent } from './shell/responsive-shell.component';
 
 export const appRoutes: Route[] = [
   {
@@ -14,7 +14,7 @@ export const appRoutes: Route[] = [
     children: [
       {
         path: '',
-        component: ShellComponent,
+        component: ResponsiveShellComponent,
         children: [
           {
             path: 'home',

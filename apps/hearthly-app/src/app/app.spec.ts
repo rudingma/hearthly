@@ -25,9 +25,7 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [{ provide: Router, useValue: routerStub }],
-    })
-      .overrideComponent(App, { set: { template: '', imports: [] } })
-      .compileComponents();
+    }).compileComponents();
 
     const main = document.createElement('main');
     main.setAttribute('tabindex', '-1');
