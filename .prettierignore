@@ -11,6 +11,7 @@ apps/*/deploy/chart/templates/
 
 # Generated code
 apps/hearthly-app/src/generated/
+apps/hearthly-api/src/schema.gql
 
 # Lockfiles
 bun.lock
