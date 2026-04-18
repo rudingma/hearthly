@@ -1,0 +1,32 @@
+<nav aria-label="Primary" class="side-nav">
+  <div class="side-nav__brand">Hearthly</div>
+  <ul class="side-nav__list">
+    @for (tab of tabs; track tab.path) {
+    <li>
+      <a
+        appListItem
+        [routerLink]="tab.path"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [class.is-active]="rla.isActive"
+        [attr.aria-current]="rla.isActive ? 'page' : null"
+      >
+        <lucide-icon [img]="tab.icon" [size]="20" />
+        <span>{{ tab.label }}</span>
+      </a>
+    </li>
+    }
+  </ul>
+  <a
+    appListItem
+    routerLink="/app/account"
+    routerLinkActive
+    #rlaAcc="routerLinkActive"
+    [class.is-active]="rlaAcc.isActive"
+    [attr.aria-current]="rlaAcc.isActive ? 'page' : null"
+    class="side-nav__account"
+  >
+    <app-avatar size="sm" [pictureUrl]="pictureUrl()" [initials]="initials()" />
+    <span>{{ displayName() }}</span>
+  </a>
+</nav>
