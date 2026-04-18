@@ -67,9 +67,7 @@ export class AuthService {
 
   private async loadUserProfile(): Promise<void> {
     try {
-      const result = await firstValueFrom(
-        this.meGQL.fetch()
-      );
+      const result = await firstValueFrom(this.meGQL.fetch());
       this.currentUser.set(result.data?.me ?? null);
       this.error.set(null);
     } catch (err) {

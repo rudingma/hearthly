@@ -26,16 +26,14 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     @Inject(authConfig.KEY) config: AuthConfig,
-    @Optional() jwks?: JWTVerifyGetKey,
+    @Optional() jwks?: JWTVerifyGetKey
   ) {
     this.issuer = config.issuerUrl;
     this.audience = config.clientId;
     this.jwks =
       jwks ??
       createRemoteJWKSet(
-        new URL(
-          `${this.issuer}/protocol/openid-connect/certs`,
-        ),
+        new URL(`${this.issuer}/protocol/openid-connect/certs`)
       );
   }
 
@@ -64,7 +62,11 @@ export class JwtAuthGuard implements CanActivate {
       });
       payload = result.payload;
     } catch (error) {
-      this.logger.warn(`JWT verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.warn(
+        `JWT verification failed: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
       throw new UnauthorizedException('Invalid or expired token');
     }
 
@@ -74,25 +76,25 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     const claims = payload as Record<string, unknown>;
-    const picture = typeof claims.picture === 'string' ? claims.picture : undefined;
+    const picture =
+      typeof claims.picture === 'string' ? claims.picture : undefined;
 
     const jwtPayload: JwtPayload = {
       sub: payload.sub!,
       email,
       name: this.extractName(claims),
       picture,
-      roles:
-        (claims.realm_access as { roles?: string[] })
-          ?.roles ?? [],
+      roles: (claims.realm_access as { roles?: string[] })?.roles ?? [],
     };
 
     request.user = jwtPayload;
     return true;
   }
 
-  private getRequest(
-    context: ExecutionContext,
-  ): { headers: Record<string, string>; user?: unknown } {
+  private getRequest(context: ExecutionContext): {
+    headers: Record<string, string>;
+    user?: unknown;
+  } {
     if (context.getType<string>() === 'graphql') {
       const gqlContext = GqlExecutionContext.create(context);
       return gqlContext.getContext().req;
@@ -100,9 +102,9 @@ export class JwtAuthGuard implements CanActivate {
     return context.switchToHttp().getRequest();
   }
 
-  private extractToken(
-    request: { headers: Record<string, string> },
-  ): string | undefined {
+  private extractToken(request: {
+    headers: Record<string, string>;
+  }): string | undefined {
     const authorization = request.headers.authorization;
     if (!authorization) return undefined;
     const [type, token] = authorization.split(' ');
@@ -114,12 +116,15 @@ export class JwtAuthGuard implements CanActivate {
       return payload.name;
     }
     const parts = [payload.given_name, payload.family_name].filter(
-      (p): p is string => typeof p === 'string' && p.length > 0,
+      (p): p is string => typeof p === 'string' && p.length > 0
     );
     if (parts.length > 0) {
       return parts.join(' ');
     }
-    if (typeof payload.preferred_username === 'string' && payload.preferred_username) {
+    if (
+      typeof payload.preferred_username === 'string' &&
+      payload.preferred_username
+    ) {
       return payload.preferred_username;
     }
     return 'Unknown';

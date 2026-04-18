@@ -29,35 +29,35 @@ Colors implemented as CSS custom properties. Reference by semantic name; never h
 
 ### Primary
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| **Hearth Terracotta** | `#c7724e` | `#d4885e` | Brand, primary buttons, active states, links — the only chromatic color in UI chrome |
-| **Terracotta Shade** | `#a3572e` | `#c7724e` | Pressed / hover on terracotta |
-| **Terracotta Tint** | `#d4885e` | `#e8a67a` | Light emphasis, background tints |
-| **Terracotta Contrast** | `#ffffff` | `#ffffff` | Text on terracotta backgrounds |
+| Token                   | Light     | Dark      | Usage                                                                                |
+| ----------------------- | --------- | --------- | ------------------------------------------------------------------------------------ |
+| **Hearth Terracotta**   | `#c7724e` | `#d4885e` | Brand, primary buttons, active states, links — the only chromatic color in UI chrome |
+| **Terracotta Shade**    | `#a3572e` | `#c7724e` | Pressed / hover on terracotta                                                        |
+| **Terracotta Tint**     | `#d4885e` | `#e8a67a` | Light emphasis, background tints                                                     |
+| **Terracotta Contrast** | `#ffffff` | `#ffffff` | Text on terracotta backgrounds                                                       |
 
 ### Surfaces
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| **Warm Stone** | `#f8f7f5` | `#0f0e0d` | Page canvas |
+| Token             | Light     | Dark      | Usage                               |
+| ----------------- | --------- | --------- | ----------------------------------- |
+| **Warm Stone**    | `#f8f7f5` | `#0f0e0d` | Page canvas                         |
 | **Clean Surface** | `#ffffff` | `#1c1a18` | Cards, headers, tab bar, list items |
 
 ### Text
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| **Warm Dark** | `#1c1917` | `#f5f0eb` | Primary text |
+| Token           | Light     | Dark      | Usage                                                           |
+| --------------- | --------- | --------- | --------------------------------------------------------------- |
+| **Warm Dark**   | `#1c1917` | `#f5f0eb` | Primary text                                                    |
 | **Stone Muted** | `#78716c` | `#a39e98` | Secondary / UI only (labels, metadata, placeholders) — not body |
-| **Deep Stone** | `#65605b` | — | Body-weight secondary (when AA on body text is required) |
+| **Deep Stone**  | `#65605b` | —         | Body-weight secondary (when AA on body text is required)        |
 
 ### Borders & Status
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| **Warm Divider** | `#e5e2dc` | `#2a2725` | Card borders, list separators, rings |
-| **Warm Success** | `#2e7d32` | `#66bb6a` | Task completion, confirmations |
-| **Warm Danger** | `#b53333` | `#e57373` | Errors, destructive actions |
+| Token            | Light     | Dark      | Usage                                                                           |
+| ---------------- | --------- | --------- | ------------------------------------------------------------------------------- |
+| **Warm Divider** | `#e5e2dc` | `#2a2725` | Card borders, list separators, rings                                            |
+| **Warm Success** | `#2e7d32` | `#66bb6a` | Task completion, confirmations                                                  |
+| **Warm Danger**  | `#b53333` | `#e57373` | Errors, destructive actions                                                     |
 | **Warm Warning** | `#e65100` | `#ffb74d` | Attention, budget alerts — close to Terracotta, always paired with warning icon |
 
 No `info` color. Informational content uses neutral tints (Stone Muted on Clean Surface) — a cool-blue info token would violate the Chromatic Rule (Move #3).
@@ -66,20 +66,20 @@ No `info` color. Informational content uses neutral tints (Stone Muted on Clean 
 
 Font stack: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`. No custom web fonts (Move #7).
 
-| Role | Size | Weight | Line Height | Letter Spacing | Usage |
-|---|---|---|---|---|---|
-| Display | 40px | 700 | 1.10 | -0.75px | Welcome hero, LargeTitle, major empty states |
-| Page Title | 32px | 700 | 1.20 | -0.5px | Major section / empty-state headlines |
-| Section Heading | 20px | 600 | 1.30 | normal | Card headers, AppHeader title |
-| Body | 16px | 400 | 1.50 | normal | Default content |
-| Body Emphasis | 16px | 500 | 1.50 | normal | Taglines, emphasized body |
-| Button | 16px | 600 | 1.00 | normal | Button labels, active tab labels (Title Case) |
-| Link | 16px | 500 | 1.50 | normal | Inline Hearth Terracotta links (underline on hover) |
-| Secondary | 14px | 500 | 1.43 | normal | Form labels, metadata |
-| Caption | 14px | 400 | 1.43 | normal | Muted labels (Stone Muted) |
-| Small | 12px | 400-500 | 1.33 | normal | Badges, tab bar labels, fine print |
-| Avatar Large | 20px | 600 | 1.00 | 0.5px | Account avatar (64px circle) |
-| Avatar Small | 12px | 600 | 1.00 | 0.5px | Header avatar (32px circle) |
+| Role            | Size | Weight  | Line Height | Letter Spacing | Usage                                               |
+| --------------- | ---- | ------- | ----------- | -------------- | --------------------------------------------------- |
+| Display         | 40px | 700     | 1.10        | -0.75px        | Welcome hero, LargeTitle, major empty states        |
+| Page Title      | 32px | 700     | 1.20        | -0.5px         | Major section / empty-state headlines               |
+| Section Heading | 20px | 600     | 1.30        | normal         | Card headers, AppHeader title                       |
+| Body            | 16px | 400     | 1.50        | normal         | Default content                                     |
+| Body Emphasis   | 16px | 500     | 1.50        | normal         | Taglines, emphasized body                           |
+| Button          | 16px | 600     | 1.00        | normal         | Button labels, active tab labels (Title Case)       |
+| Link            | 16px | 500     | 1.50        | normal         | Inline Hearth Terracotta links (underline on hover) |
+| Secondary       | 14px | 500     | 1.43        | normal         | Form labels, metadata                               |
+| Caption         | 14px | 400     | 1.43        | normal         | Muted labels (Stone Muted)                          |
+| Small           | 12px | 400-500 | 1.33        | normal         | Badges, tab bar labels, fine print                  |
+| Avatar Large    | 20px | 600     | 1.00        | 0.5px          | Account avatar (64px circle)                        |
+| Avatar Small    | 12px | 600     | 1.00        | 0.5px          | Header avatar (32px circle)                         |
 
 **Tabular Numeric** — `font-variant-numeric: tabular-nums` applied at any size for budget amounts, counters, and tabular data where digits must align.
 
@@ -116,6 +116,7 @@ All buttons: `12px` radius, Button typography (16px/600), Title Case. Focus ring
 **Vendor Auth Exception** (Google Sign-In, future Apple Sign-In) — follows vendor branding guidelines verbatim. Hearthly controls only the `:focus-visible` ring (`2px` Hearth Terracotta) and surrounding layout. This is the one place the design yields to external brand rules.
 
 Google Sign-In:
+
 - Light: `#ffffff` bg, `#3c4043` text (14px/500), `1px solid #dadce0` border
 - Dark: `#131314` bg, `#e3e3e3` text, `1px solid #8e918f` border
 - `14px 16px` padding, `12px` radius, `18×18px` Google "G" icon
@@ -147,11 +148,11 @@ Hairline `1px` Warm Divider. Labeled dividers (e.g., "Or sign in with email"): c
 
 Shared pattern: Warm Divider border when off, Hearth Terracotta fill when on. All transition `150ms ease`.
 
-| Control | Size | Off / Unselected | On / Selected | ARIA |
-|---|---|---|---|---|
-| Toggle | Track `44×24px`, `9999px` radius | Transparent + border; thumb left | Terracotta fill; thumb right (`20px` Clean Surface, `2px` track inset) | `role="switch"` + `aria-checked`; Space/Enter toggles |
-| Checkbox | `20×20px`, `6px` radius, `1.5px` border | Border only | Terracotta border+fill + white `check`. Indeterminate: `minus` icon | `role="checkbox"` + `aria-checked` (supports `mixed`); Space toggles |
-| Radio | `20×20px` circle, `1.5px` border | Border only | Terracotta border + `10px` filled inner circle | `role="radio"` in `role="radiogroup"`; arrows navigate, Space/Enter selects |
+| Control  | Size                                    | Off / Unselected                 | On / Selected                                                          | ARIA                                                                        |
+| -------- | --------------------------------------- | -------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Toggle   | Track `44×24px`, `9999px` radius        | Transparent + border; thumb left | Terracotta fill; thumb right (`20px` Clean Surface, `2px` track inset) | `role="switch"` + `aria-checked`; Space/Enter toggles                       |
+| Checkbox | `20×20px`, `6px` radius, `1.5px` border | Border only                      | Terracotta border+fill + white `check`. Indeterminate: `minus` icon    | `role="checkbox"` + `aria-checked` (supports `mixed`); Space toggles        |
+| Radio    | `20×20px` circle, `1.5px` border        | Border only                      | Terracotta border + `10px` filled inner circle                         | `role="radio"` in `role="radiogroup"`; arrows navigate, Space/Enter selects |
 
 #### Form anatomy
 
@@ -300,22 +301,23 @@ In-flow persistent message (not transient like Toast, not blocking like Modal). 
 
 #### ARIA & keyboard summary
 
-| Overlay | ARIA | Keyboard |
-|---|---|---|
-| Modal / Dialog | `role="dialog"` + `aria-modal="true"` + `aria-labelledby`; focus trap (CDK `FocusTrap`) | ESC closes, returns focus to invoker |
-| Alert Dialog (destructive) | `role="alertdialog"` — focus defaults to least-destructive action | Same as Modal |
-| Action Sheet | `role="dialog"` + `aria-modal="true"`, inner `role="menu"` with `menuitem` | ESC closes, swipe-down dismisses |
-| Action Menu | `role="menu"`, items `role="menuitem"` | ↑/↓ cycle, Enter/Space activates, ESC/Tab closes |
-| Selection Dropdown | `role="listbox"`, options `role="option"` + `aria-selected` | ↑/↓, Enter/Space commits, ESC reverts, Tab closes+commits |
-| Tooltip | `role="tooltip"` + `aria-describedby` from trigger | Appears on hover AND focus |
-| Toast (default) | `role="status"` + `aria-live="polite"` | — |
-| Toast (error) | `role="alert"` + `aria-live="assertive"` | — |
+| Overlay                    | ARIA                                                                                    | Keyboard                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Modal / Dialog             | `role="dialog"` + `aria-modal="true"` + `aria-labelledby`; focus trap (CDK `FocusTrap`) | ESC closes, returns focus to invoker                      |
+| Alert Dialog (destructive) | `role="alertdialog"` — focus defaults to least-destructive action                       | Same as Modal                                             |
+| Action Sheet               | `role="dialog"` + `aria-modal="true"`, inner `role="menu"` with `menuitem`              | ESC closes, swipe-down dismisses                          |
+| Action Menu                | `role="menu"`, items `role="menuitem"`                                                  | ↑/↓ cycle, Enter/Space activates, ESC/Tab closes          |
+| Selection Dropdown         | `role="listbox"`, options `role="option"` + `aria-selected`                             | ↑/↓, Enter/Space commits, ESC reverts, Tab closes+commits |
+| Tooltip                    | `role="tooltip"` + `aria-describedby` from trigger                                      | Appears on hover AND focus                                |
+| Toast (default)            | `role="status"` + `aria-live="polite"`                                                  | —                                                         |
+| Toast (error)              | `role="alert"` + `aria-live="assertive"`                                                | —                                                         |
 
 ### §4.5 Feedback
 
 #### Empty State
 
 **Inline** (e.g., filter returns nothing inside an existing view):
+
 - Centered vertically, generous whitespace
 - Optional `32px` Lucide icon (Stone Muted) above headline
 - Headline: Page Title in Warm Dark
@@ -323,11 +325,13 @@ In-flow persistent message (not transient like Toast, not blocking like Modal). 
 - Optional inline Primary Button
 
 **Tab-root** (e.g., entire Calendar tab has no events):
+
 - `48px` Lucide icon inside `64px` circle with `10%` Hearth Terracotta tint bg
 - **Single permitted tinted icon container** — explicit exception to the no-colored-container rule. Justified by warmth needed in otherwise-sparse tab states. Don't reuse.
 - Same headline / body / action as inline, centered
 
 **First-run vs zero-data** (voice, §10):
+
 - First-run: warm, inviting ("Add your first family list to get started")
 - Zero-data: neutral, informational ("No transactions match these filters")
 
@@ -390,15 +394,15 @@ Implementation details (responsive delivery, EXIF stripping, upload processing, 
 
 ### Section spacing
 
-| Context | Gap |
-|---|---|
-| Adjacent Whisper Cards | `16px` |
-| Between card groups | `32px` |
-| Section header → first card | `16px` |
-| LargeTitle → content | `24px` |
-| List row gaps | `0` (Warm Divider separators) |
-| Form field gap | `12px` |
-| Welcome tagline → buttons | `48px` |
+| Context                     | Gap                           |
+| --------------------------- | ----------------------------- |
+| Adjacent Whisper Cards      | `16px`                        |
+| Between card groups         | `32px`                        |
+| Section header → first card | `16px`                        |
+| LargeTitle → content        | `24px`                        |
+| List row gaps               | `0` (Warm Divider separators) |
+| Form field gap              | `12px`                        |
+| Welcome tagline → buttons   | `48px`                        |
 
 ### Whitespace rules
 
@@ -415,40 +419,40 @@ Implementation details (responsive delivery, EXIF stripping, upload processing, 
 
 ### Radius scale
 
-| Value | Usage |
-|---|---|
-| `6px` | Checkboxes, small primitives |
-| `8px` | Sidenav nav items |
-| `12px` | Buttons, inputs, badges (small), Banner/Toast |
-| `14px` | Cards, modals, action sheets (top-only) |
-| `9999px` | Pills, tags, toggles, segmented control |
-| `50%` | Avatars, circles |
+| Value    | Usage                                         |
+| -------- | --------------------------------------------- |
+| `6px`    | Checkboxes, small primitives                  |
+| `8px`    | Sidenav nav items                             |
+| `12px`   | Buttons, inputs, badges (small), Banner/Toast |
+| `14px`   | Cards, modals, action sheets (top-only)       |
+| `9999px` | Pills, tags, toggles, segmented control       |
+| `50%`    | Avatars, circles                              |
 
 ## 6. Depth & Elevation
 
-| Level | Treatment | Use |
-|---|---|---|
-| Flat | No shadow, no border | Page bg, lists, chrome surfaces (with their borders) |
-| Contained | `1px solid` Warm Divider | Inline containers |
-| Whisper | `1px` Warm Divider + `rgba(0,0,0,0.03) 0px 2px 8px` | **Cards** (Move #1) |
-| Modal | `rgba(0,0,0,0.08) 0px 8px 24px` | All transient overlays |
+| Level     | Treatment                                           | Use                                                  |
+| --------- | --------------------------------------------------- | ---------------------------------------------------- |
+| Flat      | No shadow, no border                                | Page bg, lists, chrome surfaces (with their borders) |
+| Contained | `1px solid` Warm Divider                            | Inline containers                                    |
+| Whisper   | `1px` Warm Divider + `rgba(0,0,0,0.03) 0px 2px 8px` | **Cards** (Move #1)                                  |
+| Modal     | `rgba(0,0,0,0.08) 0px 8px 24px`                     | All transient overlays                               |
 
 ### Surface Elevation Map
 
-| Surface | Level |
-|---|---|
-| Page background | Flat |
-| AppHeader | Flat + `1px` Warm Divider bottom |
-| BottomTabBar | Flat + `1px` Warm Divider top |
-| SideNav | Flat + `1px` Warm Divider right |
-| List container | Flat (rows with `1px` Warm Divider separators) |
-| Card | Whisper |
-| Action Menu / Selection Dropdown / Tooltip | Modal |
-| Action Sheet / Bottom Sheet | Modal + top-rounded `14px` |
-| Dialog / Modal / Toast | Modal |
-| PrimaryAction (FAB) | Modal |
-| Long-Wait Indicator | Flat (in-flow) |
-| Modal Scrim | `rgba(15, 14, 13, 0.5)` |
+| Surface                                    | Level                                          |
+| ------------------------------------------ | ---------------------------------------------- |
+| Page background                            | Flat                                           |
+| AppHeader                                  | Flat + `1px` Warm Divider bottom               |
+| BottomTabBar                               | Flat + `1px` Warm Divider top                  |
+| SideNav                                    | Flat + `1px` Warm Divider right                |
+| List container                             | Flat (rows with `1px` Warm Divider separators) |
+| Card                                       | Whisper                                        |
+| Action Menu / Selection Dropdown / Tooltip | Modal                                          |
+| Action Sheet / Bottom Sheet                | Modal + top-rounded `14px`                     |
+| Dialog / Modal / Toast                     | Modal                                          |
+| PrimaryAction (FAB)                        | Modal                                          |
+| Long-Wait Indicator                        | Flat (in-flow)                                 |
+| Modal Scrim                                | `rgba(15, 14, 13, 0.5)`                        |
 
 **No scroll-triggered elevation.** Headers never gain shadow when content scrolls. Calm > spectacle.
 
@@ -483,6 +487,7 @@ Not animated: layout (`width`, `height`, `padding`, `margin`). No hover-wiggle, 
 ### Reduced motion
 
 Under `prefers-reduced-motion: reduce`:
+
 - Transforms disabled
 - Transitions drop to `0.01ms`
 - Shimmer disabled
@@ -493,11 +498,11 @@ Under `prefers-reduced-motion: reduce`:
 
 Via `@capacitor/haptics`. Respects `prefers-reduced-motion`.
 
-| Trigger | Haptic | Context |
-|---|---|---|
-| Destructive confirm | Warning notification | Destructive Button press in an alertdialog |
-| Toast error shown | Error notification | Non-blocking error via toast |
-| Bottom sheet swipe-dismiss | Light impact | User-initiated close gesture |
+| Trigger                    | Haptic               | Context                                    |
+| -------------------------- | -------------------- | ------------------------------------------ |
+| Destructive confirm        | Warning notification | Destructive Button press in an alertdialog |
+| Toast error shown          | Error notification   | Non-blocking error via toast               |
+| Bottom sheet swipe-dismiss | Light impact         | User-initiated close gesture               |
 
 Intentionally not haptic: primary-button press, action-sheet option tap, toast-success. Visual feedback suffices; haptic would be cosmetic.
 
@@ -568,10 +573,10 @@ If Hearthly grows into regulated territory (thousands of users, EU jurisdictions
 
 Voice reinforces the warm-domestic identity.
 
-- **Empty states**: warm, not cheerful. *"Nothing here yet. Add your first list."* not *"Oh no, empty!"*
-- **Errors**: concrete, non-blaming. *"Couldn't save — check your connection"* not *"Failure: network error"*
+- **Empty states**: warm, not cheerful. _"Nothing here yet. Add your first list."_ not _"Oh no, empty!"_
+- **Errors**: concrete, non-blaming. _"Couldn't save — check your connection"_ not _"Failure: network error"_
 - **Destructive confirmation template**: `Delete [Specific Thing]? This can't be undone.` Always name the thing. One short second sentence. No "Are you sure?"
-- **Button labels**: actions, not restatements. *"Save"* not *"OK"*. *"Discard"* not *"Cancel"* for destructive dismissal. For non-destructive dialogs, *"Cancel"* stays *"Cancel"*.
+- **Button labels**: actions, not restatements. _"Save"_ not _"OK"_. _"Discard"_ not _"Cancel"_ for destructive dismissal. For non-destructive dialogs, _"Cancel"_ stays _"Cancel"_.
 - **First-run vs zero-data**: first-run is warm and inviting; zero-data is neutral and informational.
 - **Tone**: conversational, not cutesy. No exclamation points in errors. No emoji in UI copy.
 
@@ -597,6 +602,7 @@ Warning:     Warm Warning       #e65100 (light) / #ffb74d (dark)
 Four high-level prompts matching how agents request UI.
 
 **1. Build a tab root page.**
+
 - PageContainer in standard mode, iOS-style scroll-preserve
 - AppHeader with optional LargeTitle variant (Display 40/700 in scroll content, compact title in sticky header)
 - Content: Whisper Cards (Move #1)
@@ -605,6 +611,7 @@ Four high-level prompts matching how agents request UI.
 - Applies Moves #1, #6, #8
 
 **2. Build a destructive-confirm modal.**
+
 - Modal with `role="alertdialog"`, `aria-modal="true"`, `aria-labelledby` on title, focus defaults to Cancel
 - Destructive Button primary (right on desktop, stacked-top mobile); Cancel secondary
 - Copy follows destructive template: `Delete [Specific Thing]? This can't be undone.`
@@ -613,6 +620,7 @@ Four high-level prompts matching how agents request UI.
 - Applies Move #6, §7 haptics, §10 voice
 
 **3. Build a form section.**
+
 - Form anatomy: Label → Input → Helper or Error, `4px` gap, `12px` between fields, `24px` between sections
 - Required marker: appended `*` in Warm Danger
 - Error state: Warm Danger border + Caption message below
@@ -621,10 +629,10 @@ Four high-level prompts matching how agents request UI.
 - Applies Moves #4, #6
 
 **4. Build a tab-root empty state.**
+
 - Centered vertically in PageContainer
 - `48px` Lucide icon in `64px` circle with `10%` Hearth Terracotta tint bg (the sanctioned exception; don't reuse)
 - Page Title headline (first-run warm, zero-data neutral — §10 voice)
 - Body text in Stone Muted, max-width `~320px`
 - Optional inline Primary Button
 - Applies Moves #4, #5
-

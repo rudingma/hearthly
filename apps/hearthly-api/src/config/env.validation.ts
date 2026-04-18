@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 export const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   CORS_ORIGIN: z.string().min(1, 'CORS_ORIGIN is required'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   KEYCLOAK_ISSUER_URL: z.url(),

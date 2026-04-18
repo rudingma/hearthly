@@ -30,16 +30,22 @@ export const appConfig: ApplicationConfig = {
       const auth = new SetContextLink((prevContext) => {
         const token = oauthService.getAccessToken();
         if (!token) return {};
-        const existing: HttpHeaders = prevContext['headers'] instanceof HttpHeaders
-          ? prevContext['headers']
-          : new HttpHeaders(prevContext['headers'] as Record<string, string> | undefined);
+        const existing: HttpHeaders =
+          prevContext['headers'] instanceof HttpHeaders
+            ? prevContext['headers']
+            : new HttpHeaders(
+                prevContext['headers'] as Record<string, string> | undefined
+              );
         return {
           headers: existing.set('Authorization', `Bearer ${token}`),
         };
       });
 
       return {
-        link: ApolloLink.from([auth, httpLink.create({ uri: environment.graphql.uri })]),
+        link: ApolloLink.from([
+          auth,
+          httpLink.create({ uri: environment.graphql.uri }),
+        ]),
         cache: new InMemoryCache(),
       };
     }),

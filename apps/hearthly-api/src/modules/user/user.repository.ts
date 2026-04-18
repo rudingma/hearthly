@@ -8,7 +8,9 @@ import { users } from './schema';
 @Injectable()
 export class UserRepository {
   constructor(
-    private readonly txHost: TransactionHost<TransactionalAdapterDrizzleOrm<DrizzleDB>>,
+    private readonly txHost: TransactionHost<
+      TransactionalAdapterDrizzleOrm<DrizzleDB>
+    >
   ) {}
 
   async findById(id: string) {

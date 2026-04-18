@@ -2,4 +2,4 @@ apiVersion: v2
 name: hearthly-app
 description: Hearthly App — Angular frontend
 version: 0.3.0
-appVersion: "0.3.0"
+appVersion: '0.3.0'

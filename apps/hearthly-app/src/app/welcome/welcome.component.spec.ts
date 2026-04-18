@@ -39,7 +39,9 @@ describe('WelcomeComponent', () => {
   it('should call authService.login("google") when Google sign-in is clicked', () => {
     const fixture = TestBed.createComponent(WelcomeComponent);
     fixture.detectChanges();
-    const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-google"]');
+    const button: HTMLElement = fixture.nativeElement.querySelector(
+      '[data-testid="sign-in-google"]'
+    );
     button.click();
     expect(mockAuthService.login).toHaveBeenCalledWith('google');
   });
@@ -50,7 +52,9 @@ describe('WelcomeComponent', () => {
     try {
       const fixture = TestBed.createComponent(WelcomeComponent);
       fixture.detectChanges();
-      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      const button: HTMLElement = fixture.nativeElement.querySelector(
+        '[data-testid="sign-in-password"]'
+      );
       expect(button).toBeTruthy();
     } finally {
       (environment as any).enablePasswordAuth = original;
@@ -63,7 +67,9 @@ describe('WelcomeComponent', () => {
     try {
       const fixture = TestBed.createComponent(WelcomeComponent);
       fixture.detectChanges();
-      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      const button: HTMLElement = fixture.nativeElement.querySelector(
+        '[data-testid="sign-in-password"]'
+      );
       expect(button).toBeFalsy();
     } finally {
       (environment as any).enablePasswordAuth = original;
@@ -76,7 +82,9 @@ describe('WelcomeComponent', () => {
     try {
       const fixture = TestBed.createComponent(WelcomeComponent);
       fixture.detectChanges();
-      const button: HTMLElement = fixture.nativeElement.querySelector('[data-testid="sign-in-password"]');
+      const button: HTMLElement = fixture.nativeElement.querySelector(
+        '[data-testid="sign-in-password"]'
+      );
       button.click();
       expect(mockAuthService.login).toHaveBeenCalledWith();
     } finally {

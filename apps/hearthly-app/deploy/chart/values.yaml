@@ -25,5 +25,5 @@ resources:
     memory: 64Mi
 
 csp:
-  apiOrigin: "https://api.hearthly.dev"
-  authOrigin: "https://auth.hearthly.dev"
+  apiOrigin: 'https://api.hearthly.dev'
+  authOrigin: 'https://auth.hearthly.dev'

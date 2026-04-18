@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  NX_IGNORE_UNSUPPORTED_TS_SETUP: "true"
+  NX_IGNORE_UNSUPPORTED_TS_SETUP: 'true'
 
 permissions:
   actions: read

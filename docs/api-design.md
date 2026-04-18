@@ -65,7 +65,7 @@ GraphQLModule.forRootAsync<ApolloDriverConfig>({
       loaders: loaderFactory.create(),
     }),
   }),
-})
+});
 ```
 
 **Security:** Query depth limiting (`graphql-depth-limit`, max 7) and complexity analysis (`graphql-query-complexity`, max 1000) are configured as `validationRules` in the GraphQL module. Introspection is disabled in production. CORS is configured via `app.enableCors()` in `main.ts`.
@@ -113,9 +113,9 @@ type Family {
   id: ID!
   name: String!
   createdAt: DateTime!
-  members: [FamilyMember!]!      # NOT familyMembers
-  chores: [Chore!]!              # NOT familyChores
-  createdBy: User!               # role prefix when disambiguating
+  members: [FamilyMember!]! # NOT familyMembers
+  chores: [Chore!]! # NOT familyChores
+  createdBy: User! # role prefix when disambiguating
 }
 ```
 
@@ -124,8 +124,13 @@ type Family {
 `<Verb><Noun>Input` — mirrors the mutation name. One input per mutation, never shared.
 
 ```graphql
-input CreateFamilyInput { name: String! }
-input CompleteChoreInput { choreId: ID!, note: String }
+input CreateFamilyInput {
+  name: String!
+}
+input CompleteChoreInput {
+  choreId: ID!
+  note: String
+}
 ```
 
 ### Result Types
@@ -134,7 +139,9 @@ Every mutation returns a union result type. The success case is the payload.
 
 ```graphql
 union CreateFamilyResult = CreateFamilySuccess | FamilyNameTakenError
-type CreateFamilySuccess { family: Family! }
+type CreateFamilySuccess {
+  family: Family!
+}
 ```
 
 ### Type Namespacing
@@ -215,7 +222,10 @@ mutation CreateFamily($input: CreateFamilyInput!) {
   createFamily(input: $input) {
     __typename
     ... on CreateFamilySuccess {
-      family { id name }
+      family {
+        id
+        name
+      }
     }
     ... on FamilyNameTakenError {
       message
@@ -254,7 +264,9 @@ export interface IPaginatedResponse<T> {
 
 // PaginatedResponse factory — one line per entity to create a typed paginated response
 
-export function PaginatedResponse<T>(classRef: Type<T>): Type<IPaginatedResponse<T>> {
+export function PaginatedResponse<T>(
+  classRef: Type<T>
+): Type<IPaginatedResponse<T>> {
   @ObjectType({ isAbstract: true })
   abstract class PaginatedResponseClass implements IPaginatedResponse<T> {
     @Field(() => [classRef])
@@ -280,7 +292,8 @@ export class PaginatedTransactions extends PaginatedResponse(Transaction) {}
 @ArgsType()
 export class PaginationArgs {
   @Field(() => Int, { defaultValue: 20 })
-  @Min(1) @Max(100)
+  @Min(1)
+  @Max(100)
   limit: number = 20;
 
   @Field(() => Int, { defaultValue: 0 })
@@ -307,12 +320,23 @@ type Query {
 
 ```typescript
 const [items, countResult] = await Promise.all([
-  db.select().from(transactions).where(condition)
+  db
+    .select()
+    .from(transactions)
+    .where(condition)
     .orderBy(desc(transactions.createdAt))
-    .limit(args.limit).offset(args.offset),
-  db.select({ count: sql<number>`count(*)` }).from(transactions).where(condition),
+    .limit(args.limit)
+    .offset(args.offset),
+  db
+    .select({ count: sql<number>`count(*)` })
+    .from(transactions)
+    .where(condition),
 ]);
-return { items, totalCount: Number(countResult[0].count), hasMore: args.offset + args.limit < totalCount };
+return {
+  items,
+  totalCount: Number(countResult[0].count),
+  hasMore: args.offset + args.limit < totalCount,
+};
 ```
 
 ### Filtering & Sorting
@@ -327,8 +351,14 @@ input TransactionFilter {
   memberId: ID
 }
 
-enum TransactionSortField { CREATED_AT, AMOUNT }
-enum SortDirection { ASC, DESC }
+enum TransactionSortField {
+  CREATED_AT
+  AMOUNT
+}
+enum SortDirection {
+  ASC
+  DESC
+}
 
 input TransactionSort {
   field: TransactionSortField!
@@ -368,8 +398,7 @@ Define these per module as needed — no upfront generic filter framework. `Sort
 @Injectable()
 export class DataLoaderRegistryFactory {
   constructor(
-    private readonly familyService: FamilyService,
-    // inject more services as modules grow
+    private readonly familyService: FamilyService // inject more services as modules grow
   ) {}
 
   create(): DataLoaderRegistry {
@@ -410,7 +439,7 @@ export class HouseholdResolver {
   @ResolveField(() => [Member])
   async members(
     @Parent() household: Household,
-    @Context('loaders') loaders: DataLoaderRegistry,
+    @Context('loaders') loaders: DataLoaderRegistry
   ): Promise<Member[]> {
     return loaders.householdMembersLoader.load(household.id);
   }

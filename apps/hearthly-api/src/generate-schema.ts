@@ -1,13 +1,19 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { GraphQLSchemaBuilderModule, GraphQLSchemaFactory, GraphQLISODateTime } from '@nestjs/graphql';
+import {
+  GraphQLSchemaBuilderModule,
+  GraphQLSchemaFactory,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { printSchema, lexicographicSortSchema } from 'graphql';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { UserResolver } from './modules/user/resolvers/user.resolver';
 
 async function generateSchema() {
-  const app = await NestFactory.create(GraphQLSchemaBuilderModule, { logger: false });
+  const app = await NestFactory.create(GraphQLSchemaBuilderModule, {
+    logger: false,
+  });
   await app.init();
 
   const gqlSchemaFactory = app.get(GraphQLSchemaFactory);

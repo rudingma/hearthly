@@ -19,6 +19,7 @@ The `build` and `test` targets both depend on `graphql-codegen`, which depends o
 ## Environment Configuration
 
 Two environment files with a shared `Environment` interface:
+
 - `environment.ts` (dev): `enablePasswordAuth: true`, local URLs
 - `environment.prod.ts`: `enablePasswordAuth: false`, production URLs
 

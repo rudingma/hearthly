@@ -4,7 +4,11 @@ import { HomeComponent } from './home.component';
 import { AuthService } from '../auth/auth.service';
 
 describe('HomeComponent', () => {
-  const currentUser = signal({ name: 'Matthias', email: 'dev@hearthly.dev', id: '1' });
+  const currentUser = signal({
+    name: 'Matthias',
+    email: 'dev@hearthly.dev',
+    id: '1',
+  });
   const mockAuthService = {
     currentUser,
     isAuthenticated: computed(() => true),
