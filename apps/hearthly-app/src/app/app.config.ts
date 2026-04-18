@@ -4,7 +4,11 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  provideRouter,
+  withInMemoryScrolling,
+  withComponentInputBinding,
+} from '@angular/router';
 import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import { provideOAuthClient, OAuthService } from 'angular-oauth2-oidc';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -19,7 +23,14 @@ import { environment } from '../environments/environment';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(appRoutes),
+    provideRouter(
+      appRoutes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled',
+      }),
+      withComponentInputBinding()
+    ),
     provideHttpClient(),
     provideOAuthClient(),
     provideIonicAngular({}),
