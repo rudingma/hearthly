@@ -15,6 +15,9 @@ apps/hearthly-app/src/generated/
 # Lockfiles
 bun.lock
 
+# Superpowers-local artifacts (gitignored, mirrored here so format:check skips them)
+docs/superpowers/
+
 # Mirror of .gitignore — Terraform state and local cluster artifacts
 .terraform/
 *.tfstate
