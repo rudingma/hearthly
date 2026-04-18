@@ -1,47 +1,48 @@
-import { Component, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Location } from '@angular/common';
 import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonButton,
-  IonIcon,
-} from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { notificationsOutline } from 'ionicons/icons';
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+} from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
+import { AvatarComponent } from '../../ui/avatar/avatar.component';
+import { ButtonDirective } from '../../ui/button.directive';
 import { AuthService } from '../../auth/auth.service';
+import { NavigationHistoryService } from '../navigation-history.service';
 
 @Component({
   selector: 'app-header',
-  imports: [
-    RouterLink,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonButton,
-    IonIcon,
-  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, LucideAngularModule, AvatarComponent, ButtonDirective],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
+  /** Named `heading` rather than `title` — the HTML `title` global attribute would otherwise create an ambiguous binding on <app-header title="…">. */
+  readonly heading = input<string>('Hearthly');
+  readonly showBack = input<boolean>(false);
+
+  private readonly history = inject(NavigationHistoryService);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly authService = inject(AuthService);
 
-  readonly initials = this.authService.initials;
-  readonly pictureUrl = this.authService.pictureUrl;
-  readonly imageError = signal(false);
+  protected readonly canGoBack = this.history.canGoBack;
+  protected readonly initials = this.authService.initials;
+  protected readonly pictureUrl = this.authService.pictureUrl;
 
-  constructor() {
-    addIcons({ notificationsOutline });
-    effect(() => {
-      this.pictureUrl();
-      this.imageError.set(false);
-    });
-  }
+  // Icon objects bound via [img] in the template — `lucide-angular`'s
+  // documented standalone pattern. Avoids the name-string lookup path.
+  protected readonly ArrowLeftIcon = ArrowLeft;
 
-  onImageError(): void {
-    this.imageError.set(true);
+  protected back(): void {
+    if (this.canGoBack()) {
+      this.location.back();
+    } else {
+      this.router.navigateByUrl('/app/home');
+    }
   }
 }

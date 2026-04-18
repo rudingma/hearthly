@@ -1,22 +1,32 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Hearthly</ion-title>
-    <ion-buttons slot="end">
-      <ion-button>
-        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
-      </ion-button>
-      <ion-button [routerLink]="['/app/account']" class="avatar-button">
-        @if (pictureUrl() && !imageError()) {
-        <img
-          class="avatar-img"
-          [src]="pictureUrl()"
-          (error)="onImageError()"
-          alt="Profile"
-        />
-        } @else {
-        <span class="avatar">{{ initials() }}</span>
-        }
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<header class="app-header">
+  <div class="app-header__leading">
+    @if (showBack()) {
+    <button
+      appButton
+      variant="ghost"
+      type="button"
+      data-testid="header-back"
+      aria-label="Back"
+      (click)="back()"
+    >
+      <lucide-icon [img]="ArrowLeftIcon" [size]="20" />
+    </button>
+    }
+  </div>
+  <h1 class="app-header__title">{{ heading() }}</h1>
+  <div class="app-header__trailing">
+    <a
+      appButton
+      variant="ghost"
+      routerLink="/app/account"
+      aria-label="Account"
+      data-testid="header-account"
+    >
+      <app-avatar
+        size="sm"
+        [pictureUrl]="pictureUrl()"
+        [initials]="initials()"
+      />
+    </a>
+  </div>
+</header>
