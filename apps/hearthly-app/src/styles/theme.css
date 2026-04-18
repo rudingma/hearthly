@@ -69,4 +69,20 @@
     background: color-mix(in srgb, var(--color-warm-warning) 12%, transparent);
     color: var(--color-warm-warning);
   }
+
+  .app-page-container {
+    display: block;
+    padding-block: max(24px, env(safe-area-inset-top))
+      max(24px, env(safe-area-inset-bottom));
+    padding-inline: max(24px, env(safe-area-inset-left))
+      max(24px, env(safe-area-inset-right));
+  }
+  .app-page-container--constrained {
+    padding-block: max(32px, env(safe-area-inset-top))
+      max(32px, env(safe-area-inset-bottom));
+  }
+  .app-page-container--constrained > * {
+    max-width: 360px;
+    margin-inline: auto;
+  }
 }
