@@ -10,9 +10,14 @@
 <ion-content class="ion-padding">
   <div class="profile-section">
     @if (pictureUrl() && !imageError()) {
-      <img class="profile-avatar-img" [src]="pictureUrl()" (error)="onImageError()" alt="Profile">
+    <img
+      class="profile-avatar-img"
+      [src]="pictureUrl()"
+      (error)="onImageError()"
+      alt="Profile"
+    />
     } @else {
-      <div class="profile-avatar">{{ initials() }}</div>
+    <div class="profile-avatar">{{ initials() }}</div>
     }
     <h2 class="profile-name">{{ userName() }}</h2>
     <p class="profile-email">{{ userEmail() }}</p>
@@ -34,7 +39,13 @@
   </ion-list>
 
   <div class="sign-out-section">
-    <ion-button expand="block" fill="outline" color="medium" data-testid="sign-out-button" (click)="signOut()">
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="medium"
+      data-testid="sign-out-button"
+      (click)="signOut()"
+    >
       <ion-icon name="log-out-outline" slot="start"></ion-icon>
       Sign out
     </ion-button>

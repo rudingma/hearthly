@@ -20,4 +20,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true  # Required for Prometheus Operator CRDs
+      - ServerSideApply=true # Required for Prometheus Operator CRDs

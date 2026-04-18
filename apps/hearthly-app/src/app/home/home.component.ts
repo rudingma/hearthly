@@ -1,5 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/angular/standalone';
+import {
+  IonContent,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+} from '@ionic/angular/standalone';
 import { AuthService } from '../auth/auth.service';
 
 @Component({

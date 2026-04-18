@@ -15,18 +15,23 @@ import { calendarOutline } from 'ionicons/icons';
       </div>
     </ion-content>
   `,
-  styles: [`
-    .placeholder-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      text-align: center;
-      color: var(--hearthly-text-muted);
-    }
-    h2 { margin: 16px 0 8px; color: var(--ion-text-color); }
-  `],
+  styles: [
+    `
+      .placeholder-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+        color: var(--hearthly-text-muted);
+      }
+      h2 {
+        margin: 16px 0 8px;
+        color: var(--ion-text-color);
+      }
+    `,
+  ],
 })
 export class CalendarComponent {
   constructor() {

@@ -38,7 +38,9 @@ describe('AuthService', () => {
   describe('login()', () => {
     it('should call initCodeFlow with kc_idp_hint when idpHint is provided', () => {
       service.login('google');
-      expect(mockOAuthService.initCodeFlow).toHaveBeenCalledWith('', { kc_idp_hint: 'google' });
+      expect(mockOAuthService.initCodeFlow).toHaveBeenCalledWith('', {
+        kc_idp_hint: 'google',
+      });
     });
 
     it('should call initCodeFlow without args when no idpHint is provided', () => {

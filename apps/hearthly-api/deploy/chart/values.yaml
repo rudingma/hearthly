@@ -25,15 +25,15 @@ resources:
     memory: 256Mi
 
 env:
-  PORT: "3000"
-  NODE_ENV: "production"
-  CORS_ORIGIN: "https://hearthly.dev"
-  KEYCLOAK_ISSUER_URL: "https://auth.hearthly.dev/realms/hearthly"
-  KEYCLOAK_CLIENT_ID: "hearthly-app"
+  PORT: '3000'
+  NODE_ENV: 'production'
+  CORS_ORIGIN: 'https://hearthly.dev'
+  KEYCLOAK_ISSUER_URL: 'https://auth.hearthly.dev/realms/hearthly'
+  KEYCLOAK_CLIENT_ID: 'hearthly-app'
 
 backup:
   enabled: true
-  schedule: "0 2 * * *"  # Daily at 02:00 UTC
+  schedule: '0 2 * * *' # Daily at 02:00 UTC
   images:
     dump: postgres:18-alpine
     upload: amazon/aws-cli:2.27.31

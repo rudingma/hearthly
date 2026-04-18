@@ -4,8 +4,8 @@ version: 0.1.0
 description: Infisical secrets management — self-hosted with K8s operator
 dependencies:
   - name: infisical-standalone
-    version: "1.7.5"
-    repository: "https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/"
+    version: '1.7.5'
+    repository: 'https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/'
   - name: secrets-operator
-    version: "0.10.29"
-    repository: "https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/"
+    version: '0.10.29'
+    repository: 'https://dl.cloudsmith.io/public/infisical/helm-charts/helm/charts/'

@@ -21,7 +21,11 @@ describe('ShellComponent', () => {
       })),
     });
     const mockAuthService = {
-      currentUser: signal({ name: 'Test User', email: 'test@test.com', id: '1' }),
+      currentUser: signal({
+        name: 'Test User',
+        email: 'test@test.com',
+        id: '1',
+      }),
       isAuthenticated: computed(() => true),
       isLoading: signal(false),
       error: signal<string | null>(null),

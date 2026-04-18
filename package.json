@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "postinstall": "node scripts/patch-ionic-esm.mjs"
+    "postinstall": "node scripts/patch-ionic-esm.mjs",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write ."
   },
   "private": true,
   "devDependencies": {

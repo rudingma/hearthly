@@ -75,7 +75,9 @@ describe('AccountComponent', () => {
   it('should call logout when sign out is clicked', () => {
     const fixture = TestBed.createComponent(AccountComponent);
     fixture.detectChanges();
-    const button: HTMLElement = fixture.nativeElement.querySelector('ion-button[data-testid="sign-out-button"]');
+    const button: HTMLElement = fixture.nativeElement.querySelector(
+      'ion-button[data-testid="sign-out-button"]'
+    );
     button.click();
     expect(mockAuthService.logout).toHaveBeenCalled();
   });
@@ -95,7 +97,9 @@ describe('AccountComponent', () => {
     });
     const fixture = TestBed.createComponent(AccountComponent);
     fixture.detectChanges();
-    expect(fixture.componentInstance.pictureUrl()).toBe('https://lh3.googleusercontent.com/photo.jpg');
+    expect(fixture.componentInstance.pictureUrl()).toBe(
+      'https://lh3.googleusercontent.com/photo.jpg'
+    );
   });
 
   it('should fall back to initials when image fails to load', () => {

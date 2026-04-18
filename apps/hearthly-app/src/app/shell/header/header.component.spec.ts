@@ -5,7 +5,13 @@ import { HeaderComponent } from './header.component';
 import { AuthService } from '../../auth/auth.service';
 import type { User } from '../../auth/auth.service';
 
-function createMockAuthService(user: User | null = { name: 'Matthias Rudingsdorfer', email: 'dev@hearthly.dev', id: '1' }) {
+function createMockAuthService(
+  user: User | null = {
+    name: 'Matthias Rudingsdorfer',
+    email: 'dev@hearthly.dev',
+    id: '1',
+  }
+) {
   const currentUser = signal(user);
   const initials = computed(() => {
     const name = currentUser()?.name;
@@ -34,17 +40,27 @@ describe('HeaderComponent', () => {
     const mockAuth = createMockAuthService();
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     expect(fixture.componentInstance).toBeTruthy();
   });
 
   it('should display user initials from full name', async () => {
-    const mockAuth = createMockAuthService({ name: 'Matthias Rudingsdorfer', email: 'dev@hearthly.dev', id: '1' });
+    const mockAuth = createMockAuthService({
+      name: 'Matthias Rudingsdorfer',
+      email: 'dev@hearthly.dev',
+      id: '1',
+    });
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
@@ -52,10 +68,17 @@ describe('HeaderComponent', () => {
   });
 
   it('should handle single-word name', async () => {
-    const mockAuth = createMockAuthService({ name: 'Matthias', email: 'dev@hearthly.dev', id: '1' });
+    const mockAuth = createMockAuthService({
+      name: 'Matthias',
+      email: 'dev@hearthly.dev',
+      id: '1',
+    });
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
@@ -66,7 +89,10 @@ describe('HeaderComponent', () => {
     const mockAuth = createMockAuthService(null);
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
@@ -82,18 +108,30 @@ describe('HeaderComponent', () => {
     });
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
-    expect(fixture.componentInstance.pictureUrl()).toBe('https://lh3.googleusercontent.com/photo.jpg');
+    expect(fixture.componentInstance.pictureUrl()).toBe(
+      'https://lh3.googleusercontent.com/photo.jpg'
+    );
   });
 
   it('should return null pictureUrl when user has no picture', async () => {
-    const mockAuth = createMockAuthService({ name: 'Alice', email: 'alice@example.com', id: '1' });
+    const mockAuth = createMockAuthService({
+      name: 'Alice',
+      email: 'alice@example.com',
+      id: '1',
+    });
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
@@ -109,7 +147,10 @@ describe('HeaderComponent', () => {
     });
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{ provide: AuthService, useValue: mockAuth }, provideRouter([])],
+      providers: [
+        { provide: AuthService, useValue: mockAuth },
+        provideRouter([]),
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();

@@ -23,11 +23,7 @@
   "defaultRole": {
     "name": "default-roles-hearthly",
     "composites": {
-      "realm": [
-        "offline_access",
-        "uma_authorization",
-        "user"
-      ]
+      "realm": ["offline_access", "uma_authorization", "user"]
     }
   },
   "authenticationFlows": [
@@ -95,13 +91,8 @@
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "http://localhost:4200/*##capacitor://localhost/*"
       },
-      "redirectUris": [
-        "http://localhost:4200/*",
-        "capacitor://localhost/*"
-      ],
-      "webOrigins": [
-        "http://localhost:4200"
-      ],
+      "redirectUris": ["http://localhost:4200/*", "capacitor://localhost/*"],
+      "webOrigins": ["http://localhost:4200"],
       "protocolMappers": [
         {
           "name": "audience-mapper",
@@ -150,11 +141,7 @@
           "temporary": false
         }
       ],
-      "realmRoles": [
-        "user",
-        "offline_access",
-        "uma_authorization"
-      ]
+      "realmRoles": ["user", "offline_access", "uma_authorization"]
     }
   ]
 }

@@ -23,16 +23,21 @@ describe('UserRepository (integration)', () => {
 
   describe('findById', () => {
     it('returns null when user does not exist', async () => {
-      const result = await repo.findById('00000000-0000-0000-0000-000000000000');
+      const result = await repo.findById(
+        '00000000-0000-0000-0000-000000000000'
+      );
       expect(result).toBeNull();
     });
 
     it('returns the user when found', async () => {
-      const [inserted] = await db.insert(users).values({
-        keycloakId: 'kc-1',
-        email: 'alice@example.com',
-        name: 'Alice',
-      }).returning();
+      const [inserted] = await db
+        .insert(users)
+        .values({
+          keycloakId: 'kc-1',
+          email: 'alice@example.com',
+          name: 'Alice',
+        })
+        .returning();
 
       const result = await repo.findById(inserted.id);
       expect(result).not.toBeNull();
@@ -71,7 +76,9 @@ describe('UserRepository (integration)', () => {
       expect(result.keycloakId).toBe('kc-new');
       expect(result.email).toBe('charlie@example.com');
       expect(result.name).toBe('Charlie');
-      expect(result.picture).toBe('https://lh3.googleusercontent.com/charlie.jpg');
+      expect(result.picture).toBe(
+        'https://lh3.googleusercontent.com/charlie.jpg'
+      );
       expect(result.id).toBeDefined();
     });
 
@@ -101,7 +108,9 @@ describe('UserRepository (integration)', () => {
         picture: 'https://lh3.googleusercontent.com/photo.jpg',
       });
 
-      expect(result.picture).toBe('https://lh3.googleusercontent.com/photo.jpg');
+      expect(result.picture).toBe(
+        'https://lh3.googleusercontent.com/photo.jpg'
+      );
       expect(result.name).toBe('Existing Name');
     });
 
@@ -121,7 +130,9 @@ describe('UserRepository (integration)', () => {
       });
 
       expect(result.name).toBe('Name From Google');
-      expect(result.picture).toBe('https://lh3.googleusercontent.com/photo.jpg');
+      expect(result.picture).toBe(
+        'https://lh3.googleusercontent.com/photo.jpg'
+      );
     });
 
     it('preserves existing name and picture on conflict', async () => {
@@ -142,7 +153,9 @@ describe('UserRepository (integration)', () => {
       expect(result.keycloakId).toBe('kc-existing');
       expect(result.email).toBe('new@example.com');
       expect(result.name).toBe('Original Name');
-      expect(result.picture).toBe('https://lh3.googleusercontent.com/original.jpg');
+      expect(result.picture).toBe(
+        'https://lh3.googleusercontent.com/original.jpg'
+      );
 
       const allUsers = await db.select().from(users);
       expect(allUsers).toHaveLength(1);

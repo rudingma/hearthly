@@ -19,10 +19,7 @@ describe('UserService', () => {
     };
 
     const module = await Test.createTestingModule({
-      providers: [
-        UserService,
-        { provide: UserRepository, useValue: repo },
-      ],
+      providers: [UserService, { provide: UserRepository, useValue: repo }],
     }).compile();
 
     service = module.get(UserService);
@@ -48,7 +45,12 @@ describe('UserService', () => {
 
   describe('getByKeycloakId', () => {
     it('returns the user when found', async () => {
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice' };
+      const mockUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+      };
       repo.findByKeycloakId.mockResolvedValue(mockUser);
 
       const result = await service.getByKeycloakId('kc-1');
@@ -66,8 +68,19 @@ describe('UserService', () => {
 
   describe('findOrCreateByKeycloakId', () => {
     it('delegates to repository', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
+      const claims = {
+        sub: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://alice.jpg',
+      };
+      const mockUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://alice.jpg',
+      };
       repo.findOrCreateByKeycloakId.mockResolvedValue(mockUser);
 
       const result = await service.findOrCreateByKeycloakId(claims);
@@ -78,8 +91,19 @@ describe('UserService', () => {
 
   describe('getOrSyncByKeycloakId', () => {
     it('returns existing user when email matches (no sync needed)', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'New Name', picture: 'https://new.jpg' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://old.jpg' };
+      const claims = {
+        sub: 'kc-1',
+        email: 'a@b.com',
+        name: 'New Name',
+        picture: 'https://new.jpg',
+      };
+      const mockUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://old.jpg',
+      };
       repo.findByKeycloakId.mockResolvedValue(mockUser);
 
       const result = await service.getOrSyncByKeycloakId(claims);
@@ -89,8 +113,19 @@ describe('UserService', () => {
     });
 
     it('does not overwrite name or picture when they differ', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Google Name', picture: 'https://google.jpg' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Custom Name', picture: 'https://custom.jpg' };
+      const claims = {
+        sub: 'kc-1',
+        email: 'a@b.com',
+        name: 'Google Name',
+        picture: 'https://google.jpg',
+      };
+      const mockUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Custom Name',
+        picture: 'https://custom.jpg',
+      };
       repo.findByKeycloakId.mockResolvedValue(mockUser);
 
       const result = await service.getOrSyncByKeycloakId(claims);
@@ -99,8 +134,19 @@ describe('UserService', () => {
     });
 
     it('upserts when user not found (first login)', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
-      const mockUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://alice.jpg' };
+      const claims = {
+        sub: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://alice.jpg',
+      };
+      const mockUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://alice.jpg',
+      };
       repo.findByKeycloakId.mockResolvedValue(null);
       repo.findOrCreateByKeycloakId.mockResolvedValue(mockUser);
 
@@ -110,9 +156,26 @@ describe('UserService', () => {
     });
 
     it('syncs when picture is null but JWT has one', async () => {
-      const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://google.jpg' };
-      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: null };
-      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: 'https://google.jpg' };
+      const claims = {
+        sub: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://google.jpg',
+      };
+      const existingUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: null,
+      };
+      const updatedUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: 'https://google.jpg',
+      };
       repo.findByKeycloakId.mockResolvedValue(existingUser);
       repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
 
@@ -123,8 +186,20 @@ describe('UserService', () => {
 
     it('syncs when name is null but JWT has one', async () => {
       const claims = { sub: 'kc-1', email: 'a@b.com', name: 'Alice' };
-      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: null, picture: null };
-      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'a@b.com', name: 'Alice', picture: null };
+      const existingUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: null,
+        picture: null,
+      };
+      const updatedUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'a@b.com',
+        name: 'Alice',
+        picture: null,
+      };
       repo.findByKeycloakId.mockResolvedValue(existingUser);
       repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
 
@@ -135,8 +210,20 @@ describe('UserService', () => {
 
     it('syncs when email has changed', async () => {
       const claims = { sub: 'kc-1', email: 'new@b.com', name: 'Alice' };
-      const existingUser = { id: '1', keycloakId: 'kc-1', email: 'old@b.com', name: 'Alice', picture: null };
-      const updatedUser = { id: '1', keycloakId: 'kc-1', email: 'new@b.com', name: 'Alice', picture: null };
+      const existingUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'old@b.com',
+        name: 'Alice',
+        picture: null,
+      };
+      const updatedUser = {
+        id: '1',
+        keycloakId: 'kc-1',
+        email: 'new@b.com',
+        name: 'Alice',
+        picture: null,
+      };
       repo.findByKeycloakId.mockResolvedValue(existingUser);
       repo.findOrCreateByKeycloakId.mockResolvedValue(updatedUser);
 

@@ -19,6 +19,7 @@ The `build` and `test` targets both depend on `graphql-codegen`, which depends o
 ## Environment Configuration
 
 Two environment files with a shared `Environment` interface:
+
 - `environment.ts` (dev): `enablePasswordAuth: true`, local URLs
 - `environment.prod.ts`: `enablePasswordAuth: false`, production URLs
 
@@ -26,23 +27,20 @@ Two environment files with a shared `Environment` interface:
 
 ## Routing
 
-- `ShellComponent` must be eagerly imported (Ionic tabs need child routes defined synchronously).
 - Full-screen pages (like Account) go under `path: 'app'` children with `authGuard`, not at root level.
 - Tab pages are lazy-loaded via `loadComponent`.
+
+## Design System
+
+- **Spec:** `/DESIGN.md` (framework-neutral — colors, typography, components, elevation, motion, voice). Any UI/design change requires a manual review against it as part of the pre-commit quality gate.
+- **Stack:** Angular CDK (behavioral primitives: focus trap, overlay, breakpoints) + Tailwind CSS v4 (`@theme` block references tokens from `variables.scss`) + Lucide icons (stroke-based, `currentColor`).
+- **Custom components** implement DESIGN.md specs directly — no third-party UI kit. Shell layout (`AppHeader`, `BottomTabBar`, `SideNav`, `ResponsiveShell`) switches at `993px` via CDK `BreakpointObserver`.
+- **Tokens:** never hardcode hex — reference CSS variables by semantic name (e.g., `--color-hearth-terracotta`, `--color-warm-stone`).
 
 ## Testing
 
 - **Mock `AuthService` with real signals**: Use `signal()` and `computed()` objects, not plain mocks. Every test touching a component that consumes `AuthService` needs this.
-- **`ShellComponent` tests** require a `window.matchMedia` mock (`ion-split-pane` uses it).
+- **`ResponsiveShell` tests** require a `window.matchMedia` mock — CDK `BreakpointObserver` wraps `matchMedia`.
 - **`data-testid` convention**: Interactive elements use `data-testid` attributes for test selectors (e.g., `sign-in-google`, `sign-out-button`). Query by these, not CSS classes.
 - **Component selector prefix:** `app` (ESLint-enforced, kebab-case)
 - **Vitest globals** (`vi`, not `jest`) — types via `tsconfig.spec.json`
-
-## Known Issues
-
-- **Ionic ESM patch:** `scripts/patch-ionic-esm.mjs` (postinstall) fixes `@ionic/core` exports for Vitest. Must run before tests work.
-- **Docker + postinstall:** Dockerfile copies `scripts/` before `bun install` because the ESM patch runs as a postinstall hook.
-
-## Reference
-
-- Design doc: `docs/frontend-design.md` (navigation, theming, component conventions)

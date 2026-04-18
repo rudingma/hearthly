@@ -1,12 +1,25 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
-import type { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import type {
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { signal, computed } from '@angular/core';
 import { authGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 
-function createMockAuthService(overrides: { loading?: boolean; authenticated?: boolean; error?: string | null } = {}) {
-  const currentUser = signal(overrides.authenticated ? { name: 'Test', email: 'test@test.com', id: '1' } : null);
+function createMockAuthService(
+  overrides: {
+    loading?: boolean;
+    authenticated?: boolean;
+    error?: string | null;
+  } = {}
+) {
+  const currentUser = signal(
+    overrides.authenticated
+      ? { name: 'Test', email: 'test@test.com', id: '1' }
+      : null
+  );
   return {
     currentUser,
     isAuthenticated: computed(() => currentUser() !== null),
@@ -38,7 +51,9 @@ describe('authGuard', () => {
       ],
     });
 
-    TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+    TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
     expect(createUrlTree).toHaveBeenCalledWith(['/']);
     expect(mockAuth.login).not.toHaveBeenCalled();
   });
@@ -53,7 +68,9 @@ describe('authGuard', () => {
       ],
     });
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
     expect(result).toBe(true);
   });
 
@@ -67,12 +84,16 @@ describe('authGuard', () => {
       ],
     });
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
     expect(result).toBe(false);
   });
 
   it('should allow access when error (API down) so component can show error state', () => {
-    const mockAuth = createMockAuthService({ error: 'Failed to load user profile' });
+    const mockAuth = createMockAuthService({
+      error: 'Failed to load user profile',
+    });
 
     TestBed.configureTestingModule({
       providers: [
@@ -81,7 +102,9 @@ describe('authGuard', () => {
       ],
     });
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
     expect(result).toBe(true);
   });
 });

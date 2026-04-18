@@ -14,10 +14,7 @@ import type { AuthConfig } from '../../../config';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
-function createMockExecutionContext(
-  token?: string,
-  isGraphQL = true,
-) {
+function createMockExecutionContext(token?: string, isGraphQL = true) {
   const request = {
     headers: token ? { authorization: `Bearer ${token}` } : {},
     user: undefined as unknown,
@@ -131,7 +128,7 @@ describe('JwtAuthGuard', () => {
     const { context } = createMockExecutionContext(undefined);
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      UnauthorizedException,
+      UnauthorizedException
     );
   });
 
@@ -142,7 +139,7 @@ describe('JwtAuthGuard', () => {
     const { context } = createMockExecutionContext(token);
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      UnauthorizedException,
+      UnauthorizedException
     );
   });
 
@@ -153,7 +150,7 @@ describe('JwtAuthGuard', () => {
     const { context } = createMockExecutionContext(token);
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      UnauthorizedException,
+      UnauthorizedException
     );
   });
 
@@ -164,7 +161,7 @@ describe('JwtAuthGuard', () => {
     const { context } = createMockExecutionContext(token);
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      UnauthorizedException,
+      UnauthorizedException
     );
   });
 
@@ -172,7 +169,7 @@ describe('JwtAuthGuard', () => {
     const { context } = createMockExecutionContext('not-a-jwt');
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      UnauthorizedException,
+      UnauthorizedException
     );
   });
 
@@ -218,7 +215,7 @@ describe('JwtAuthGuard', () => {
     const { context } = createMockExecutionContext(token);
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      UnauthorizedException,
+      UnauthorizedException
     );
   });
 });

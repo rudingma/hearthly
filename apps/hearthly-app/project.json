@@ -96,9 +96,7 @@
         "{projectRoot}/src/**/*.graphql",
         "{workspaceRoot}/codegen.ts"
       ],
-      "outputs": [
-        "{projectRoot}/src/generated/graphql.ts"
-      ]
+      "outputs": ["{projectRoot}/src/generated/graphql.ts"]
     }
   }
 }

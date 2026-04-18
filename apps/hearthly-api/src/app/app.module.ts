@@ -55,12 +55,17 @@ const gqlLogger = new Logger('GraphQLSecurity');
               ],
               onComplete: (complexity: number) => {
                 if (complexity >= 750) {
-                  gqlLogger.warn(`Query approaching complexity limit: ${complexity}/1000`);
+                  gqlLogger.warn(
+                    `Query approaching complexity limit: ${complexity}/1000`
+                  );
                 }
               },
             }),
           ],
-          context: ({ req, res }: { req: Request; res: Response }) => ({ req, res }),
+          context: ({ req, res }: { req: Request; res: Response }) => ({
+            req,
+            res,
+          }),
         };
       },
     }),

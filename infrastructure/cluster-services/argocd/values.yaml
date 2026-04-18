@@ -22,7 +22,7 @@ controller:
       cpu: 200m
       memory: 512Mi
     limits:
-      cpu: "1"
+      cpu: '1'
       memory: 2Gi
 
 server:
@@ -47,7 +47,7 @@ server:
 repoServer:
   env:
     - name: ARGOCD_EXEC_TIMEOUT
-      value: "180s"
+      value: '180s'
   resources:
     requests:
       cpu: 50m

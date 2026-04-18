@@ -7,9 +7,14 @@
       </ion-button>
       <ion-button [routerLink]="['/app/account']" class="avatar-button">
         @if (pictureUrl() && !imageError()) {
-          <img class="avatar-img" [src]="pictureUrl()" (error)="onImageError()" alt="Profile">
+        <img
+          class="avatar-img"
+          [src]="pictureUrl()"
+          (error)="onImageError()"
+          alt="Profile"
+        />
         } @else {
-          <span class="avatar">{{ initials() }}</span>
+        <span class="avatar">{{ initials() }}</span>
         }
       </ion-button>
     </ion-buttons>
