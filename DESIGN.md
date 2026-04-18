@@ -1,351 +1,630 @@
 # Hearthly — Design System
 
+> Specification for Hearthly's visual design. Describes what the design **is** — colors, typography, spacing, components, elevation, motion, voice — independent of implementation. Any framework that realizes this spec is valid.
+
 ## 1. Visual Theme & Atmosphere
 
-Hearthly's interface is a warm domestic space rendered as software — a family management app that feels like coming home to a well-lit kitchen where everything is in its place. The design is built on a warm off-white canvas (`#f8f7f5`) with a terracotta accent (`#c7724e`) that directly references the brand name: "hearth" means fireplace, the warm center of a home. Where productivity apps lean into cool efficiency and fintech apps project confidence, Hearthly radiates familial calm — unhurried, grounded, and free of urgency.
+Hearthly is a warm domestic space rendered as software — a family management app that feels like coming home to a well-lit kitchen where everything is in its place. Built on a warm off-white canvas (`#f8f7f5`) with a terracotta accent (`#c7724e`) — "hearth" is the warm center of a home. Where productivity apps lean into cool efficiency and fintech apps project confidence, Hearthly radiates familial calm — unhurried, grounded, and free of urgency.
 
-The typography uses the platform's native system font stack (`-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto`) — no custom web fonts, no loading overhead, no visual friction between the app and the device it runs on. This isn't a compromise; it's a deliberate choice. A family app should feel like a natural extension of the phone, not a foreign website. Headings run at 32px/700 with slight negative letter-spacing (`-0.5px`), creating titles that feel substantial without shouting. Body text at 16px/400 is the workhorse — clean, readable, unremarkable in the best way.
+Typography uses the platform's native system font stack. No custom web fonts, no loading overhead. The app should feel like a natural extension of the phone, not a foreign website.
 
-What makes Hearthly's visual language distinctive is its commitment to warm neutrals. Every gray in the system carries a stone or beige undertone — there are no cold blue-grays anywhere. The background (`#f8f7f5`) has a barely perceptible yellow warmth. The muted text color (`#78716c`) is a warm stone, not a sterile gray. Even in dark mode, the near-black (`#0f0e0d`) and surface (`#1c1a18`) carry olive-brown warmth rather than the blue-black of typical dark themes. Combined with Ionic's platform-adaptive rendering (iOS-style on iOS, Material-style on Android), the result is an app that feels native, warm, and quietly domestic on every device.
+Every neutral in the system carries a warm undertone — there are no cold blue-grays anywhere, light mode or dark. The result is one consistent brand voice on every device, not platform-adaptive.
 
-**Key Characteristics:**
+### Signature Moves
 
-- Warm off-white canvas (`#f8f7f5`) — not pure white, not cream, a subtle stone warmth
-- Terracotta accent (`#c7724e`) as the singular brand color — earthy, deliberate, un-tech
-- System font stack only — zero web fonts, native feel on every platform
-- Exclusively warm-toned neutrals — every gray has a stone/beige undertone, never blue-gray
-- Ionic 8 component framework — platform-adaptive rendering, CSS variable theming
-- Flat by default — depth comes from surface color contrast, not shadows
-- Mobile-first with `ion-split-pane` for desktop — bottom tabs on mobile, sidebar at 993px+
-- Comfortable density — generous padding, breathing room, not data-dense
-- No decorative motion — transitions are `0.15s` for background/color, Ionic handles page transitions natively
+Eight constitutional rules. Numbered for cross-reference (e.g., "see Move #3").
+
+1. **Whisper Card** — cards are the only non-overlay surface with elevation: `1px` Warm Divider border + `rgba(0,0,0,0.03) 0px 2px 8px` shadow. Transient overlays use Modal level (§6).
+2. **Hearth Ring** — `2px` Warm Divider ring on photo avatars (`box-sizing: border-box`). Blends user photos into the warm palette.
+3. **Chromatic Rule** — warm-only neutrals everywhere, both modes. No cool blue-grays, ever. Constitutional.
+4. **Terracotta Accent** — Hearth Terracotta is the single chromatic color in UI chrome. Rare by design.
+5. **Tinted Badge** — badges, pills, and selection states use translucent `10-12%` tints — never solid fills. Powers active tab pills, selected sidenav rows, active segmented controls, and the tab-root empty-state hero.
+6. **Title Case Always** — buttons, labels, nav items in Title Case. Never UPPERCASE.
+7. **System Fonts Forever** — native stack only (`-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, ...`). Zero web fonts.
+8. **Single Breakpoint** — one switch at `993px` (mobile ↔ desktop). Content-width constraints (e.g., `360px` auth max) are a separate concern.
 
 ## 2. Color Palette & Roles
 
-All colors are defined as CSS custom properties in `apps/hearthly-app/src/theme/variables.scss`. Ionic components inherit theme via `--ion-color-*` variables. Custom elements use `--hearthly-*` tokens.
+Colors implemented as CSS custom properties. Reference by semantic name; never hardcode hex in component styles.
 
-### Primary (Terracotta)
+### Primary
 
-- **Hearth Terracotta** (`#c7724e` light / `#d4885e` dark): `--ion-color-primary`. The core brand color — a burnt orange-brown that says "home" without saying "kitchen app." Used for primary buttons, active tab icons, avatar backgrounds, and links. The only chromatic color in the UI chrome. In dark mode it lightens to maintain vibrancy against dark surfaces.
-- **Terracotta Shade** (`#a3572e` light / `#c7724e` dark): `--ion-color-primary-shade`. Pressed and hover states on terracotta elements — darker, more saturated, providing tactile feedback.
-- **Terracotta Tint** (`#d4885e` light / `#e8a67a` dark): `--ion-color-primary-tint`. Subtle accents, light emphasis, background tints at low opacity. The gentler end of the terracotta range.
-- **Terracotta Contrast** (`#ffffff`): `--ion-color-primary-contrast`. Text on terracotta backgrounds — always pure white for maximum legibility.
+| Token | Light | Dark | Usage |
+|---|---|---|---|
+| **Hearth Terracotta** | `#c7724e` | `#d4885e` | Brand, primary buttons, active states, links — the only chromatic color in UI chrome |
+| **Terracotta Shade** | `#a3572e` | `#c7724e` | Pressed / hover on terracotta |
+| **Terracotta Tint** | `#d4885e` | `#e8a67a` | Light emphasis, background tints |
+| **Terracotta Contrast** | `#ffffff` | `#ffffff` | Text on terracotta backgrounds |
 
-### Background & Surfaces
+### Surfaces
 
-- **Warm Stone** (`#f8f7f5` light / `#0f0e0d` dark): `--ion-background-color`. The page canvas — a warm off-white with a barely perceptible yellow-stone tint that's gentler than pure white. In dark mode, a near-black with olive warmth rather than blue-black. The emotional foundation of the entire design.
-- **Clean Surface** (`#ffffff` light / `#1c1a18` dark): `--hearthly-surface`, `--ion-item-background`, `--ion-card-background`, `--ion-toolbar-background`, `--ion-tab-bar-background`. Cards, headers, tab bar, list items — one step brighter than the canvas, creating subtle layering. The distinction between canvas and surface is the primary depth mechanism.
+| Token | Light | Dark | Usage |
+|---|---|---|---|
+| **Warm Stone** | `#f8f7f5` | `#0f0e0d` | Page canvas |
+| **Clean Surface** | `#ffffff` | `#1c1a18` | Cards, headers, tab bar, list items |
 
 ### Text
 
-- **Warm Dark** (`#1c1917` light / `#f5f0eb` dark): `--ion-text-color`. Primary text — not pure black but a warm near-black with brown undertones. In dark mode, not pure white but a warm parchment tone (`#f5f0eb`) that prevents eye strain on dark surfaces.
-- **Stone Muted** (`#78716c` light / `#a39e98` dark): `--hearthly-text-muted`, `--ion-color-medium`. Secondary text, labels, timestamps, placeholders, taglines — a warm stone gray. The most-used text color after primary, providing hierarchy without coldness.
-- **Deep Stone** (`#65605b`): `--ion-color-medium-shade`. De-emphasized text, darker variant of muted.
-- **Light Stone** (`#867f7b`): `--ion-color-medium-tint`. Slightly lighter muted text for gentler de-emphasis.
+| Token | Light | Dark | Usage |
+|---|---|---|---|
+| **Warm Dark** | `#1c1917` | `#f5f0eb` | Primary text |
+| **Stone Muted** | `#78716c` | `#a39e98` | Secondary / UI only (labels, metadata, placeholders) — not body |
+| **Deep Stone** | `#65605b` | — | Body-weight secondary (when AA on body text is required) |
 
-### Borders
+### Borders & Status
 
-- **Warm Divider** (`#e5e2dc` light / `#2a2725` dark): `--ion-border-color`. Card borders, list separators, dividers — a warm cream-gray that creates the gentlest possible containment. In dark mode, a warm charcoal that maintains the stone undertone.
+| Token | Light | Dark | Usage |
+|---|---|---|---|
+| **Warm Divider** | `#e5e2dc` | `#2a2725` | Card borders, list separators, rings |
+| **Warm Success** | `#2e7d32` | `#66bb6a` | Task completion, confirmations |
+| **Warm Danger** | `#b53333` | `#e57373` | Errors, destructive actions |
+| **Warm Warning** | `#e65100` | `#ffb74d` | Attention, budget alerts — close to Terracotta, always paired with warning icon |
 
-### Status Colors
+No `info` color. Informational content uses neutral tints (Stone Muted on Clean Surface) — a cool-blue info token would violate the Chromatic Rule (Move #3).
 
-Status colors are warm-tinted to blend with the palette rather than fight it. Defined via Ionic's semantic color system (`--ion-color-success`, `--ion-color-danger`, `--ion-color-warning`).
+## 3. Typography
 
-- **Warm Success** (`#2e7d32` light / `#66bb6a` dark): `--ion-color-success`. Task completion, positive confirmations — a grounded forest green, not a neon lime. Warm enough to sit alongside terracotta without clashing.
-- **Warm Danger** (`#b53333` light / `#e57373` dark): `--ion-color-danger`. Form validation errors, destructive actions — a deep, serious red that doesn't scream. Inspired by Claude's Error Crimson.
-- **Warm Warning** (`#e65100` light / `#ffb74d` dark): `--ion-color-warning`. Attention needed, budget alerts — a burnt orange that feels like a natural extension of the terracotta family.
-
-### Chromatic Rule
-
-All neutrals are warm-tinted with stone or beige undertones. There are no cool blue-grays anywhere in the system — not in light mode, not in dark mode, not in borders, not in shadows. If a new gray is needed, it must carry warmth. This is the single most important visual rule in the system.
-
-## 3. Typography Rules
-
-### Font Family
-
-- **Primary:** `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif` — set via `--ion-font-family`
-- **No custom web fonts.** The system font stack renders San Francisco on Apple devices, Segoe UI on Windows, Roboto on Android — each platform's native typeface. A family app should feel like it belongs on your phone, not like a branded experience fighting the OS. Zero loading overhead, zero flash of unstyled text, zero visual friction.
-
-### Hierarchy
+Font stack: `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`. No custom web fonts (Move #7).
 
 | Role | Size | Weight | Line Height | Letter Spacing | Usage |
 |---|---|---|---|---|---|
-| Page Title | 32px (2.00rem) | 700 | 1.20 (tight) | -0.5px | Welcome headline, major section titles — substantial without shouting |
-| Section Heading | 20px (1.25rem) | 600 | 1.30 | normal | Card headers, profile name, feature titles |
-| Body | 16px (1.00rem) | 400 | 1.50 (relaxed) | normal | Default content, descriptions, navigation labels — the workhorse |
-| Body Emphasis | 16px (1.00rem) | 500 | 1.50 (relaxed) | normal | Taglines, welcome messages, slightly emphasized body |
-| Secondary | 14px (0.88rem) | 500 | 1.43 | normal | Buttons, email addresses, metadata, form labels |
-| Caption | 14px (0.88rem) | 400 | 1.43 | normal | Muted labels, secondary info in Stone Muted color |
-| Small | 12px (0.75rem) | 400–500 | 1.33 | normal | Badges, timestamps, fine print |
-| Avatar Initials (large) | 20px (1.25rem) | 600 | 1.00 | 0.5px | Account page avatar (64px circle) — wider tracking for legibility |
-| Avatar Initials (small) | 12px (0.75rem) | 600 | 1.00 | 0.5px | Header avatar (32px circle) — compact but legible |
+| Display | 40px | 700 | 1.10 | -0.75px | Welcome hero, LargeTitle, major empty states |
+| Page Title | 32px | 700 | 1.20 | -0.5px | Major section / empty-state headlines |
+| Section Heading | 20px | 600 | 1.30 | normal | Card headers, AppHeader title |
+| Body | 16px | 400 | 1.50 | normal | Default content |
+| Body Emphasis | 16px | 500 | 1.50 | normal | Taglines, emphasized body |
+| Button | 16px | 600 | 1.00 | normal | Button labels, active tab labels (Title Case) |
+| Link | 16px | 500 | 1.50 | normal | Inline Hearth Terracotta links (underline on hover) |
+| Secondary | 14px | 500 | 1.43 | normal | Form labels, metadata |
+| Caption | 14px | 400 | 1.43 | normal | Muted labels (Stone Muted) |
+| Small | 12px | 400-500 | 1.33 | normal | Badges, tab bar labels, fine print |
+| Avatar Large | 20px | 600 | 1.00 | 0.5px | Account avatar (64px circle) |
+| Avatar Small | 12px | 600 | 1.00 | 0.5px | Header avatar (32px circle) |
 
-### Principles
+**Tabular Numeric** — `font-variant-numeric: tabular-nums` applied at any size for budget amounts, counters, and tabular data where digits must align.
 
-- **System fonts as identity:** The native font stack isn't a fallback — it's the design. San Francisco on iOS, Roboto on Android, Segoe UI on Windows. Each user sees their platform's typeface, making the app feel like a natural part of the device rather than a foreign brand.
-- **Weight for hierarchy, not size:** The range is compact (12px–32px) because a family app doesn't need billboard headlines. Hierarchy comes from weight transitions: 700 (titles) → 600 (section heads) → 500 (emphasis) → 400 (body). Size differences are subtle; weight differences are clear.
-- **Negative tracking on titles only:** Page titles at 32px use `-0.5px` letter-spacing for a compact, grounded feel. All other text uses default tracking — tight headings and relaxed body create natural rhythm.
-- **Relaxed body line-height:** Body text at `1.50` line-height is more generous than typical app UI (1.3–1.4). A family app is for browsing at home, not scanning dashboards at work. The extra breathing room supports comfortable reading.
+**Principles**: weight carries hierarchy (700 → 600 → 500 → 400), sizes stay compact. Negative tracking only on Display (40px) and Page Title (32px). Body line-height `1.50` is generous — browsing-at-home, not dashboard-scanning. All interactive labels in Title Case (Move #6).
 
-## 4. Component Stylings
+## 4. Components
 
-All components use Ionic 8 standalone elements, themed via CSS variables. Custom styling is scoped per-component in SCSS and kept minimal — Ionic handles most visual concerns through its variable system.
+Organized into 7 subsections. Each component spec covers visual style, states, and the ARIA essentials for screen readers (VoiceOver, TalkBack).
 
-### Buttons
+### §4.1 Primitives
 
-**Primary (Ionic)**
+#### Iconography
 
-- Component: `ion-button`
-- Background: Hearth Terracotta (`--ion-color-primary`)
-- Text: Pure White (`--ion-color-primary-contrast`)
-- Padding: Ionic default (`10px 20px` equivalent — managed by the framework, do not override)
-- Radius: 12px (`--hearthly-radius-button`)
-- Hover: Terracotta Shade (`--ion-color-primary-shade`)
-- Focus: `outline: 2px solid var(--ion-color-primary); outline-offset: 2px`
-- Disabled: `opacity: 0.5; pointer-events: none` (Ionic default)
-- The only chromatic button — reserved for primary actions
+- **Style**: stroke-based, `2px` uniform stroke. Never filled or dual-tone.
+- **Sizes**: `16px` (inline in small text), `20px` (default UI), `24px` (tab bar, page headers, primary interactive), `32px` (empty-state inline), `48px` (tab-root empty-state hero only).
+- **Color**: `currentColor`. Stone Muted default (passive); Hearth Terracotta active.
+- **Placement**: leading in list rows, trailing chevrons for navigation rows, top-above-label in tab bar.
+- **In buttons**: allowed for icon-only ghost, destructive (e.g., trash + "Delete"), and brand/social (Google Sign-In). Label-only otherwise.
+- **No colored icon containers** (iOS Settings pattern). Single exception: tab-root empty-state hero (§4.5).
+- Library-agnostic; Lucide-compatible.
 
-**Secondary (Ionic)**
+#### Buttons
 
-- Component: `ion-button` with `fill="outline"`
-- Background: transparent
-- Text: Warm Dark (`--ion-text-color`)
-- Border: `1px solid var(--ion-border-color)` (Warm Divider)
-- Padding: Ionic default
-- Radius: 12px (`--hearthly-radius-button`)
-- Hover: background `rgba(var(--ion-text-color-rgb), 0.05)` — a barely-visible warm tint
-- Use: Cancel, Skip, secondary actions — any action that's available but not encouraged
+All buttons: `12px` radius, Button typography (16px/600), Title Case. Focus ring `2px` Hearth Terracotta outline with `2px` offset (`:focus-visible` only).
 
-**Ghost (Ionic)**
+**Primary** — Hearth Terracotta bg, white text, `10px 20px` padding (48px min height). Hover: Terracotta Shade. Active (mobile): `scale(0.98)`.
 
-- Component: `ion-button` with `fill="clear"`
-- Background: transparent
-- Text: Stone Muted (`--ion-color-medium`)
-- Border: none
-- Padding: Ionic default
-- Radius: 12px (`--hearthly-radius-button`)
-- Use: Tertiary actions, inline text-like buttons — "Show more", "Edit", "Remove"
+**Secondary (Outline)** — transparent bg, Warm Dark text, `1px` Warm Divider border. Hover: Warm Divider at ~40% opacity.
 
-**Google Sign-In** (custom, follows [Google Branding Guidelines](https://developers.google.com/identity/branding-guidelines))
+**Ghost** — transparent, Stone Muted text (shifts to Warm Dark on hover). For tertiary and icon-only actions.
 
-- Background: `#ffffff` (light) / `#131314` (dark)
-- Text: `#3c4043` (light) / `#e3e3e3` (dark), 14px weight 500
-- Border: 1px solid `#dadce0` (light) / `#8e918f` (dark)
-- Padding: 14px 16px
-- Radius: 12px (`--hearthly-radius-button`)
-- Icon: Google "G" at 18x18px, flex-shrink 0
-- Hover: background `#f7f8f8`, border `#c4c7c5` / background `#1f1f20`, border `#a1a3a0`
-- Active: background `#e8eaed` / `#2a2a2b`
-- Focus: `outline: 2px solid var(--ion-color-primary); outline-offset: 2px`
-- Transition: `background 0.15s, border-color 0.15s` — subtle, not bouncy
+**Destructive** — Warm Danger bg, white text. Triggers warning-confirm haptic (§7) in alertdialogs.
 
-### Cards
+**Vendor Auth Exception** (Google Sign-In, future Apple Sign-In) — follows vendor branding guidelines verbatim. Hearthly controls only the `:focus-visible` ring (`2px` Hearth Terracotta) and surrounding layout. This is the one place the design yields to external brand rules.
 
-- Component: `ion-card`
-- Background: Clean Surface (`--ion-card-background`) — white / `#1c1a18`
-- Border: `1px solid var(--ion-border-color)` — warm containment replacing heavy shadow
-- Radius: 14px (`--hearthly-radius-card`)
-- Shadow: `rgba(0,0,0,0.03) 0px 2px 8px` — a whisper-soft lift, barely visible. Replaces Ionic's default Material shadow which is too heavy and cold for the warm palette. Inspired by Notion's sub-0.05 opacity approach.
-- Content padding: Ionic defaults via `ion-card-content`
-- Cards are the primary content container — they sit on the Warm Stone canvas, creating depth through warm border + surface/canvas color difference + whisper shadow
+Google Sign-In:
+- Light: `#ffffff` bg, `#3c4043` text (14px/500), `1px solid #dadce0` border
+- Dark: `#131314` bg, `#e3e3e3` text, `1px solid #8e918f` border
+- `14px 16px` padding, `12px` radius, `18×18px` Google "G" icon
 
-### Navigation Items (Sidebar)
+#### Badges / Pills
 
-- Component: `ion-item` inside `ion-menu`
-- Padding: 16px start (`--padding-start`)
-- Radius: 8px (`--border-radius`)
-- Margin: 4px vertical, 8px horizontal (inside menu)
-- Cursor: pointer
-- **Default state:** Ionic default item appearance
-- **Selected state:** `background: rgba(var(--ion-color-primary-rgb), 0.1); color: var(--ion-color-primary)` — a 10% terracotta tint that's visible but not heavy, with terracotta text for the label and icon
+Tinted Badge signature (Move #5). Same mechanic powers tab-pills, sidenav-selected, segmented-active, and tab-root empty-state.
 
-### Avatars
+- **Terracotta Badge** (default): `10%` Terracotta tint bg + Terracotta text
+- **Neutral Badge**: `~6%` Warm Dark tint + Stone Muted text
+- **Status Badge**: `~12%` status-color tint + status-color text
+- Shape: `9999px` (full pill), `padding: 2px 10px`, Small (12px/500)
+- **Never solid fills** (Move #5)
 
-- **Header avatar:** 32px circle, terracotta background (`--ion-color-primary`), white initials at 12px/600 with `0.5px` letter-spacing
-- **Account page avatar:** 64px circle, same treatment, 20px/600 initials with `0.5px` letter-spacing
-- **Photo variant:** `object-fit: cover`, same circle dimensions, replaces initials when available. Photos get a `2px solid var(--ion-border-color)` ring to blend warmly into the UI — without it, profile photos with white or dark edges look disconnected from the warm palette.
-- Shape: always `border-radius: 50%` — never rounded-square, never square
+#### Inputs
 
-### Badges & Pills
+- Clean Surface bg, `1px` Warm Divider border, `12px` radius, `12px 16px` padding
+- Body text in Warm Dark; Stone Muted placeholder
+- Focus: `1px` Hearth Terracotta border + `2px`/`2px` focus ring
+- Error: Warm Danger border + message below in Warm Danger Caption text
 
-Pill badges are used for member roles ("Parent", "Kid"), categories, status labels, and tags. Inspired by Notion's tinted-background pill pattern.
+#### Dividers
 
-- **Terracotta Badge** (default): `background: rgba(var(--ion-color-primary-rgb), 0.1); color: var(--ion-color-primary)` — a 10% terracotta tint with terracotta text. The primary badge for most labels.
-- **Neutral Badge:** `background: rgba(var(--ion-text-color-rgb), 0.06); color: var(--hearthly-text-muted)` — a subtle warm gray for de-emphasized tags.
-- **Status Badges:** Same pattern with status colors — e.g., `rgba(var(--ion-color-success-rgb), 0.12)` background with `var(--ion-color-success)` text.
-- Shape: `border-radius: 9999px` (full pill), `padding: 2px 10px`, `font-size: 12px`, `font-weight: 500`
-- Never use solid-colored backgrounds for badges — always tinted/translucent to maintain the soft, warm feel
+Hairline `1px` Warm Divider. Labeled dividers (e.g., "Or sign in with email"): center Stone Muted 13px label between two flex lines.
 
-### Lists & Items
+### §4.2 Atomics
 
-- Component: `ion-list`, `ion-item`
-- Background: `--ion-item-background` (Clean Surface)
-- Borders: Ionic default separators using `--ion-border-color`
-- No custom list styling — Ionic's native list rendering is the design
+#### Toggle, Checkbox, Radio
 
-### Inputs & Forms
+Shared pattern: Warm Divider border when off, Hearth Terracotta fill when on. All transition `150ms ease`.
 
-- Components: `ion-input`, `ion-select`, `ion-textarea`
-- Radius: 12px (`--hearthly-radius-button`)
-- Focus: primary color outline ring
-- Styling: Ionic defaults with CSS variable theming — no custom input chrome
+| Control | Size | Off / Unselected | On / Selected | ARIA |
+|---|---|---|---|---|
+| Toggle | Track `44×24px`, `9999px` radius | Transparent + border; thumb left | Terracotta fill; thumb right (`20px` Clean Surface, `2px` track inset) | `role="switch"` + `aria-checked`; Space/Enter toggles |
+| Checkbox | `20×20px`, `6px` radius, `1.5px` border | Border only | Terracotta border+fill + white `check`. Indeterminate: `minus` icon | `role="checkbox"` + `aria-checked` (supports `mixed`); Space toggles |
+| Radio | `20×20px` circle, `1.5px` border | Border only | Terracotta border + `10px` filled inner circle | `role="radio"` in `role="radiogroup"`; arrows navigate, Space/Enter selects |
 
-## 5. Layout Principles
+#### Form anatomy
 
-### Spacing Scale
+Stacked with `4px` gaps: Label → Input → Helper-or-Error. Field-to-field: `12px`. Section-to-section: `24px`.
+
+- Label: Secondary in Warm Dark. Required marker: appended `*` in Warm Danger.
+- Helper: Caption in Stone Muted.
+- Error: replaces Helper; Warm Danger text + Warm Danger input border.
+- Async validation: inline spinner inside input; `check` (Warm Success) on valid, `alert-circle` (Warm Danger) on invalid.
+
+#### Progress Indicator (determinate)
+
+Only for operations with a real progress signal (uploads, imports). Track `4px` tall, Warm Divider bg, `9999px` radius. Fill Hearth Terracotta, width `{progress}%`, transition `width 200ms ease-out`. Caption label above in Stone Muted. **Never fabricate percentages** — use Long-Wait Indicator (§4.5) for unknown duration. ARIA: `role="progressbar"` with `aria-valuenow` / `valuemin` / `valuemax` / `label`.
+
+#### Amount / Numeric input
+
+Variant of Input for currency. Leading `€` / `$` symbol inside input as Stone Muted decoration (`8px` from edge). Text Warm Dark, `tabular-nums`, right-aligned. `inputmode="decimal"` on mobile.
+
+#### Table
+
+Header row: Secondary typography + `1px` Warm Divider bottom. Data rows: Body text + `1px` Warm Divider separators. Numeric columns: `tabular-nums`, right-aligned. Row padding `12px 16px`; hover bg → Warm Divider at ~30% opacity. Semantic `<table>` preferred.
+
+#### Link Contexts
+
+All use Link typography in Hearth Terracotta.
+
+- **Body-text** — inline in prose; underline on hover and `:focus-visible`
+- **Nav** — AppHeader / SideNav / BottomTabBar; no underline; active via Tinted Badge (Move #5)
+- **List-row** — entire row is tap target; trailing chevron signals navigability
+
+#### Avatars
+
+Always `border-radius: 50%`.
+
+- Header: `32px`, Hearth Terracotta bg, Avatar Small initials (white, `0.5px` tracking)
+- Account: `64px`, same, Avatar Large initials
+- Photo variant: `object-fit: cover`, same dimensions, **Hearth Ring** (Move #2: `2px` Warm Divider ring, `box-sizing: border-box`). No filters or tints.
+- Fallback: if photo fails, render initials variant (`600ms` delay before fallback to avoid flicker).
+- Loading: skeleton circle; shimmer disabled under `prefers-reduced-motion`.
+
+#### Cards (Whisper Card — Move #1)
+
+Clean Surface, `1px` Warm Divider border, `14px` radius, `rgba(0,0,0,0.03) 0px 2px 8px` shadow, `16px` internal padding. The only non-overlay surface with elevation.
+
+#### List Items
+
+Clean Surface container (Flat). Rows: `12px 16px` padding, `1px` Warm Divider bottom separator (except last), min `48px` tall. Typical: leading icon (20px Stone Muted) + label (Body Warm Dark) + optional trailing chevron or value.
+
+#### Settings-List pattern
+
+The most-used surface in Account, Family, Notifications, Privacy.
+
+> **Leading icon (20px Stone Muted) + Label (Body) + optional Value (Secondary Stone Muted, right-aligned) + Trailing (chevron / Toggle / none)** — row height `56px`.
+
+### §4.3 Navigation & Shell
+
+#### AppHeader
+
+`56px` + `env(safe-area-inset-top)`. Clean Surface + `1px` Warm Divider bottom. Sticky at top of PageContainer, flat always (no scroll shadow — Move #1). `0 16px` padding.
+
+3 slots: Leading (`40×40px` — optional back-arrow or menu trigger, ghost button) / Title (Section Heading, left-aligned, ellipsis on overflow) / Trailing (`40×40px` each — up to 2 ghost icon buttons or one `32px` header avatar).
+
+**LargeTitle variant** (optional, tab roots): Display (40/700) title in scroll content above the sticky header; scrolls away naturally, sticky header retains compact title. **Search** lives in-page at top of content — never in AppHeader.
+
+#### BottomTabBar (`<993px`)
+
+`80px` content + `env(safe-area-inset-bottom)`. Clean Surface + `1px` Warm Divider top. Flat. 4 tabs evenly distributed: Home, Budget, Lists, Calendar. Each tab: stacked icon (24px) + label (Small), full-cell touch target, min `48px` tall.
+
+**Active**: `10%` Hearth Terracotta pill (`40×28px`, `14px` radius) centered behind icon; icon and label Terracotta (Move #5). **Inactive**: Stone Muted icon + label, no pill.
+
+ARIA: `<nav aria-label="Primary">` + `<a aria-current="page">` on active. Not `role="tablist"`.
+
+#### SideNav (`≥993px`)
+
+`250px` wide, full height. Clean Surface + `1px` Warm Divider right. Flat. Vertical stack: optional wordmark top (`24px` padding) → nav items (middle) → optional avatar + name + "Account" link (bottom). Nav items: `16px` start padding, `4px` vertical margin, `8px` horizontal, `8px` radius.
+
+**Active**: full-row `10%` Hearth Terracotta tint bg + Terracotta text/icon (Move #5). ARIA: `<nav aria-label="Primary">`, `<a aria-current="page">` on active.
+
+#### PageContainer
+
+Transparent bg (inherits Warm Stone). Vertical scroll only. Respects `env(safe-area-inset-*)`.
+
+- **Standard mode** (tab pages): `24px` horizontal, `24px` vertical padding, full-width children
+- **Constrained mode** (welcome/auth): `24px` horizontal, `32px` vertical padding, children max-width `360px` centered
+- **Scroll restoration**: iOS-style preserve (switching tabs keeps scroll position)
+- **Optional `onRefresh`**: pull-to-refresh → Terracotta spinner. Opt-in per tab (Home typically yes, others no).
+
+#### PrimaryAction (Extended FAB)
+
+Terracotta pill with icon + label — NOT circular. Explicit labels reduce ambiguity.
+
+- Primary Button treatment: Hearth Terracotta bg, white text, `12px` radius
+- Leading icon (e.g., Lucide `plus`) 20px + `8px` gap + Label (Button typography, Title Case, e.g., "Add Transaction")
+- `12px 16px` padding
+- Fixed position: `bottom: {16px + safe-area + BottomTabBar height}`, `right: 16px`
+- Modal-level shadow (§6) so it floats above content
+- Used by: Budget, Lists, Calendar. Home typically none. If a tab doesn't declare an action, not rendered.
+
+#### ResponsiveShell
+
+- **`<993px`**: `[AppHeader] / [PageContainer] / [BottomTabBar]`
+- **`≥993px`**: `[SideNav | [AppHeader / PageContainer]]` — SideNav full-height left; AppHeader spans only the content area, NOT over SideNav (Notion/Slack pattern)
+- Welcome / Account pages are outside ResponsiveShell (own full-screen layout with own header; avoids double-header)
+- Edge-swipe-back on iOS: shell responsibility. Left-edge pan dismisses stacked routes.
+- Tab-switch transition: subtle crossfade (`150ms ease`). Disabled under `prefers-reduced-motion`.
+
+### §4.4 Overlays
+
+All transient overlays use Modal elevation (§6: `rgba(0,0,0,0.08) 0px 8px 24px`). Modal scrim: `rgba(15, 14, 13, 0.5)`.
+
+#### Modal / Dialog
+
+Clean Surface, `14px` radius, Modal shadow + scrim. Mobile: centered, max-width `min(100vw - 32px, 400px)`. Desktop: max-width `500px`. `24px` padding. Title: Section Heading. Body: Body. Optional X-close top-right (ghost button).
+
+**Actions**: ≤2 → right-aligned desktop (primary rightmost), stacked full-width mobile. ≥3 → stacked full-width always, primary on top, Cancel on bottom. `12px` gap.
+
+#### Action Sheet / Bottom Sheet
+
+Mobile-primary (desktop → Action Menu or Dialog). Clean Surface, `14px` top-rounded, Modal shadow + scrim. Slides up `200ms ease-out`; swipe-down to dismiss (light-impact haptic §7). `36×4px` Warm Divider drag handle at top center. Options stacked `48px` tall, `1px` Warm Divider separators. Destructive options in Warm Danger. Cancel at bottom, visually separated.
+
+#### Action Menu
+
+Anchored context actions (Edit, Delete, Share). Clean Surface, `14px` radius, Modal shadow, `1px solid` Warm Divider border. Max width `~320px`, options `40-48px` tall.
+
+#### Selection Dropdown (listbox)
+
+Value picker replacing native `<select>`. Same visual treatment as Action Menu. Selected option: leading `check` in Hearth Terracotta.
+
+**When in doubt**: actions → Action Menu; choosing a value → Selection Dropdown.
+
+#### Tooltip
+
+Desktop-only. Warm Dark bg (inverted), Ivory text, Small typography, `6px` radius, `6px 10px` padding, max width `~240px`. `500ms` first-show delay, `300ms` skip-cluster between adjacent triggers. **Appears on focus too** (keyboard users).
+
+#### Toast / Snackbar
+
+Warm Dark bg (inverted), Ivory text, Body typography, `12px` radius, `12px 16px` padding, max width `400px`. Mobile: bottom-center `16px` above BottomTabBar+safe-area. Desktop: top-right with `24px` edge margin. Auto-dismiss `5s`, pause on hover/focus; close button always present. Optional leading status icon. Enter: slide+fade `200ms ease-out`. Exit: fade `150ms ease-in`. Error toasts trigger error-notification haptic (§7).
+
+#### Banner
+
+In-flow persistent message (not transient like Toast, not blocking like Modal). `10%` status-color tint bg on Clean Surface, leading status icon (20px), Body text, optional inline action link, optional X-dismiss. `12px` radius, `12px 16px` padding.
+
+**Variants**: neutral / warning / error / success. No `info` (neutral covers informational). Warning variant always carries the warning icon (Move #3 — Warning vs Terracotta disambiguation, §8).
+
+**Banner vs Toast vs Inline form error**: in-flow persistent / transient / field-scoped. Don't mix.
+
+#### ARIA & keyboard summary
+
+| Overlay | ARIA | Keyboard |
+|---|---|---|
+| Modal / Dialog | `role="dialog"` + `aria-modal="true"` + `aria-labelledby`; focus trap (CDK `FocusTrap`) | ESC closes, returns focus to invoker |
+| Alert Dialog (destructive) | `role="alertdialog"` — focus defaults to least-destructive action | Same as Modal |
+| Action Sheet | `role="dialog"` + `aria-modal="true"`, inner `role="menu"` with `menuitem` | ESC closes, swipe-down dismisses |
+| Action Menu | `role="menu"`, items `role="menuitem"` | ↑/↓ cycle, Enter/Space activates, ESC/Tab closes |
+| Selection Dropdown | `role="listbox"`, options `role="option"` + `aria-selected` | ↑/↓, Enter/Space commits, ESC reverts, Tab closes+commits |
+| Tooltip | `role="tooltip"` + `aria-describedby` from trigger | Appears on hover AND focus |
+| Toast (default) | `role="status"` + `aria-live="polite"` | — |
+| Toast (error) | `role="alert"` + `aria-live="assertive"` | — |
+
+### §4.5 Feedback
+
+#### Empty State
+
+**Inline** (e.g., filter returns nothing inside an existing view):
+- Centered vertically, generous whitespace
+- Optional `32px` Lucide icon (Stone Muted) above headline
+- Headline: Page Title in Warm Dark
+- Body: Body in Stone Muted, max-width `~320px`, centered
+- Optional inline Primary Button
+
+**Tab-root** (e.g., entire Calendar tab has no events):
+- `48px` Lucide icon inside `64px` circle with `10%` Hearth Terracotta tint bg
+- **Single permitted tinted icon container** — explicit exception to the no-colored-container rule. Justified by warmth needed in otherwise-sparse tab states. Don't reuse.
+- Same headline / body / action as inline, centered
+
+**First-run vs zero-data** (voice, §10):
+- First-run: warm, inviting ("Add your first family list to get started")
+- Zero-data: neutral, informational ("No transactions match these filters")
+
+#### Loading Skeleton
+
+Shimmer pattern. Warm Divider base + Clean Surface overlay animated left-to-right, `1.5s` per sweep.
+
+- Variants: list row, card, avatar circle, text line (each matches the content it replaces)
+- **Under `prefers-reduced-motion`**: static Warm Divider blocks, no shimmer.
+- **Scope rules**:
+  - `<1s` loads: no loader (flash is worse than silence)
+  - `1-10s`: Loading Skeleton
+  - `>10s` with real progress signal: determinate Progress Indicator (§4.2)
+  - `>10s` without progress signal: Long-Wait Indicator (below)
+
+#### Long-Wait Indicator
+
+For unknown-duration fetches exceeding 10s.
+
+- Centered Terracotta spinner: `20px`, `2px` stroke, 1 rotation per second
+- Status message below: Body in Stone Muted (e.g., "Loading…" or "Getting your family's lists…")
+- **Never fabricate percentages** when none is known
+- Under `prefers-reduced-motion`: static `hourglass` icon instead of spinner
+
+### §4.6 Controls
+
+#### Segmented Control
+
+For mutually-exclusive view switches (Budget: Income/Expense; Calendar: Day/Week/Month).
+
+- Container: pill (`9999px` radius, `1px` Warm Divider border, `4px` internal padding, Clean Surface bg)
+- Segments grow equally. Each a child pill with Button typography.
+- **Active**: `10%` Hearth Terracotta tint bg + Terracotta text (Move #5)
+- **Inactive**: transparent bg + Stone Muted text. Hover (desktop): text → Warm Dark.
+- Transition: `background-color 150ms ease, color 150ms ease`
+- ARIA: `role="radiogroup"`, segments `role="radio"` + `aria-checked`. Keyboard: arrows cycle.
+- Intentionally diverges from Material 3's rounded-rect pattern — pill shape reuses Tinted Badge mechanic.
+
+### §4.7 Imagery
+
+Avatar photos specified in §4.2. This section covers other user-uploaded content photos.
+
+- **Radius**: `12px` (nested feel inside `14px` cards)
+- **Aspect ratios in feeds/lists**: `1:1`, `4:3`, or `16:9` only. Free-form allowed only in detail/lightbox views. Prevents layout shift.
+- **Border**: none (Whisper Card border contains when nested)
+- **Placement in cards**: photo fills top edge, respects card's top `14px` corners
+- **Fallback**: if image fails → Warm Divider bg + `image-off` Lucide icon (Stone Muted) centered. `600ms` delay before fallback renders.
+- **Loading**: LQIP dominant-color placeholder computed at upload, painted as CSS bg until image loads. Image fades in on load (`200ms ease-out`).
+- **No filters or tints** on user photos. **No decorative imagery** (gradients, hero illustrations, patterns). User photos ARE content, not decoration.
+- **Alt text**: user-provided caption at upload (optional). Fallback `alt="Photo uploaded by {name}"` or `alt="Photo from {event name}"`. Fallback/image-off state: `role="img"` + `aria-label="Image unavailable"`.
+- **Taste rule**: no screenshots of chats, documents, or other apps as family content.
+
+Implementation details (responsive delivery, EXIF stripping, upload processing, crop UX) are backend/pipeline concerns, not design. Addressed when the feature is built.
+
+## 5. Layout
+
+### Spacing scale
+
+`4px`, `8px`, `12px`, `16px`, `24px`, `32px`, `48px`.
+
+### Section spacing
+
+| Context | Gap |
+|---|---|
+| Adjacent Whisper Cards | `16px` |
+| Between card groups | `32px` |
+| Section header → first card | `16px` |
+| LargeTitle → content | `24px` |
+| List row gaps | `0` (Warm Divider separators) |
+| Form field gap | `12px` |
+| Welcome tagline → buttons | `48px` |
+
+### Whitespace rules
+
+1. **Cards breathe, lists unify** — cards have gaps; list rows use separators, not gaps
+2. **Mobile breathing room** — `24px` PageContainer padding is the floor
+3. **Desktop restraint** — SideNav takes extra width; content area stays at comfortable mobile-era width
+
+### Layout rules
+
+- Mobile-first (`375px` viewport baseline)
+- Centered constrained content: max-width `360px` (welcome/auth only)
+- `24px` horizontal page padding; `24px` vertical (tab pages) or `32px` vertical (auth)
+- No grid system — app is list-and-card based
+
+### Radius scale
 
 | Value | Usage |
 |---|---|
-| 4px | Tight gaps — name to email, icon to label when compact |
-| 8px | Compact spacing — tag gaps, icon margins, sidebar item vertical margin |
-| 12px | Default element gaps — button stacks, avatar to text, form field gaps |
-| 16px | Section internal padding — sidebar item padding, card content margins |
-| 24px | Container horizontal padding — page edges, section breaks, vertical rhythm between groups |
-| 32px | Major section separation — profile section to content, sign-out section top margin |
-| 48px | Hero spacing — welcome tagline to sign-in buttons, largest standard gap |
-
-### Layout Rules
-
-- **Mobile-first.** Design for 375px viewport width. Ionic handles scaling to larger screens.
-- **Centered action areas:** max-width 320px (sign-in buttons, welcome content only). Tab and list pages are full-width with no container cap.
-- **Centering:** Flexbox column + center alignment for standalone pages (welcome, account profile).
-- **Page padding:** 24px horizontal, 32px vertical for full-screen pages (welcome-style).
-- **Desktop breakpoint:** 993px — `ion-split-pane` pins a 250px sidebar, tab bar hides.
-- **No explicit grid system.** Ionic's layout utilities (`ion-grid`, `ion-row`, `ion-col`) are available but most layouts are simple vertical stacks. The app is list-and-card based, not grid-based.
-
-### Whitespace Philosophy
-
-Hearthly uses comfortable, domestic spacing — not the vast breathing room of a marketing site, not the tight compression of a data dashboard. The spacing says "take your time" without wasting screen real estate on a mobile device. Sections feel grouped but not cramped. The 24px container padding is generous enough to feel airy on a phone screen without pushing content unnecessarily small.
-
-### Border Radius Scale
-
-| Value | Token | Usage |
-|---|---|---|
-| 8px | — | Sidebar navigation items, small interactive elements |
-| 12px | `--hearthly-radius-button` | Buttons, inputs, form elements |
-| 14px | `--hearthly-radius-card` | Cards, content containers |
-| 9999px | — | Pill badges, tags, status labels — full pill shape |
-| 50% | — | Avatars, circular elements — always perfect circles |
-
-The radius scale is deliberately narrow. Four values plus circles cover the entire app. This isn't a limitation — it's consistency. Every rounded corner feels like it belongs to the same family.
+| `6px` | Checkboxes, small primitives |
+| `8px` | Sidenav nav items |
+| `12px` | Buttons, inputs, badges (small), Banner/Toast |
+| `14px` | Cards, modals, action sheets (top-only) |
+| `9999px` | Pills, tags, toggles, segmented control |
+| `50%` | Avatars, circles |
 
 ## 6. Depth & Elevation
 
-| Level | Treatment | Usage |
+| Level | Treatment | Use |
 |---|---|---|
-| Flat (Level 0) | No shadow, no border | Most surfaces — list items, toolbars, tab bar, page background |
-| Contained (Level 1) | `1px solid var(--ion-border-color)` | Warm border containment — the default for cards and containers |
-| Whisper (Level 2) | `1px solid var(--ion-border-color)` + `rgba(0,0,0,0.03) 0px 2px 8px` | Cards (`ion-card`) — warm border plus a barely-visible lift |
-| Modal (Level 3) | Ionic default modal/popover shadow | Action sheets, dialogs, popovers — framework-managed elevation |
+| Flat | No shadow, no border | Page bg, lists, chrome surfaces (with their borders) |
+| Contained | `1px solid` Warm Divider | Inline containers |
+| Whisper | `1px` Warm Divider + `rgba(0,0,0,0.03) 0px 2px 8px` | **Cards** (Move #1) |
+| Modal | `rgba(0,0,0,0.08) 0px 8px 24px` | All transient overlays |
 
-**Shadow Philosophy:** Hearthly's depth comes from three mechanisms layered together: the canvas/surface color difference (Warm Stone vs Clean Surface), warm borders (`--ion-border-color`), and whisper-soft shadows at 0.03 opacity. This replaces Ionic's default Material card shadow — which uses cold-tinted rgba at up to 0.2 opacity — with something warmer and subtler, inspired by Notion's sub-0.05 opacity approach and Claude's warm ring borders.
+### Surface Elevation Map
 
-The result should feel like cards sitting on a warm wooden desk — paper on wood, not glass floating over a void. Borders do the containing, the surface color difference creates depth, and the whisper shadow adds just enough lift to feel three-dimensional without drawing attention to itself.
+| Surface | Level |
+|---|---|
+| Page background | Flat |
+| AppHeader | Flat + `1px` Warm Divider bottom |
+| BottomTabBar | Flat + `1px` Warm Divider top |
+| SideNav | Flat + `1px` Warm Divider right |
+| List container | Flat (rows with `1px` Warm Divider separators) |
+| Card | Whisper |
+| Action Menu / Selection Dropdown / Tooltip | Modal |
+| Action Sheet / Bottom Sheet | Modal + top-rounded `14px` |
+| Dialog / Modal / Toast | Modal |
+| PrimaryAction (FAB) | Modal |
+| Long-Wait Indicator | Flat (in-flow) |
+| Modal Scrim | `rgba(15, 14, 13, 0.5)` |
 
-Modal and popover shadows use Ionic's defaults unchanged — these are transient overlays that benefit from stronger elevation to signal their temporary nature.
+**No scroll-triggered elevation.** Headers never gain shadow when content scrolls. Calm > spectacle.
 
-## 7. Do's and Don'ts
+Depth comes from: canvas/surface color difference + warm borders + whisper-soft card shadow + slightly stronger modal shadow. Paper on wood, not glass over a void.
+
+## 7. Motion & Haptics
+
+> **Motion in Hearthly is functional only — it communicates state change, never personality.**
+
+### Durations
+
+- `150ms` — micro (color, background, border, opacity)
+- `200ms` — macro (modal fade+slide, sheet slide-in, tab transitions)
+
+### Easings
+
+- `ease-out` — entrances
+- `ease-in` — exits
+- `ease` — state changes
+- **No springs, no bouncy cubic-béziers.**
+
+### What animates
+
+Allowed: `color`, `background-color`, `border-color`, `opacity`, `transform` (modal fade+slide, button press `scale(0.98)`, sheet slide).
+
+Not animated: layout (`width`, `height`, `padding`, `margin`). No hover-wiggle, no pulse.
+
+### Sanctioned ornamental motion
+
+**Loading Skeleton shimmer** (`1.5s` sweep) is the one exception to functional-only motion. Progress signals read as broken without it. Under `prefers-reduced-motion`, shimmer disables (static blocks).
+
+### Reduced motion
+
+Under `prefers-reduced-motion: reduce`:
+- Transforms disabled
+- Transitions drop to `0.01ms`
+- Shimmer disabled
+- Haptics disabled
+- Long-Wait spinner becomes a static `hourglass` icon
+
+### Haptics (3 semantic triggers)
+
+Via `@capacitor/haptics`. Respects `prefers-reduced-motion`.
+
+| Trigger | Haptic | Context |
+|---|---|---|
+| Destructive confirm | Warning notification | Destructive Button press in an alertdialog |
+| Toast error shown | Error notification | Non-blocking error via toast |
+| Bottom sheet swipe-dismiss | Light impact | User-initiated close gesture |
+
+Intentionally not haptic: primary-button press, action-sheet option tap, toast-success. Visual feedback suffices; haptic would be cosmetic.
+
+## 8. Do's and Don'ts
 
 ### Do
 
-- Use Ionic components (`ion-button`, `ion-card`, `ion-item`, `ion-toolbar`, `ion-tabs`, `ion-modal`) for all structural UI — they are the design system
-- Import Ionic components individually from `@ionic/angular/standalone` — standalone components only, no NgModules
-- Register icons via `addIcons()` in component constructors — the Ionic icon pattern
-- Use `var(--ion-color-*)` and `var(--hearthly-*)` tokens for all colors — never hardcode hex values in component SCSS
-- Keep component SCSS minimal — if Ionic already handles it through variables, don't duplicate with custom styles
-- Use `data-testid` attributes on all interactive elements for test selectors
-- Maintain warm-toned neutrals everywhere — stone/beige undertone on every gray, in both light and dark mode
-- Let the terracotta accent be the only chromatic color — it should feel special when it appears
-- Use the surface/canvas color difference for depth — not shadows
+- Reference colors by semantic name — never hardcode hex in component styles
+- Use tokens for every color, radius, shadow
+- Keep neutrals warm in both modes (Move #3)
+- Apply Whisper Card shadow to cards only (Move #1); transient overlays use Modal level
+- Use Title Case on buttons and interactive labels (Move #6)
+- Cross-reference Signature Moves by number in downstream specs
+- Warning banners always carry the warning icon — differentiates from Terracotta tints
 
 ### Don't
 
-- Don't use Tailwind, Angular Material, or any utility-class CSS framework — Ionic + CSS variables is the styling system
-- Don't add custom web fonts — the system font stack is the design, not a fallback
-- Don't use heavy or cold shadows — the whisper shadow (`rgba(0,0,0,0.03) 0px 2px 8px`) on cards is the maximum; anything above 0.05 opacity is too much
-- Don't use cold blue-grays anywhere — every neutral must carry warm stone/beige undertones
-- Don't use pure black (`#000000`) for text or backgrounds — use Warm Dark (`#1c1917`) or near-black (`#0f0e0d`)
-- Don't use pure white (`#ffffff`) for page backgrounds — use Warm Stone (`#f8f7f5`). Pure white is reserved for card surfaces only
-- Don't build custom navigation patterns — use Ionic's `ion-tabs`, `ion-split-pane`, `ion-menu`
-- Don't override Ionic's platform-adaptive behavior — iOS rendering on iOS, Material on Android is correct
-- Don't add decorative elements, gradients, illustrations, or animations without a clear functional purpose — the design is content-first, not decoration-first
-- Don't introduce additional brand colors beyond terracotta and the three status colors (success, danger, warning)
-- Don't use solid-colored badge backgrounds — always use translucent tints (10–12% opacity) for pills and tags
+- Don't use `#ffffff` for primary text (use Warm Dark or Warm Parchment `#f5f0eb` in dark mode)
+- Don't use `#808080` or Material's `#e0e0e0` for borders (use Warm Divider)
+- Don't use `#1976d2` or any cool-blue focus color (use Hearth Terracotta)
+- Don't use pure black / pure white for page backgrounds
+- Don't use UPPERCASE button labels
+- Don't use solid-colored badge backgrounds (Move #5 — tinted only)
+- Don't add decorative motion, gradients, hero illustrations, or background patterns
+- Don't use screenshots of chats or other apps as family content
+- Don't introduce a cool-blue info color (use neutral variant)
+- Don't adopt platform-adaptive rendering (one unified brand voice everywhere)
 
-## 8. Responsive Behavior
+## 9. Responsive Behavior & Accessibility Baseline
 
 ### Breakpoints
 
-| Name | Width | Behavior |
-|---|---|---|
-| Mobile | < 993px | Bottom tab bar visible (4 tabs: Home, Budget, Lists, Calendar). No sidebar. Full-width content. Header avatar for account access. |
-| Desktop | >= 993px | `ion-split-pane` pins a 250px sidebar with same navigation items. Tab bar hidden via `@media (min-width: 993px) { ion-tab-bar { display: none; } }`. Avatar stays in header. |
+Single switch at `993px` (Move #8). Below: BottomTabBar visible, no SideNav, full-width content, header avatar for account access. Above: `250px` SideNav pinned, BottomTabBar hidden, avatar stays in header.
 
-The single breakpoint is intentional. Ionic's adaptive components handle intermediate sizes gracefully. The only structural change is sidebar vs tabs — everything else scales naturally.
+Content-width constraint (`360px` max for welcome/auth) is a content rule, not a breakpoint.
 
-### Touch Targets
+### Touch targets
 
-- Minimum 44px touch target — Ionic enforces this on mobile
-- Buttons: 14px vertical padding minimum (Google Sign-In sets the standard)
-- List items: Ionic default item height (~48px) — comfortable for thumb interaction
-- Tab bar icons: Ionic default sizing — adequate for all finger sizes
+- Minimum `44×44px`
+- Buttons: `48px` total height
+- List rows: `48px` tall; Settings-List rows `56px` for value-display comfort
+- Tab bar cells: full-cell tap target
 
-### Navigation Collapse
+### Gestures (iOS)
 
-- **Mobile:** 4 bottom tabs (Home, Budget, Lists, Calendar) + header avatar (32px circle, top-right) for account access
-- **Desktop:** 250px sidebar with the same navigation items, avatar remains in header
-- **Account page:** Full-screen, outside the tab system — has its own header with back button. Not nested inside the shell to avoid double-header.
+- **Edge-swipe-back**: left-edge pan dismisses stacked routes (Account page, sub-pages). Shell responsibility.
+- Swipe-to-dismiss on Action Sheets / Bottom Sheets
+- Pull-to-refresh via PageContainer `onRefresh` (opt-in)
 
-### Safe Areas
+### Safe areas
 
-Ionic handles safe-area insets automatically via CSS environment variables (`safe-area-inset-top`, `safe-area-inset-bottom`). Do not add manual safe-area padding — it will conflict with Ionic's handling and produce double spacing on notched devices.
+Use `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`, etc. for PageContainer, AppHeader, BottomTabBar, PrimaryAction. Explicit handling only — no framework defaults.
 
-## 9. Agent Prompt Guide
+### Accessibility baseline
 
-### Quick Color Reference
+Pragmatic scope for a family app — not enterprise compliance:
+
+- **Contrast**: WCAG AA floor. Stone Muted is for secondary/UI only (fails AA on body text); use Deep Stone for body-weight secondary. Measure exact ratios during implementation.
+- **Focus visibility**: `2px` Hearth Terracotta outline with `2px` offset, `:focus-visible` only.
+- **Keyboard (desktop)**: Tab in visual order, Enter activates, Space toggles switches/checkboxes, ESC closes overlays, arrow keys within radio groups and segmented controls. Sensible defaults — not full APG compliance.
+- **Screen readers**: VoiceOver (iOS) and TalkBack (Android) are primary. Every component declares appropriate ARIA role in its §4 spec; component authors use those.
+- **Alt text**: user-supplied caption on upload; fallback `alt="Photo uploaded by {name}"`. Decorative images `alt=""`. Icon-only buttons require `aria-label`.
+- **Reduced motion**: see §7.
+
+If Hearthly grows into regulated territory (thousands of users, EU jurisdictions, etc.), this section expands. For now: baseline that works, not exhaustive compliance.
+
+## 10. Voice & Copy
+
+Voice reinforces the warm-domestic identity.
+
+- **Empty states**: warm, not cheerful. *"Nothing here yet. Add your first list."* not *"Oh no, empty!"*
+- **Errors**: concrete, non-blaming. *"Couldn't save — check your connection"* not *"Failure: network error"*
+- **Destructive confirmation template**: `Delete [Specific Thing]? This can't be undone.` Always name the thing. One short second sentence. No "Are you sure?"
+- **Button labels**: actions, not restatements. *"Save"* not *"OK"*. *"Discard"* not *"Cancel"* for destructive dismissal. For non-destructive dialogs, *"Cancel"* stays *"Cancel"*.
+- **First-run vs zero-data**: first-run is warm and inviting; zero-data is neutral and informational.
+- **Tone**: conversational, not cutesy. No exclamation points in errors. No emoji in UI copy.
+
+## 11. Agent Prompt Guide
+
+### Quick reference
 
 ```
-Primary:     Hearth Terracotta  #c7724e (light) / #d4885e (dark)
-Shade:       Terracotta Shade   #a3572e (light) / #c7724e (dark)
-Tint:        Terracotta Tint    #d4885e (light) / #e8a67a (dark)
+Brand:       Hearth Terracotta  #c7724e (light) / #d4885e (dark)
 Background:  Warm Stone         #f8f7f5 (light) / #0f0e0d (dark)
 Surface:     Clean Surface      #ffffff (light) / #1c1a18 (dark)
 Text:        Warm Dark          #1c1917 (light) / #f5f0eb (dark)
-Muted:       Stone Muted        #78716c (light) / #a39e98 (dark)
+Muted:       Stone Muted        #78716c (light) / #a39e98 (dark) — secondary/UI only
+Body-muted:  Deep Stone         #65605b (light)                  — body-weight secondary
 Border:      Warm Divider       #e5e2dc (light) / #2a2725 (dark)
 Success:     Warm Success       #2e7d32 (light) / #66bb6a (dark)
 Danger:      Warm Danger        #b53333 (light) / #e57373 (dark)
 Warning:     Warm Warning       #e65100 (light) / #ffb74d (dark)
 ```
 
-### Example Component Prompts
+### Composition prompts
 
-"Create a home tab page: `ion-content` with Warm Stone background (`#f8f7f5`). A greeting card using `ion-card` with 14px radius on Clean Surface (`#ffffff`). Title at 20px weight 600 in Warm Dark (`#1c1917`), subtitle at 16px weight 400 in Stone Muted (`#78716c`). Use standalone component with individual Ionic imports."
+Four high-level prompts matching how agents request UI.
 
-"Design a family member list: `ion-list` with `ion-item` rows on Clean Surface. Each row has a 32px avatar circle (terracotta `#c7724e` background, white initials at 600 weight), name at 16px/400 in Warm Dark, role at 14px/400 in Stone Muted. 12px gap between avatar and text. Borders use `--ion-border-color` (`#e5e2dc`)."
+**1. Build a tab root page.**
+- PageContainer in standard mode, iOS-style scroll-preserve
+- AppHeader with optional LargeTitle variant (Display 40/700 in scroll content, compact title in sticky header)
+- Content: Whisper Cards (Move #1)
+- Optional PrimaryAction (Extended FAB) for tabs with a primary constructive action
+- Search lives in-page at top of content, NOT in AppHeader
+- Applies Moves #1, #6, #8
 
-"Build an account page: `ion-content` with centered profile section — 64px avatar circle (terracotta background, 20px/600 white initials), name at 20px/600, email at 14px/400 in Stone Muted. 4px gap between name and email, 12px below avatar. Below: `ion-list` with navigation items (Family, Settings, Help). Sign-out button at bottom with 32px top margin."
+**2. Build a destructive-confirm modal.**
+- Modal with `role="alertdialog"`, `aria-modal="true"`, `aria-labelledby` on title, focus defaults to Cancel
+- Destructive Button primary (right on desktop, stacked-top mobile); Cancel secondary
+- Copy follows destructive template: `Delete [Specific Thing]? This can't be undone.`
+- Primary press triggers warning-confirm haptic (§7)
+- ESC closes, return focus to invoker
+- Applies Move #6, §7 haptics, §10 voice
 
-"Create a settings list that works in both light and dark mode: use `var(--ion-text-color)` for labels, `var(--hearthly-text-muted)` for descriptions, `var(--ion-item-background)` for row backgrounds, `var(--ion-border-color)` for separators. Never hardcode hex values — the CSS variables handle mode switching automatically."
+**3. Build a form section.**
+- Form anatomy: Label → Input → Helper or Error, `4px` gap, `12px` between fields, `24px` between sections
+- Required marker: appended `*` in Warm Danger
+- Error state: Warm Danger border + Caption message below
+- Submit: Primary Button bottom-right desktop, full-width mobile
+- Optional async validation affordance (inline spinner → check / alert-circle)
+- Applies Moves #4, #6
 
-"Verify dark mode: background shifts to `#0f0e0d`, surfaces to `#1c1a18`, text to `#f5f0eb`, muted text to `#a39e98`, borders to `#2a2725`, primary lightens to `#d4885e`. All grays must stay warm-toned (stone undertone). No cold blue-grays."
+**4. Build a tab-root empty state.**
+- Centered vertically in PageContainer
+- `48px` Lucide icon in `64px` circle with `10%` Hearth Terracotta tint bg (the sanctioned exception; don't reuse)
+- Page Title headline (first-run warm, zero-data neutral — §10 voice)
+- Body text in Stone Muted, max-width `~320px`
+- Optional inline Primary Button
+- Applies Moves #4, #5
 
-"Create a new feature tab: standalone Angular component, Ionic imports from `@ionic/angular/standalone`, register icons via `addIcons()` in constructor. Scoped SCSS using `var(--ion-color-*)` and `var(--hearthly-*)` tokens. `data-testid` on all interactive elements. Test with `provideRouter([])` in test providers."
-
-### Iteration Guide
-
-- Always specify warm-toned colors by name — "use Stone Muted (`#78716c`)" not "make it gray"
-- Specify Ionic components explicitly — "`ion-card` with 14px radius" not "a card component"
-- Reference CSS variable tokens — `var(--ion-color-primary)` not `#c7724e` in SCSS
-- For cards, use the whisper shadow defined in `styles.scss` via `--box-shadow` — do not add other shadow values. For all other elements, use no shadow
-- The warm background is non-negotiable — always "on Warm Stone (`#f8f7f5`)" or "on near-black (`#0f0e0d`)"
-- Check both modes — every component must work in light and dark by using CSS variables, not hardcoded colors
-
-### Framework Notes for AI Agents
-
-- **This is an Ionic 8 app**, not a plain HTML/CSS app. Always use `ion-*` components for structure.
-- **Standalone components only** — no NgModules. Each component declares its own `imports: [IonContent, IonCard, ...]`.
-- **CSS variables are the theming mechanism.** All Ionic components inherit from `--ion-color-*` variables. Changing `variables.scss` changes the entire app.
-- **Token source of truth:** `apps/hearthly-app/src/theme/variables.scss`
-- **Architecture decisions:** `docs/frontend-design.md` (why Ionic, why bottom tabs, app icon direction)
-- **Icon registration pattern:** `addIcons({ iconName })` in constructor, then `<ion-icon name="icon-name">` in template.
