@@ -24,7 +24,12 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 
 ## Build & Run Commands
 
-**Quality gates (run before every commit):** `npx nx lint <app>` + `npx nx test <app>` + `npx nx build <app>` for affected apps. Helm charts: `helm template <name> <path>` to verify rendering.
+**Quality gates (run before every commit):**
+
+1. `npx nx lint <app>` + `npx nx test <app>` + `npx nx build <app>` for affected apps
+2. `bun run format:check` — Prettier check across the repo (also enforced in CI)
+3. Helm charts: `helm template <name> <path>` to verify rendering
+4. **UI/design changes only — manual DESIGN.md review (not CI-checkable):** open `DESIGN.md` and verify the change respects the relevant spec — tokens used by semantic name (§2), typography roles (§3), component specs (§4), spacing/radius (§5), elevation level (§6), motion/haptic rules (§7), and the eight Signature Moves (§1). If the design intentionally diverges, update `DESIGN.md` in the same PR.
 
 ```bash
 # Initial setup
