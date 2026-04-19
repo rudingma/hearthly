@@ -18,6 +18,11 @@ test.describe('Tab-root placeholders', () => {
 
         const critical = await analyzeA11y(page);
         expect(critical).toEqual([]);
+
+        await expect(page).toHaveScreenshot(`${route}-${scheme}.png`, {
+          fullPage: true,
+          maxDiffPixelRatio: 0.05,
+        });
       });
     }
   }

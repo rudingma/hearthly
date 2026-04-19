@@ -26,6 +26,11 @@ test.describe('Home', () => {
 
       const critical = await analyzeA11y(page);
       expect(critical).toEqual([]);
+
+      await expect(page).toHaveScreenshot(`home-${scheme}.png`, {
+        fullPage: true,
+        maxDiffPixelRatio: 0.05,
+      });
     });
   }
 });

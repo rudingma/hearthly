@@ -15,6 +15,11 @@ test.describe('Welcome', () => {
 
       const critical = await analyzeA11y(page);
       expect(critical).toEqual([]);
+
+      await expect(page).toHaveScreenshot(`welcome-${scheme}.png`, {
+        fullPage: true,
+        maxDiffPixelRatio: 0.05,
+      });
     });
 
     test(`primary button hover passes axe (${scheme})`, async ({ page }) => {
