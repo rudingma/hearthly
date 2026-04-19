@@ -1,12 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
+import { ButtonDirective } from '../ui/button.directive';
+import { PageContainerComponent } from '../ui/page-container/page-container.component';
 
 @Component({
   selector: 'app-welcome',
-  imports: [IonContent, IonButton],
+  standalone: true,
+  imports: [ButtonDirective, PageContainerComponent],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.scss',
 })
