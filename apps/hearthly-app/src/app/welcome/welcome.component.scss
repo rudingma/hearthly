@@ -32,7 +32,7 @@
   font-weight: 500;
   line-height: 1.5;
   text-align: center;
-  color: var(--color-stone-muted);
+  color: var(--color-text-body-muted);
 }
 .welcome-buttons {
   display: flex;
@@ -43,7 +43,7 @@
 .welcome-divider {
   position: relative;
   text-align: center;
-  color: var(--color-stone-muted);
+  color: var(--color-text-body-muted);
   font-size: 14px;
 
   &::before,
@@ -92,7 +92,7 @@
   background: #f8f9fa;
 }
 .google-sign-in:focus-visible {
-  outline: 2px solid var(--color-hearth-terracotta);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 .google-icon {

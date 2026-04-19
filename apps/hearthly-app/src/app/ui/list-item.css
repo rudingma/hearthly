@@ -22,7 +22,7 @@
     background: color-mix(in srgb, var(--color-warm-dark) 4%, transparent);
   }
   .app-list-item--interactive:focus-visible {
-    outline: 2px solid var(--color-hearth-terracotta);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: -2px;
   }
 }

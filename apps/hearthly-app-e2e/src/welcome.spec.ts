@@ -1,50 +1,46 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-
-/**
- * Axe runs with the DEFAULT ruleset — we need the full contrast / name-role /
- * keyboard set, not just one rule. `landmark-unique` is included by default;
- * we re-enable it explicitly to be resilient to future axe defaults.
- *
- * `color-contrast` is disabled for now — DESIGN.md's Hearth Terracotta primary
- * (`#fff` on `#c7724e` = 3.53:1) and Stone Muted body-text (`#78716c` on
- * `#f8f7f5` = 4.48:1) fall short of WCAG AA 4.5:1. Pre-existing tokens
- * inherited from `main`; re-enable this rule once #99 lands.
- */
-function axeBuilder(page: import('@playwright/test').Page) {
-  return new AxeBuilder({ page }).options({
-    rules: {
-      'landmark-unique': { enabled: true },
-      'color-contrast': { enabled: false },
-    },
-  });
-}
+import { analyzeA11y } from '../playwright/axe';
+import { stubOIDC } from '../playwright/auth-stub';
 
 test.describe('Welcome', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('renders core content and passes axe (light)', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'light' });
-    await page.goto('/');
-    await expect(page.getByTestId('sign-in-google')).toBeVisible();
-    await expect(page.locator('h1')).toContainText('Hearthly');
-
-    const results = await axeBuilder(page).analyze();
-    const critical = results.violations.filter((v) =>
-      ['serious', 'critical'].includes(v.impact ?? '')
-    );
-    expect(critical).toEqual([]);
+  test.beforeEach(async ({ page }) => {
+    // Unauthenticated specs still need OIDC discovery to succeed so
+    // `AuthService.init()` can finish and bootstrap the app. See stubOIDC.
+    await stubOIDC(page);
   });
 
-  test('renders core content and passes axe (dark)', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'dark' });
-    await page.goto('/');
-    await expect(page.getByTestId('sign-in-google')).toBeVisible();
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`renders core content and passes axe (${scheme})`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/');
+      await expect(page.getByTestId('sign-in-google')).toBeVisible();
+      await expect(page.locator('h1')).toContainText('Hearthly');
 
-    const results = await axeBuilder(page).analyze();
-    const critical = results.violations.filter((v) =>
-      ['serious', 'critical'].includes(v.impact ?? '')
-    );
-    expect(critical).toEqual([]);
-  });
+      const critical = await analyzeA11y(page);
+      expect(critical).toEqual([]);
+
+      await expect(page).toHaveScreenshot(`welcome-${scheme}.png`, {
+        fullPage: true,
+        maxDiffPixelRatio: 0.05,
+      });
+    });
+
+    test(`primary button hover passes axe (${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/');
+      // Hover the primary Sign In button to exercise --color-primary-fill-hover
+      // (color-mix(in oklch, …, black)) — a broken oklch composition would
+      // silently pass without this.
+      const signIn = page.getByTestId('sign-in-password');
+      await expect(signIn).toBeVisible();
+      await signIn.hover();
+
+      const critical = await analyzeA11y(page);
+      expect(critical).toEqual([]);
+    });
+  }
 });
