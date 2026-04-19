@@ -1,8 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { analyzeA11y } from '../playwright/axe';
+import { stubOIDC } from '../playwright/auth-stub';
 
 test.describe('Welcome', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test.beforeEach(async ({ page }) => {
+    // Unauthenticated specs still need OIDC discovery to succeed so
+    // `AuthService.init()` can finish and bootstrap the app. See stubOIDC.
+    await stubOIDC(page);
+  });
 
   for (const scheme of ['light', 'dark'] as const) {
     test(`renders core content and passes axe (${scheme})`, async ({
