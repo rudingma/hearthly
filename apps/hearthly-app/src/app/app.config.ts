@@ -4,25 +4,39 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {
+  provideRouter,
+  TitleStrategy,
+  withInMemoryScrolling,
+  withComponentInputBinding,
+} from '@angular/router';
 import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import { provideOAuthClient, OAuthService } from 'angular-oauth2-oidc';
-import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { InMemoryCache, ApolloLink } from '@apollo/client/core';
 import { SetContextLink } from '@apollo/client/link/context';
 import { appRoutes } from './app.routes';
 import { AuthService } from './auth/auth.service';
+import { HearthlyTitleStrategy } from './shell/title-strategy';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(appRoutes),
+    provideRouter(
+      appRoutes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled',
+      }),
+      withComponentInputBinding()
+    ),
+    // `useExisting` so the router uses our custom strategy AND components
+    // can inject `HearthlyTitleStrategy` directly to read the signal.
+    { provide: TitleStrategy, useExisting: HearthlyTitleStrategy },
     provideHttpClient(),
     provideOAuthClient(),
-    provideIonicAngular({}),
     provideApollo(() => {
       const httpLink = inject(HttpLink);
       const oauthService = inject(OAuthService);

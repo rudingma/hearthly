@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Test } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 
@@ -11,18 +10,21 @@ describe('UserService', () => {
     findOrCreateByKeycloakId: ReturnType<typeof vi.fn>;
   };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     repo = {
       findById: vi.fn(),
       findByKeycloakId: vi.fn(),
       findOrCreateByKeycloakId: vi.fn(),
     };
 
-    const module = await Test.createTestingModule({
-      providers: [UserService, { provide: UserRepository, useValue: repo }],
-    }).compile();
-
-    service = module.get(UserService);
+    // Direct instantiation (no NestJS DI) — matches the pattern in
+    // user.repository.integration.spec.ts and jwt-auth.guard.spec.ts.
+    // Vitest runs TypeScript through esbuild which doesn't emit
+    // `emitDecoratorMetadata`, so `Test.createTestingModule` can't wire
+    // the `UserRepository` constructor parameter by type — it silently
+    // leaves `userRepo` undefined. Plain instantiation sidesteps that
+    // and keeps the unit test focused on service logic.
+    service = new UserService(repo as unknown as UserRepository);
   });
 
   describe('getById', () => {

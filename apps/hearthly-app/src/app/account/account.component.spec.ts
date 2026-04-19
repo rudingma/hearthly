@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { signal, computed } from '@angular/core';
 import { AccountComponent } from './account.component';
 import { AuthService } from '../auth/auth.service';
+import { NavigationHistoryService } from '../shell/navigation-history.service';
 
 describe('AccountComponent', () => {
   const currentUser = signal<{
@@ -20,28 +21,15 @@ describe('AccountComponent', () => {
     isAuthenticated: computed(() => true),
     isLoading: signal(false),
     error: signal<string | null>(null),
-    displayName: computed(() => {
-      const user = currentUser();
-      if (!user) return '';
-      return user.name || user.email.split('@')[0];
-    }),
-    initials: computed(() => {
-      const name = currentUser()?.name;
-      if (name) {
-        const parts = name.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0][0].toUpperCase();
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-      }
-      const email = currentUser()?.email;
-      if (email) return email[0].toUpperCase();
-      return '';
-    }),
+    displayName: computed(() => currentUser()?.name ?? ''),
+    initials: computed(() => 'MR'),
     pictureUrl: computed(() => currentUser()?.picture ?? null),
     login: vi.fn(),
     logout: vi.fn(),
     retry: vi.fn(),
     init: vi.fn(),
   };
+  const mockHistory = { canGoBack: signal(true) };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -54,6 +42,7 @@ describe('AccountComponent', () => {
       imports: [AccountComponent],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
+        { provide: NavigationHistoryService, useValue: mockHistory },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -76,44 +65,16 @@ describe('AccountComponent', () => {
     const fixture = TestBed.createComponent(AccountComponent);
     fixture.detectChanges();
     const button: HTMLElement = fixture.nativeElement.querySelector(
-      'ion-button[data-testid="sign-out-button"]'
+      'button[data-testid="sign-out-button"]'
     );
     button.click();
     expect(mockAuthService.logout).toHaveBeenCalled();
   });
 
-  it('should expose pictureUrl from auth service', () => {
+  it('renders <main tabindex="-1"> wrapper (outside-shell route contract)', () => {
     const fixture = TestBed.createComponent(AccountComponent);
     fixture.detectChanges();
-    expect(fixture.componentInstance.pictureUrl()).toBeNull();
-  });
-
-  it('should display picture when user has one', async () => {
-    currentUser.set({
-      name: 'Matthias Rudingsdorfer',
-      email: 'dev@hearthly.dev',
-      id: '1',
-      picture: 'https://lh3.googleusercontent.com/photo.jpg',
-    });
-    const fixture = TestBed.createComponent(AccountComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.pictureUrl()).toBe(
-      'https://lh3.googleusercontent.com/photo.jpg'
-    );
-  });
-
-  it('should fall back to initials when image fails to load', () => {
-    currentUser.set({
-      name: 'Matthias Rudingsdorfer',
-      email: 'dev@hearthly.dev',
-      id: '1',
-      picture: 'https://lh3.googleusercontent.com/broken.jpg',
-    });
-    const fixture = TestBed.createComponent(AccountComponent);
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.imageError()).toBe(false);
-    fixture.componentInstance.onImageError();
-    expect(fixture.componentInstance.imageError()).toBe(true);
+    const main = fixture.nativeElement.querySelector('main[tabindex="-1"]');
+    expect(main).not.toBeNull();
   });
 });

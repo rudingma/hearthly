@@ -1,0 +1,28 @@
+@layer components {
+  .app-list-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+    min-height: 48px;
+    color: var(--color-warm-dark);
+    list-style: none;
+    text-decoration: none;
+  }
+
+  .app-list-item--interactive {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+  }
+  .app-list-item--interactive:hover {
+    background: color-mix(in srgb, var(--color-warm-dark) 4%, transparent);
+  }
+  .app-list-item--interactive:focus-visible {
+    outline: 2px solid var(--color-hearth-terracotta);
+    outline-offset: -2px;
+  }
+}

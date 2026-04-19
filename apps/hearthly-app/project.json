@@ -14,14 +14,14 @@
         "outputPath": "dist/apps/hearthly-app",
         "browser": "apps/hearthly-app/src/main.ts",
         "tsConfig": "apps/hearthly-app/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
+        "inlineStyleLanguage": "css",
         "assets": [
           {
             "glob": "**/*",
             "input": "apps/hearthly-app/public"
           }
         ],
-        "styles": ["apps/hearthly-app/src/styles.scss"]
+        "styles": ["apps/hearthly-app/src/styles.css"]
       },
       "configurations": {
         "production": {

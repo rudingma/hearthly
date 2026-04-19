@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
-import { IonContent, IonIcon } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { walletOutline } from 'ionicons/icons';
+import { LucideAngularModule, Wallet } from 'lucide-angular';
+import { PageContainerComponent } from '../ui/page-container/page-container.component';
 
 @Component({
   selector: 'app-budget',
-  imports: [IonContent, IonIcon],
+  standalone: true,
+  imports: [PageContainerComponent, LucideAngularModule],
   template: `
-    <ion-content class="ion-padding">
+    <app-page-container>
       <div class="placeholder-page">
-        <ion-icon name="wallet-outline" size="large"></ion-icon>
+        <lucide-icon [img]="WalletIcon" [size]="48" />
         <h2>Budget</h2>
         <p>Coming soon</p>
       </div>
-    </ion-content>
+    </app-page-container>
   `,
   styles: [
     `
@@ -24,17 +24,17 @@ import { walletOutline } from 'ionicons/icons';
         justify-content: center;
         min-height: 60vh;
         text-align: center;
-        color: var(--hearthly-text-muted);
+        color: var(--color-stone-muted);
       }
       h2 {
         margin: 16px 0 8px;
-        color: var(--ion-text-color);
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--color-warm-dark);
       }
     `,
   ],
 })
 export class BudgetComponent {
-  constructor() {
-    addIcons({ walletOutline });
-  }
+  protected readonly WalletIcon = Wallet;
 }

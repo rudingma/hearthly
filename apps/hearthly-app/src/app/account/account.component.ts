@@ -1,40 +1,34 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonIcon,
-  IonButton,
-  IonBackButton,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-} from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import {
-  peopleOutline,
-  settingsOutline,
-  helpCircleOutline,
-  logOutOutline,
-} from 'ionicons/icons';
+  LucideAngularModule,
+  Users,
+  Settings,
+  HelpCircle,
+  LogOut,
+} from 'lucide-angular';
 import { AuthService } from '../auth/auth.service';
+import { AvatarComponent } from '../ui/avatar/avatar.component';
+import { ButtonDirective } from '../ui/button.directive';
+import { ListItemDirective } from '../ui/list-item.directive';
+import { PageContainerComponent } from '../ui/page-container/page-container.component';
+import { HeaderComponent } from '../shell/header/header.component';
 
 @Component({
   selector: 'app-account',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    IonContent,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonIcon,
-    IonButton,
-    IonBackButton,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
+    HeaderComponent,
+    PageContainerComponent,
+    AvatarComponent,
+    ButtonDirective,
+    ListItemDirective,
+    LucideAngularModule,
   ],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
@@ -42,32 +36,19 @@ import { AuthService } from '../auth/auth.service';
 export class AccountComponent {
   private readonly authService = inject(AuthService);
 
-  readonly userName = this.authService.displayName;
-  readonly userEmail = computed(
+  protected readonly userName = this.authService.displayName;
+  protected readonly userEmail = computed(
     () => this.authService.currentUser()?.email ?? ''
   );
-  readonly initials = this.authService.initials;
-  readonly pictureUrl = this.authService.pictureUrl;
-  readonly imageError = signal(false);
+  protected readonly initials = this.authService.initials;
+  protected readonly pictureUrl = this.authService.pictureUrl;
 
-  constructor() {
-    addIcons({
-      peopleOutline,
-      settingsOutline,
-      helpCircleOutline,
-      logOutOutline,
-    });
-    effect(() => {
-      this.pictureUrl();
-      this.imageError.set(false);
-    });
-  }
+  protected readonly UsersIcon = Users;
+  protected readonly SettingsIcon = Settings;
+  protected readonly HelpCircleIcon = HelpCircle;
+  protected readonly LogOutIcon = LogOut;
 
-  onImageError(): void {
-    this.imageError.set(true);
-  }
-
-  signOut(): void {
+  protected signOut(): void {
     this.authService.logout();
   }
 }

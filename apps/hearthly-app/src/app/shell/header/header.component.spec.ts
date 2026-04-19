@@ -1,162 +1,97 @@
+import { Location } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { signal, computed } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { computed, signal } from '@angular/core';
+import { describe, expect, it, vi } from 'vitest';
+import { LucideAngularModule } from 'lucide-angular';
 import { HeaderComponent } from './header.component';
 import { AuthService } from '../../auth/auth.service';
-import type { User } from '../../auth/auth.service';
+import { NavigationHistoryService } from '../navigation-history.service';
 
-function createMockAuthService(
-  user: User | null = {
-    name: 'Matthias Rudingsdorfer',
-    email: 'dev@hearthly.dev',
-    id: '1',
-  }
-) {
-  const currentUser = signal(user);
-  const initials = computed(() => {
-    const name = currentUser()?.name;
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  });
-  const pictureUrl = computed(() => currentUser()?.picture ?? null);
+function authStub() {
   return {
-    currentUser,
-    isAuthenticated: computed(() => currentUser() !== null),
-    isLoading: signal(false),
-    error: signal<string | null>(null),
-    initials,
-    pictureUrl,
-    login: vi.fn(),
-    logout: vi.fn(),
-    retry: vi.fn(),
-    init: vi.fn(),
-  };
+    initials: signal('MR'),
+    pictureUrl: signal(null),
+    displayName: signal('Matthias'),
+    currentUser: signal({ email: 'x@y.z' }),
+    isAuthenticated: computed(() => true),
+    isLoading: computed(() => false),
+    error: signal(null),
+  } as unknown as AuthService;
+}
+
+function baseProviders(canGoBack = false) {
+  return [
+    { provide: AuthService, useValue: authStub() },
+    {
+      provide: NavigationHistoryService,
+      useValue: {
+        canGoBack: signal(canGoBack),
+      } as unknown as NavigationHistoryService,
+    },
+    { provide: Location, useValue: { back: vi.fn() } },
+    { provide: Router, useValue: { navigateByUrl: vi.fn() } },
+    { provide: ActivatedRoute, useValue: {} },
+  ];
 }
 
 describe('HeaderComponent', () => {
-  it('should create', async () => {
-    const mockAuth = createMockAuthService();
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(HeaderComponent);
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it('should display user initials from full name', async () => {
-    const mockAuth = createMockAuthService({
-      name: 'Matthias Rudingsdorfer',
-      email: 'dev@hearthly.dev',
-      id: '1',
+  it('hides the back button when showBack is false', () => {
+    TestBed.configureTestingModule({
+      imports: [HeaderComponent, LucideAngularModule],
+      providers: baseProviders(false),
     });
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
     fixture.detectChanges();
-    expect(fixture.componentInstance.initials()).toBe('MR');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="header-back"]')
+    ).toBeNull();
   });
 
-  it('should handle single-word name', async () => {
-    const mockAuth = createMockAuthService({
-      name: 'Matthias',
-      email: 'dev@hearthly.dev',
-      id: '1',
+  it('shows the back button when showBack is true and calls Location.back()', () => {
+    TestBed.configureTestingModule({
+      imports: [HeaderComponent, LucideAngularModule],
+      providers: baseProviders(true),
     });
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.componentRef.setInput('showBack', true);
     fixture.detectChanges();
-    expect(fixture.componentInstance.initials()).toBe('M');
+
+    const location = TestBed.inject(Location) as unknown as {
+      back: ReturnType<typeof vi.fn>;
+    };
+    const router = TestBed.inject(Router) as unknown as {
+      navigateByUrl: ReturnType<typeof vi.fn>;
+    };
+    const btn = fixture.nativeElement.querySelector(
+      '[data-testid="header-back"]'
+    ) as HTMLButtonElement;
+    btn.click();
+    expect(location.back).toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
 
-  it('should return empty string when no user', async () => {
-    const mockAuth = createMockAuthService(null);
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(HeaderComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.initials()).toBe('');
-  });
-
-  it('should expose pictureUrl from auth service', async () => {
-    const mockAuth = createMockAuthService({
-      name: 'Alice',
-      email: 'alice@example.com',
-      id: '1',
-      picture: 'https://lh3.googleusercontent.com/photo.jpg',
+  it('falls back to /app/home when canGoBack() is false', () => {
+    TestBed.configureTestingModule({
+      imports: [HeaderComponent, LucideAngularModule],
+      providers: baseProviders(false),
     });
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
     const fixture = TestBed.createComponent(HeaderComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.pictureUrl()).toBe(
-      'https://lh3.googleusercontent.com/photo.jpg'
-    );
-  });
-
-  it('should return null pictureUrl when user has no picture', async () => {
-    const mockAuth = createMockAuthService({
-      name: 'Alice',
-      email: 'alice@example.com',
-      id: '1',
-    });
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(HeaderComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.pictureUrl()).toBeNull();
-  });
-
-  it('should fall back to initials when image fails to load', async () => {
-    const mockAuth = createMockAuthService({
-      name: 'Alice',
-      email: 'alice@example.com',
-      id: '1',
-      picture: 'https://lh3.googleusercontent.com/broken.jpg',
-    });
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        provideRouter([]),
-      ],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(HeaderComponent);
+    fixture.componentRef.setInput('showBack', true);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.imageError()).toBe(false);
-    fixture.componentInstance.onImageError();
-    expect(fixture.componentInstance.imageError()).toBe(true);
+    const location = TestBed.inject(Location) as unknown as {
+      back: ReturnType<typeof vi.fn>;
+    };
+    const router = TestBed.inject(Router) as unknown as {
+      navigateByUrl: ReturnType<typeof vi.fn>;
+    };
+    (
+      fixture.nativeElement.querySelector(
+        '[data-testid="header-back"]'
+      ) as HTMLButtonElement
+    ).click();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/app/home');
+    expect(location.back).not.toHaveBeenCalled();
   });
 });

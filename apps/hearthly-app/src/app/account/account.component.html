@@ -1,53 +1,42 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/app/home"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Account</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-header heading="Account" [showBack]="true" />
+<main tabindex="-1" class="account-main">
+  <app-page-container>
+    <div class="profile-section">
+      <app-avatar
+        size="lg"
+        [pictureUrl]="pictureUrl()"
+        [initials]="initials()"
+      />
+      <h2 class="profile-name">{{ userName() }}</h2>
+      <p class="profile-email">{{ userEmail() }}</p>
+    </div>
 
-<ion-content class="ion-padding">
-  <div class="profile-section">
-    @if (pictureUrl() && !imageError()) {
-    <img
-      class="profile-avatar-img"
-      [src]="pictureUrl()"
-      (error)="onImageError()"
-      alt="Profile"
-    />
-    } @else {
-    <div class="profile-avatar">{{ initials() }}</div>
-    }
-    <h2 class="profile-name">{{ userName() }}</h2>
-    <p class="profile-email">{{ userEmail() }}</p>
-  </div>
+    <ul class="list">
+      <li appListItem>
+        <lucide-icon [img]="UsersIcon" [size]="20" />
+        <span>Family</span>
+      </li>
+      <li appListItem>
+        <lucide-icon [img]="SettingsIcon" [size]="20" />
+        <span>Settings</span>
+      </li>
+      <li appListItem>
+        <lucide-icon [img]="HelpCircleIcon" [size]="20" />
+        <span>Help</span>
+      </li>
+    </ul>
 
-  <ion-list lines="inset">
-    <ion-item button="true" detail="true">
-      <ion-icon name="people-outline" slot="start"></ion-icon>
-      <ion-label>Family</ion-label>
-    </ion-item>
-    <ion-item button="true" detail="true">
-      <ion-icon name="settings-outline" slot="start"></ion-icon>
-      <ion-label>Settings</ion-label>
-    </ion-item>
-    <ion-item button="true" detail="true">
-      <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-      <ion-label>Help</ion-label>
-    </ion-item>
-  </ion-list>
-
-  <div class="sign-out-section">
-    <ion-button
-      expand="block"
-      fill="outline"
-      color="medium"
-      data-testid="sign-out-button"
-      (click)="signOut()"
-    >
-      <ion-icon name="log-out-outline" slot="start"></ion-icon>
-      Sign out
-    </ion-button>
-  </div>
-</ion-content>
+    <div class="sign-out-section">
+      <button
+        appButton
+        variant="secondary"
+        [fullWidth]="true"
+        data-testid="sign-out-button"
+        (click)="signOut()"
+      >
+        <lucide-icon [img]="LogOutIcon" [size]="20" />
+        <span>Sign out</span>
+      </button>
+    </div>
+  </app-page-container>
+</main>
