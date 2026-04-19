@@ -1,0 +1,15 @@
+@if (isDesktop()) {
+<div class="shell shell--desktop">
+  <app-side-nav />
+  <div class="shell__content">
+    <app-header [heading]="activeTitle()" />
+    <main tabindex="-1" class="app-main"><router-outlet /></main>
+  </div>
+</div>
+} @else {
+<div class="shell shell--mobile">
+  <app-header [heading]="activeTitle()" />
+  <main tabindex="-1" class="app-main"><router-outlet /></main>
+  <app-bottom-tab-bar />
+</div>
+}

@@ -1,122 +1,101 @@
-.welcome-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.welcome-main {
+  display: block;
   min-height: 100%;
-  text-align: center;
-  padding: 32px 24px;
+  outline: none;
 }
-
 .welcome-logo {
-  margin-bottom: 24px;
-}
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
 
+  app-brand-mark {
+    width: 80px;
+    height: 80px;
+  }
+}
 .welcome-title {
-  font-size: 32px;
+  // Use margin-block only so the `.app-page-container--constrained > *`
+  // `margin-inline: auto` rule keeps the 360px box centered in the viewport.
+  // A full `margin: X Y Z` shorthand would set margin-inline to 0 and
+  // defeat the centering.
+  margin-block: 24px 8px;
+  font-size: 40px;
   font-weight: 700;
-  margin: 0 0 8px;
-  letter-spacing: -0.5px;
+  line-height: 1.1;
+  text-align: center;
+  letter-spacing: -0.75px;
+  color: var(--color-warm-dark);
 }
-
 .welcome-tagline {
+  margin-block: 0;
   font-size: 16px;
-  color: var(--hearthly-text-muted);
-  margin: 0 0 48px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-stone-muted);
 }
-
 .welcome-buttons {
-  width: 100%;
-  max-width: 360px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  margin-top: 32px;
 }
+.welcome-divider {
+  position: relative;
+  text-align: center;
+  color: var(--color-stone-muted);
+  font-size: 14px;
 
-// Google Sign-In button — follows Google Branding Guidelines
-// https://developers.google.com/identity/branding-guidelines
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 60px);
+    border-top: 1px solid var(--color-warm-divider);
+  }
+  &::before {
+    left: 0;
+  }
+  &::after {
+    right: 0;
+  }
+  span {
+    // `position: relative` + `z-index: 1` lifts the label above the
+    // absolutely-positioned ::before/::after lines. Without it, the
+    // lines (positioned elements, higher paint order) draw on top of
+    // the span's background and the rule cuts through the text.
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    padding: 0 12px;
+    background: var(--color-warm-stone);
+  }
+}
 .google-sign-in {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
-  padding: 14px 16px;
-  border: 1px solid #dadce0;
-  border-radius: var(--hearthly-radius-button);
+  min-height: 48px;
+  padding: 10px 20px;
+  border-radius: var(--radius-button);
   background: #ffffff;
   color: #3c4043;
-  font-family: inherit;
+  border: 1px solid #dadce0;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-
-  &:hover {
-    background: #f7f8f8;
-    border-color: #c4c7c5;
-  }
-
-  &:active {
-    background: #e8eaed;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--ion-color-primary);
-    outline-offset: 2px;
-  }
 }
-
+.google-sign-in:hover {
+  background: #f8f9fa;
+}
+.google-sign-in:focus-visible {
+  outline: 2px solid var(--color-hearth-terracotta);
+  outline-offset: 2px;
+}
 .google-icon {
   width: 18px;
   height: 18px;
-  flex-shrink: 0;
-}
-
-// Divider — matches Keycloak "Or sign in with" pattern
-.welcome-divider {
-  display: flex;
-  align-items: center;
-  color: var(--hearthly-text-muted);
-  font-size: 13px;
-  margin: 4px 0;
-}
-
-.welcome-divider::before,
-.welcome-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--ion-border-color);
-}
-
-.welcome-divider span {
-  padding: 0 12px;
-}
-
-// Dev-only fallback button — matches Keycloak Sign In button styling
-ion-button {
-  --border-radius: var(--hearthly-radius-button);
-  text-transform: none;
-  letter-spacing: normal;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-// Dark mode — Google brand colors for dark theme
-@media (prefers-color-scheme: dark) {
-  .google-sign-in {
-    background: #131314;
-    border-color: #8e918f;
-    color: #e3e3e3;
-
-    &:hover {
-      background: #1f1f20;
-      border-color: #a1a3a0;
-    }
-
-    &:active {
-      background: #2a2a2b;
-    }
-  }
 }

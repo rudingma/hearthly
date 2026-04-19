@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
-import { IonContent, IonIcon } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { listOutline } from 'ionicons/icons';
+import { LucideAngularModule, List } from 'lucide-angular';
+import { PageContainerComponent } from '../ui/page-container/page-container.component';
 
 @Component({
   selector: 'app-lists',
-  imports: [IonContent, IonIcon],
+  standalone: true,
+  imports: [PageContainerComponent, LucideAngularModule],
   template: `
-    <ion-content class="ion-padding">
+    <app-page-container>
       <div class="placeholder-page">
-        <ion-icon name="list-outline" size="large"></ion-icon>
+        <lucide-icon [img]="ListIcon" [size]="48" />
         <h2>Lists</h2>
         <p>Coming soon</p>
       </div>
-    </ion-content>
+    </app-page-container>
   `,
   styles: [
     `
@@ -24,17 +24,17 @@ import { listOutline } from 'ionicons/icons';
         justify-content: center;
         min-height: 60vh;
         text-align: center;
-        color: var(--hearthly-text-muted);
+        color: var(--color-stone-muted);
       }
       h2 {
         margin: 16px 0 8px;
-        color: var(--ion-text-color);
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--color-warm-dark);
       }
     `,
   ],
 })
 export class ListsComponent {
-  constructor() {
-    addIcons({ listOutline });
-  }
+  protected readonly ListIcon = List;
 }

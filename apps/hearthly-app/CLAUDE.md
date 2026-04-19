@@ -33,9 +33,17 @@ Two environment files with a shared `Environment` interface:
 ## Design System
 
 - **Spec:** `/DESIGN.md` (framework-neutral — colors, typography, components, elevation, motion, voice). Any UI/design change requires a manual review against it as part of the pre-commit quality gate.
-- **Stack:** Angular CDK (behavioral primitives: focus trap, overlay, breakpoints) + Tailwind CSS v4 (`@theme` block references tokens from `variables.scss`) + Lucide icons (stroke-based, `currentColor`).
+- **Stack:** Angular CDK (behavioral primitives: focus trap, overlay, breakpoints) + Tailwind CSS v4 (`@theme` block defined in `src/styles/theme.css` with `light-dark()` token values) + Lucide icons (stroke-based, `currentColor`).
 - **Custom components** implement DESIGN.md specs directly — no third-party UI kit. Shell layout (`AppHeader`, `BottomTabBar`, `SideNav`, `ResponsiveShell`) switches at `993px` via CDK `BreakpointObserver`.
 - **Tokens:** never hardcode hex — reference CSS variables by semantic name (e.g., `--color-hearth-terracotta`, `--color-warm-stone`).
+- **UI primitives** (preferred over wrapper components for native-element semantics):
+  - `[appButton]` — attribute directive for `<button>` / `<a>` (variants: primary, secondary, ghost, destructive; supports `fullWidth`).
+  - `[appListItem]` — attribute directive for `<li>` / `<a>` rows (DESIGN.md §4.5 list-item spec).
+  - `<app-avatar>` — circular avatar with picture-or-initials fallback and a11y label.
+  - `<app-page-container>` — page wrapper that applies safe-area-aware padding and the optional constrained max-width.
+- **Shell services / constants:**
+  - `NavigationHistoryService` (provided in root) — tracks router history depth and drives the `HeaderComponent` back-button `canGoBack()` signal.
+  - `DESKTOP_MEDIA` / `DESKTOP_MIN_WIDTH_PX` — exported from `src/app/ui/breakpoints.ts`. Single source of truth for the 993px shell breakpoint, referenced by both `ResponsiveShellComponent`'s `BreakpointObserver` and the `--breakpoint-desktop` token in `theme.css`.
 
 ## Testing
 
@@ -44,3 +52,5 @@ Two environment files with a shared `Environment` interface:
 - **`data-testid` convention**: Interactive elements use `data-testid` attributes for test selectors (e.g., `sign-in-google`, `sign-out-button`). Query by these, not CSS classes.
 - **Component selector prefix:** `app` (ESLint-enforced, kebab-case)
 - **Vitest globals** (`vi`, not `jest`) — types via `tsconfig.spec.json`
+- **Accessibility tests run in Playwright only** (browser-based via `@axe-core/playwright`); JSDOM cannot evaluate `color-contrast` and other browser-dependent rules. Unit tests assert structure / behavior, not axe.
+- **SPA focus-on-navigation invariant:** the focus reset on `NavigationEnd` lives in `AppComponent`. Every routed page must render exactly one `<main tabindex="-1">` so the handler has a unique target to focus.

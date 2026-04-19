@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+@import './styles/theme.css';
+@import './app/ui/button.css';
+@import './app/ui/list-item.css';
+
+html,
+body,
+app-root {
+  height: 100%;
+  background: var(--color-warm-stone);
+  color: var(--color-warm-dark);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}

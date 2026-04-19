@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  background: var(--color-clean-surface);
+  border-top: 1px solid var(--color-warm-divider);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-tab-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 80px;
+}
+.bottom-tab-bar a {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  gap: 4px;
+  color: var(--color-stone-muted);
+  text-decoration: none;
+}
+.bottom-tab-bar a::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  width: 40px;
+  height: 28px;
+  border-radius: 14px;
+  background: transparent;
+  transition: background 150ms ease;
+  pointer-events: none;
+}
+.bottom-tab-bar a.is-active {
+  color: var(--color-hearth-terracotta);
+}
+.bottom-tab-bar a.is-active::before {
+  background: color-mix(
+    in srgb,
+    var(--color-hearth-terracotta) 10%,
+    transparent
+  );
+}
+.bottom-tab-bar a .label {
+  font-size: 12px;
+  line-height: 1.33;
+  font-weight: 500;
+}

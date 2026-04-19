@@ -213,7 +213,15 @@ The most-used surface in Account, Family, Notifications, Privacy.
 
 `56px` + `env(safe-area-inset-top)`. Clean Surface + `1px` Warm Divider bottom. Sticky at top of PageContainer, flat always (no scroll shadow — Move #1). `0 16px` padding.
 
-3 slots: Leading (`40×40px` — optional back-arrow or menu trigger, ghost button) / Title (Section Heading, left-aligned, ellipsis on overflow) / Trailing (`40×40px` each — up to 2 ghost icon buttons or one `32px` header avatar).
+3 slots: Leading (`40×40px`) / Title (Section Heading, left-aligned, ellipsis on overflow) / Trailing (`40×40px` each — up to 2 ghost icon buttons or one `32px` header avatar).
+
+**Leading slot content** (one of, always filled on a rendered AppHeader):
+
+- **Back-arrow** on stacked routes (ghost button).
+- **Menu trigger** (optional) on flat routes where the app exposes a hamburger.
+- **Compact brand mark** (`~28px` Hearthly house icon) on flat tab-root routes — fills the slot so the header reads as a cohesive bar rather than a left-empty 40px gap, and on mobile carries brand identity where no SideNav wordmark is visible.
+
+**Title content:** per-route current page name ("Home", "Budget", "Lists", "Calendar", "Account"). Falls back to "Hearthly" when a route doesn't declare a title.
 
 **LargeTitle variant** (optional, tab roots): Display (40/700) title in scroll content above the sticky header; scrolls away naturally, sticky header retains compact title. **Search** lives in-page at top of content — never in AppHeader.
 

@@ -48,7 +48,9 @@ describe('WelcomeComponent', () => {
 
   it('should show dev fallback button when enablePasswordAuth is true', () => {
     const original = environment.enablePasswordAuth;
-    (environment as any).enablePasswordAuth = true;
+    (
+      environment as unknown as { enablePasswordAuth: boolean }
+    ).enablePasswordAuth = true;
     try {
       const fixture = TestBed.createComponent(WelcomeComponent);
       fixture.detectChanges();
@@ -57,13 +59,17 @@ describe('WelcomeComponent', () => {
       );
       expect(button).toBeTruthy();
     } finally {
-      (environment as any).enablePasswordAuth = original;
+      (
+        environment as unknown as { enablePasswordAuth: boolean }
+      ).enablePasswordAuth = original;
     }
   });
 
   it('should hide dev fallback button when enablePasswordAuth is false', () => {
     const original = environment.enablePasswordAuth;
-    (environment as any).enablePasswordAuth = false;
+    (
+      environment as unknown as { enablePasswordAuth: boolean }
+    ).enablePasswordAuth = false;
     try {
       const fixture = TestBed.createComponent(WelcomeComponent);
       fixture.detectChanges();
@@ -72,13 +78,17 @@ describe('WelcomeComponent', () => {
       );
       expect(button).toBeFalsy();
     } finally {
-      (environment as any).enablePasswordAuth = original;
+      (
+        environment as unknown as { enablePasswordAuth: boolean }
+      ).enablePasswordAuth = original;
     }
   });
 
   it('should call authService.login() without args when dev fallback is clicked', () => {
     const original = environment.enablePasswordAuth;
-    (environment as any).enablePasswordAuth = true;
+    (
+      environment as unknown as { enablePasswordAuth: boolean }
+    ).enablePasswordAuth = true;
     try {
       const fixture = TestBed.createComponent(WelcomeComponent);
       fixture.detectChanges();
@@ -88,23 +98,17 @@ describe('WelcomeComponent', () => {
       button.click();
       expect(mockAuthService.login).toHaveBeenCalledWith();
     } finally {
-      (environment as any).enablePasswordAuth = original;
+      (
+        environment as unknown as { enablePasswordAuth: boolean }
+      ).enablePasswordAuth = original;
     }
   });
 
   it('should redirect to /app/home if already authenticated', () => {
     const authenticatedMock = {
+      ...mockAuthService,
       currentUser: signal({ name: 'Test', email: 'test@test.com', id: '1' }),
       isAuthenticated: computed(() => true),
-      isLoading: signal(false),
-      error: signal<string | null>(null),
-      initials: computed(() => 'T'),
-      displayName: computed(() => 'Test'),
-      pictureUrl: computed(() => null),
-      login: vi.fn(),
-      logout: vi.fn(),
-      retry: vi.fn(),
-      init: vi.fn(),
     };
 
     TestBed.resetTestingModule();

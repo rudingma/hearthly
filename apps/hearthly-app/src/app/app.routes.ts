@@ -1,6 +1,6 @@
 import type { Route } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
-import { ShellComponent } from './shell/shell.component';
+import { ResponsiveShellComponent } from './shell/responsive-shell.component';
 
 export const appRoutes: Route[] = [
   {
@@ -14,12 +14,13 @@ export const appRoutes: Route[] = [
     children: [
       {
         path: '',
-        component: ShellComponent,
+        component: ResponsiveShellComponent,
         children: [
           {
             path: 'home',
             loadComponent: () =>
               import('./home/home.component').then((m) => m.HomeComponent),
+            title: 'Home',
           },
           {
             path: 'budget',
@@ -27,11 +28,13 @@ export const appRoutes: Route[] = [
               import('./budget/budget.component').then(
                 (m) => m.BudgetComponent
               ),
+            title: 'Budget',
           },
           {
             path: 'lists',
             loadComponent: () =>
               import('./lists/lists.component').then((m) => m.ListsComponent),
+            title: 'Lists',
           },
           {
             path: 'calendar',
@@ -39,6 +42,7 @@ export const appRoutes: Route[] = [
               import('./calendar/calendar.component').then(
                 (m) => m.CalendarComponent
               ),
+            title: 'Calendar',
           },
           { path: '', redirectTo: 'home', pathMatch: 'full' },
         ],
@@ -47,6 +51,7 @@ export const appRoutes: Route[] = [
         path: 'account',
         loadComponent: () =>
           import('./account/account.component').then((m) => m.AccountComponent),
+        title: 'Account',
       },
     ],
   },

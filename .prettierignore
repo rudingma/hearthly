@@ -1,5 +1,6 @@
 # Add files here to ignore them from prettier formatting
 /dist
+apps/**/dist/
 /coverage
 /.nx/cache
 /.nx/workspace-data
@@ -11,9 +12,13 @@ apps/*/deploy/chart/templates/
 
 # Generated code
 apps/hearthly-app/src/generated/
+apps/hearthly-api/src/schema.gql
 
 # Lockfiles
 bun.lock
+
+# Superpowers-local artifacts (gitignored, mirrored here so format:check skips them)
+docs/superpowers/
 
 # Mirror of .gitignore — Terraform state and local cluster artifacts
 .terraform/
@@ -21,3 +26,9 @@ bun.lock
 *.tfstate.backup
 infrastructure/cluster/k3s_kubeconfig.yaml
 infrastructure/cluster/k3s_kustomization_backup.yaml
+
+# Scratch dir for AI working artifacts (gitignored — see CLAUDE.md)
+tmp/
+
+# Playwright CLI snapshot cache (gitignored, timestamped YAML dumps)
+.playwright-cli/
