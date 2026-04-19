@@ -87,4 +87,24 @@ describe('AuthService', () => {
       ).toHaveBeenCalled();
     });
   });
+
+  describe('init() resilience', () => {
+    it('resolves without throwing when OIDC discovery fails', async () => {
+      mockOAuthService.loadDiscoveryDocumentAndTryLogin.mockRejectedValue(
+        new Error('Keycloak unreachable')
+      );
+
+      // init() is wired into provideAppInitializer — it must not reject, or
+      // Angular bootstrap blocks and the app never renders.
+      await expect(service.init()).resolves.toBeUndefined();
+
+      expect(service.currentUser()).toBeNull();
+      expect(service.isAuthenticated()).toBe(false);
+      expect(service.isLoading()).toBe(false);
+      expect(service.error()).toContain('unavailable');
+      expect(
+        mockOAuthService.setupAutomaticSilentRefresh
+      ).not.toHaveBeenCalled();
+    });
+  });
 });

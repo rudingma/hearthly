@@ -58,14 +58,24 @@ export class AuthService {
 
     this.oauthService.configure(authConfig);
 
-    await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+    try {
+      await this.oauthService.loadDiscoveryDocumentAndTryLogin();
 
-    if (this.oauthService.hasValidAccessToken()) {
-      await this.loadUserProfile();
+      if (this.oauthService.hasValidAccessToken()) {
+        await this.loadUserProfile();
+      }
+
+      this.oauthService.setupAutomaticSilentRefresh();
+    } catch (err) {
+      // Keycloak unreachable or misconfigured at bootstrap. Don't block the
+      // Angular app initializer — render the welcome page so the user can
+      // at least see something and retry. The error signal surfaces the
+      // condition for any UI that wants to show a banner.
+      console.error('Auth initialization failed:', err);
+      this.error.set('Sign-in service is temporarily unavailable');
+    } finally {
+      this.isLoading.set(false);
     }
-
-    this.isLoading.set(false);
-    this.oauthService.setupAutomaticSilentRefresh();
   }
 
   private readE2EUser(): User | null {
