@@ -38,6 +38,9 @@ jobs:
       - name: Prettier check
         run: bun run format:check
 
+      - name: Typecheck affected
+        run: npx nx affected --target=typecheck
+
       - name: Test affected
         run: npx nx affected --target=test
 

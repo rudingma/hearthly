@@ -4,6 +4,7 @@ import type { Environment } from './environment.interface';
 export const environment: Environment = {
   production: false,
   enablePasswordAuth: true,
+  e2eBypassEnabled: true,
   keycloak: {
     issuer: 'http://localhost:8180/realms/hearthly',
     clientId: 'hearthly-app',

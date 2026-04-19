@@ -1,22 +1,30 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { seedAuth } from '../playwright/auth-stub';
 
 /**
  * Axe runs with the DEFAULT ruleset — we need the full contrast / name-role /
  * keyboard set, not just one rule. `landmark-unique` is included by default;
  * we re-enable it explicitly to be resilient to future axe defaults.
+ *
+ * `color-contrast` is disabled pending #99 (token contrast audit) — same
+ * rationale as welcome.spec.ts.
  */
 function axeBuilder(page: import('@playwright/test').Page) {
   return new AxeBuilder({ page }).options({
-    rules: { 'landmark-unique': { enabled: true } },
+    rules: {
+      'landmark-unique': { enabled: true },
+      'color-contrast': { enabled: false },
+    },
   });
 }
 
-// TODO(#100): unskip once e2e auth stubbing lands. /app/account is behind
-// authGuard — without a seeded OIDC session these tests bounce to / and fail.
-// Scaffolding kept intact so re-enabling is a one-line `.skip` → `.describe` flip.
-test.describe.skip('Account', () => {
+test.describe('Account', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test.beforeEach(async ({ page }) => {
+    await seedAuth(page);
+  });
 
   test('renders sign-out and passes axe (light)', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
@@ -42,11 +50,12 @@ test.describe.skip('Account', () => {
     expect(critical).toEqual([]);
   });
 
-  test('header back button triggers navigation', async ({ page }) => {
+  test('header back button navigates back to home', async ({ page }) => {
     await page.goto('/app/home');
+    await page.waitForURL('**/app/home');
     await page.goto('/app/account');
-    const before = page.url();
+    await page.waitForURL('**/app/account');
     await page.getByTestId('header-back').click();
-    await expect.poll(() => page.url()).not.toBe(before);
+    await expect(page).toHaveURL(/\/app\/home$/);
   });
 });
