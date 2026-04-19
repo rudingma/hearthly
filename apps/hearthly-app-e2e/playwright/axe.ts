@@ -6,13 +6,15 @@ import AxeBuilder from '@axe-core/playwright';
  * rather than instantiating AxeBuilder directly — enforced by the
  * no-restricted-imports ESLint rule in eslint.config.mjs.
  *
- * `color-contrast` is non-waivable (DESIGN.md §9). `landmark-unique` is
- * re-enabled explicitly to be resilient to future axe-core defaults.
+ * Filter: serious + critical impact only. moderate/minor deliberately not
+ * surfaced — they're noisy (landmark-unique, empty-heading, etc.) and the
+ * gate is about shipping violations that affect real users.
+ *
+ * color-contrast is non-waivable (DESIGN.md §9) — serious impact, always
+ * surfaces.
  */
 export async function analyzeA11y(page: Page) {
-  const results = await new AxeBuilder({ page })
-    .options({ rules: { 'landmark-unique': { enabled: true } } })
-    .analyze();
+  const results = await new AxeBuilder({ page }).analyze();
   return results.violations.filter((v) =>
     ['serious', 'critical'].includes(v.impact ?? '')
   );

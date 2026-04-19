@@ -11,9 +11,10 @@ test.describe('Home', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    // Order matters: seedAuth's addInitScript and page.clock.install both run
+    // before page navigation. seedAuth seeds window.__E2E_USER__; clock.install
+    // freezes time to 10:00 UTC → HomeComponent.greeting = "Good morning".
     await seedAuth(page);
-    // Freeze time to 10:00 UTC (morning). Combined with timezoneId: 'UTC'
-    // above, HomeComponent.greeting deterministically produces "Good morning".
     await page.clock.install({ time: new Date('2026-04-19T10:00:00Z') });
   });
 
@@ -21,7 +22,7 @@ test.describe('Home', () => {
     test(`renders content and passes axe (${scheme})`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme });
       await page.goto('/app/home');
-      await expect(page.locator('main').first()).toBeVisible();
+      await expect(page.locator('.card h2')).toContainText('Good morning');
 
       const critical = await analyzeA11y(page);
       expect(critical).toEqual([]);

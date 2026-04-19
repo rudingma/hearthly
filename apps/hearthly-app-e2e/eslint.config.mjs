@@ -9,9 +9,9 @@ export default [
     rules: {},
   },
   {
-    // DESIGN.md §9: color-contrast is non-waivable. Specs must route through
-    // playwright/axe.ts — no direct AxeBuilder use allowed.
-    files: ['src/**/*.spec.ts'],
+    // DESIGN.md §9: color-contrast is non-waivable. Specs MUST route through
+    // playwright/axe.ts — no direct AxeBuilder or axe-core use allowed.
+    files: ['src/**/*.{spec,test}.{ts,js}'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -20,7 +20,19 @@ export default [
             {
               name: '@axe-core/playwright',
               message:
-                'Import `analyzeA11y` from `../playwright/axe` instead. Direct AxeBuilder use is prohibited (DESIGN.md §9).',
+                'Import analyzeA11y from the sanctioned helper (playwright/axe.ts). Direct AxeBuilder use is prohibited (DESIGN.md §9).',
+            },
+            {
+              name: 'axe-core',
+              message:
+                'Do not inject axe-core directly. Use analyzeA11y from the sanctioned helper (playwright/axe.ts) — DESIGN.md §9.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@axe-core/playwright/*', 'axe-core/*'],
+              message:
+                'Do not import axe via sub-paths. Use analyzeA11y from the sanctioned helper (playwright/axe.ts) — DESIGN.md §9.',
             },
           ],
         },

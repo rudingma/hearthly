@@ -11,9 +11,21 @@ test.describe('Welcome', () => {
       await page.emulateMedia({ colorScheme: scheme });
       await page.goto('/');
       await expect(page.getByTestId('sign-in-google')).toBeVisible();
-      if (scheme === 'light') {
-        await expect(page.locator('h1')).toContainText('Hearthly');
-      }
+      await expect(page.locator('h1')).toContainText('Hearthly');
+
+      const critical = await analyzeA11y(page);
+      expect(critical).toEqual([]);
+    });
+
+    test(`primary button hover passes axe (${scheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/');
+      // Hover the primary Sign In button to exercise --color-primary-fill-hover
+      // (color-mix(in oklch, …, black)) — a broken oklch composition would
+      // silently pass without this.
+      const signIn = page.getByTestId('sign-in-password');
+      await expect(signIn).toBeVisible();
+      await signIn.hover();
 
       const critical = await analyzeA11y(page);
       expect(critical).toEqual([]);
