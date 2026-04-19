@@ -1,6 +1,47 @@
 import type { Page } from '@playwright/test';
 
 /**
+ * Stub the Keycloak OIDC discovery document so `AuthService.init()` can
+ * complete `loadDiscoveryDocumentAndTryLogin()` in environments where the
+ * real Keycloak instance is not reachable (CI without the docker-compose
+ * stack). Unauthenticated specs (Welcome) use this instead of seedAuth —
+ * the user stays unauthenticated, but bootstrap no longer blocks.
+ */
+export async function stubOIDC(page: Page): Promise<void> {
+  await page.route(
+    '**/realms/hearthly/.well-known/openid-configuration',
+    (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          issuer: 'http://localhost:8180/realms/hearthly',
+          authorization_endpoint:
+            'http://localhost:8180/realms/hearthly/protocol/openid-connect/auth',
+          token_endpoint:
+            'http://localhost:8180/realms/hearthly/protocol/openid-connect/token',
+          userinfo_endpoint:
+            'http://localhost:8180/realms/hearthly/protocol/openid-connect/userinfo',
+          jwks_uri:
+            'http://localhost:8180/realms/hearthly/protocol/openid-connect/certs',
+          end_session_endpoint:
+            'http://localhost:8180/realms/hearthly/protocol/openid-connect/logout',
+          response_types_supported: ['code'],
+          subject_types_supported: ['public'],
+          id_token_signing_alg_values_supported: ['RS256'],
+        }),
+      })
+  );
+  await page.route('**/protocol/openid-connect/certs', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ keys: [] }),
+    })
+  );
+}
+
+/**
  * E2E auth stub. See issue #100 and apps/hearthly-app/CLAUDE.md > Testing.
  *
  * Pairs with the `AuthService` bypass hook: when `window.__E2E_USER__` is

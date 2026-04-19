@@ -15,7 +15,7 @@
     transition: background 150ms ease, transform 100ms ease;
   }
   .app-button:focus-visible {
-    outline: 2px solid var(--color-hearth-terracotta);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
   }
   .app-button--full-width {
@@ -23,12 +23,12 @@
   }
 
   .app-button--primary {
-    background: var(--color-hearth-terracotta);
-    color: var(--color-terracotta-contrast);
+    background: var(--color-primary-fill);
+    color: var(--color-on-primary-fill);
     border: none;
   }
   .app-button--primary:hover {
-    background: var(--color-terracotta-shade);
+    background: var(--color-primary-fill-hover);
   }
   .app-button--primary:active {
     transform: scale(0.98);
@@ -45,7 +45,7 @@
 
   .app-button--ghost {
     background: transparent;
-    color: var(--color-stone-muted);
+    color: var(--color-text-ui-label);
     border: none;
     min-height: 40px;
     padding: 8px;
