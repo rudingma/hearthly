@@ -4,7 +4,7 @@
 
 ## 1. Visual Theme & Atmosphere
 
-Hearthly is a warm domestic space rendered as software — a family management app that feels like coming home to a well-lit kitchen where everything is in its place. Built on a warm off-white canvas (`#f8f7f5`) with a terracotta accent (`#c7724e`) — "hearth" is the warm center of a home. Where productivity apps lean into cool efficiency and fintech apps project confidence, Hearthly radiates familial calm — unhurried, grounded, and free of urgency.
+Hearthly is a warm domestic space rendered as software — a family management app that feels like coming home to a well-lit kitchen where everything is in its place. Built on a warm off-white canvas (`#f8f7f5`) with a terracotta accent (`#a85230`) — "hearth" is the warm center of a home. Where productivity apps lean into cool efficiency and fintech apps project confidence, Hearthly radiates familial calm — unhurried, grounded, and free of urgency.
 
 Typography uses the platform's native system font stack. No custom web fonts, no loading overhead. The app should feel like a natural extension of the phone, not a foreign website.
 
@@ -29,12 +29,12 @@ Colors implemented as CSS custom properties. Reference by semantic name; never h
 
 ### Primary
 
-| Token                   | Light     | Dark      | Usage                                                                                |
-| ----------------------- | --------- | --------- | ------------------------------------------------------------------------------------ |
-| **Hearth Terracotta**   | `#c7724e` | `#d4885e` | Brand, primary buttons, active states, links — the only chromatic color in UI chrome |
-| **Terracotta Shade**    | `#a3572e` | `#c7724e` | Pressed / hover on terracotta                                                        |
-| **Terracotta Tint**     | `#d4885e` | `#e8a67a` | Light emphasis, background tints                                                     |
-| **Terracotta Contrast** | `#ffffff` | `#ffffff` | Text on terracotta backgrounds                                                       |
+| Token                   | Light     | Dark      | Usage                                                                                                     |
+| ----------------------- | --------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| **Hearth Terracotta**   | `#a85230` | `#e89468` | Brand accent — text, icons, links, active states, 10% tint references. Only chromatic color in UI chrome. |
+| **Terracotta Shade**    | `#7a3919` | `#a85230` | Pressed / hover on accent text and icons; palette backing for `--color-primary-fill`.                     |
+| **Terracotta Tint**     | `#d4885e` | `#f2a880` | Light emphasis, background tint surfaces.                                                                 |
+| **Terracotta Contrast** | `#ffffff` | `#ffffff` | Text on terracotta backgrounds (`--color-on-primary-fill`).                                               |
 
 ### Surfaces
 
@@ -45,11 +45,11 @@ Colors implemented as CSS custom properties. Reference by semantic name; never h
 
 ### Text
 
-| Token           | Light     | Dark      | Usage                                                           |
-| --------------- | --------- | --------- | --------------------------------------------------------------- |
-| **Warm Dark**   | `#1c1917` | `#f5f0eb` | Primary text                                                    |
-| **Stone Muted** | `#78716c` | `#a39e98` | Secondary / UI only (labels, metadata, placeholders) — not body |
-| **Deep Stone**  | `#65605b` | —         | Body-weight secondary (when AA on body text is required)        |
+| Token           | Light     | Dark      | Usage                                                                                                           |
+| --------------- | --------- | --------- | --------------------------------------------------------------------------------------------------------------- |
+| **Warm Dark**   | `#1c1917` | `#f5f0eb` | Primary text                                                                                                    |
+| **Stone Muted** | `#78716c` | `#a39e98` | Secondary / UI only (labels, metadata, placeholders) — not body                                                 |
+| **Deep Stone**  | `#65605b` | `#b5b0aa` | Body-weight secondary — backs `--color-text-body-muted`. AA-safe on Warm Stone and Clean Surface in both modes. |
 
 ### Borders & Status
 
@@ -59,6 +59,19 @@ Colors implemented as CSS custom properties. Reference by semantic name; never h
 | **Warm Success** | `#2e7d32` | `#66bb6a` | Task completion, confirmations                                                  |
 | **Warm Danger**  | `#b53333` | `#e57373` | Errors, destructive actions                                                     |
 | **Warm Warning** | `#e65100` | `#ffb74d` | Attention, budget alerts — close to Terracotta, always paired with warning icon |
+
+### Role tokens
+
+Components reference role tokens (below), not palette tokens. Role tokens are the stable API; palette hexes may rotate. Defined in `apps/hearthly-app/src/styles/theme.css`.
+
+| Role token                   | Backed by                                      | Purpose                                                        |
+| ---------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| `--color-primary-fill`       | Terracotta Shade                               | Solid-fill CTA background (primary button, PrimaryAction/FAB). |
+| `--color-primary-fill-hover` | `color-mix(in oklch, primary-fill 85%, black)` | Hover/press on CTA fill.                                       |
+| `--color-on-primary-fill`    | `#ffffff`                                      | Text/icon color on solid terracotta fill.                      |
+| `--color-focus-ring`         | Hearth Terracotta                              | Focus outline (2px, 2px offset, `:focus-visible` only).        |
+| `--color-text-body-muted`    | Deep Stone                                     | Muted body-weight secondary text — AA-safe on any surface.     |
+| `--color-text-ui-label`      | Stone Muted                                    | Small UI labels on Clean Surface.                              |
 
 No `info` color. Informational content uses neutral tints (Stone Muted on Clean Surface) — a cool-blue info token would violate the Chromatic Rule (Move #3).
 
@@ -105,7 +118,7 @@ Organized into 7 subsections. Each component spec covers visual style, states, a
 
 All buttons: `12px` radius, Button typography (16px/600), Title Case. Focus ring `2px` Hearth Terracotta outline with `2px` offset (`:focus-visible` only).
 
-**Primary** — Hearth Terracotta bg, white text, `10px 20px` padding (48px min height). Hover: Terracotta Shade. Active (mobile): `scale(0.98)`.
+**Primary** — `var(--color-primary-fill)` bg, `var(--color-on-primary-fill)` text, `10px 20px` padding (48px min height). Hover: `var(--color-primary-fill-hover)`. Active (mobile): `scale(0.98)`. _Fill token is deep by design — guarantees white text passes WCAG AA in both modes._
 
 **Secondary (Outline)** — transparent bg, Warm Dark text, `1px` Warm Divider border. Hover: Warm Divider at ~40% opacity.
 
@@ -140,7 +153,7 @@ Tinted Badge signature (Move #5). Same mechanic powers tab-pills, sidenav-select
 
 #### Dividers
 
-Hairline `1px` Warm Divider. Labeled dividers (e.g., "Or sign in with email"): center Stone Muted 13px label between two flex lines.
+Hairline `1px` Warm Divider. Labeled dividers (e.g., "Or sign in with email"): center a `var(--color-text-body-muted)` 13px label between two flex lines.
 
 ### §4.2 Atomics
 
@@ -159,13 +172,13 @@ Shared pattern: Warm Divider border when off, Hearth Terracotta fill when on. Al
 Stacked with `4px` gaps: Label → Input → Helper-or-Error. Field-to-field: `12px`. Section-to-section: `24px`.
 
 - Label: Secondary in Warm Dark. Required marker: appended `*` in Warm Danger.
-- Helper: Caption in Stone Muted.
+- Helper: Caption in `var(--color-text-ui-label)`.
 - Error: replaces Helper; Warm Danger text + Warm Danger input border.
 - Async validation: inline spinner inside input; `check` (Warm Success) on valid, `alert-circle` (Warm Danger) on invalid.
 
 #### Progress Indicator (determinate)
 
-Only for operations with a real progress signal (uploads, imports). Track `4px` tall, Warm Divider bg, `9999px` radius. Fill Hearth Terracotta, width `{progress}%`, transition `width 200ms ease-out`. Caption label above in Stone Muted. **Never fabricate percentages** — use Long-Wait Indicator (§4.5) for unknown duration. ARIA: `role="progressbar"` with `aria-valuenow` / `valuemin` / `valuemax` / `label`.
+Only for operations with a real progress signal (uploads, imports). Track `4px` tall, Warm Divider bg, `9999px` radius. Fill Hearth Terracotta, width `{progress}%`, transition `width 200ms ease-out`. Caption label above in `var(--color-text-ui-label)`. **Never fabricate percentages** — use Long-Wait Indicator (§4.5) for unknown duration. ARIA: `role="progressbar"` with `aria-valuenow` / `valuemin` / `valuemax` / `label`.
 
 #### Amount / Numeric input
 
@@ -187,7 +200,7 @@ All use Link typography in Hearth Terracotta.
 
 Always `border-radius: 50%`.
 
-- Header: `32px`, Hearth Terracotta bg, Avatar Small initials (white, `0.5px` tracking)
+- Header: `32px`, `var(--color-primary-fill)` bg, Avatar Small initials (white, `0.5px` tracking)
 - Account: `64px`, same, Avatar Large initials
 - Photo variant: `object-fit: cover`, same dimensions, **Hearth Ring** (Move #2: `2px` Warm Divider ring, `box-sizing: border-box`). No filters or tints.
 - Fallback: if photo fails, render initials variant (`600ms` delay before fallback to avoid flicker).
@@ -252,7 +265,7 @@ Transparent bg (inherits Warm Stone). Vertical scroll only. Respects `env(safe-a
 
 Terracotta pill with icon + label — NOT circular. Explicit labels reduce ambiguity.
 
-- Primary Button treatment: Hearth Terracotta bg, white text, `12px` radius
+- Primary Button treatment: `var(--color-primary-fill)` bg, `var(--color-on-primary-fill)` text, `12px` radius
 - Leading icon (e.g., Lucide `plus`) 20px + `8px` gap + Label (Button typography, Title Case, e.g., "Add Transaction")
 - `12px 16px` padding
 - Fixed position: `bottom: {16px + safe-area + BottomTabBar height}`, `right: 16px`
@@ -329,7 +342,7 @@ In-flow persistent message (not transient like Toast, not blocking like Modal). 
 - Centered vertically, generous whitespace
 - Optional `32px` Lucide icon (Stone Muted) above headline
 - Headline: Page Title in Warm Dark
-- Body: Body in Stone Muted, max-width `~320px`, centered
+- Body: Body in `var(--color-text-body-muted)`, max-width `~320px`, centered
 - Optional inline Primary Button
 
 **Tab-root** (e.g., entire Calendar tab has no events):
@@ -360,7 +373,7 @@ Shimmer pattern. Warm Divider base + Clean Surface overlay animated left-to-righ
 For unknown-duration fetches exceeding 10s.
 
 - Centered Terracotta spinner: `20px`, `2px` stroke, 1 rotation per second
-- Status message below: Body in Stone Muted (e.g., "Loading…" or "Getting your family's lists…")
+- Status message below: Body in `var(--color-text-body-muted)` (e.g., "Loading…" or "Getting your family's lists…")
 - **Never fabricate percentages** when none is known
 - Under `prefers-reduced-motion`: static `hourglass` icon instead of spinner
 
@@ -568,7 +581,7 @@ Use `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`, etc. for PageCont
 
 Pragmatic scope for a family app — not enterprise compliance:
 
-- **Contrast**: WCAG AA floor. Stone Muted is for secondary/UI only (fails AA on body text); use Deep Stone for body-weight secondary. Measure exact ratios during implementation.
+- **Contrast**: WCAG AA floor, enforced on every PR via `@axe-core/playwright` in the `e2e` job of `.github/workflows/ci.yml`. All specs use `analyzeA11y(page)` from `apps/hearthly-app-e2e/playwright/axe.ts`; the `color-contrast` axe rule is **non-waivable**, and the `no-restricted-imports` ESLint rule blocks direct AxeBuilder use. Components reference role tokens (`--color-text-body-muted`, `--color-text-ui-label`, `--color-primary-fill`, …), all pre-validated AA-safe. A reproducible ledger lives in `scripts/check-contrast.mjs`.
 - **Focus visibility**: `2px` Hearth Terracotta outline with `2px` offset, `:focus-visible` only.
 - **Keyboard (desktop)**: Tab in visual order, Enter activates, Space toggles switches/checkboxes, ESC closes overlays, arrow keys within radio groups and segmented controls. Sensible defaults — not full APG compliance.
 - **Screen readers**: VoiceOver (iOS) and TalkBack (Android) are primary. Every component declares appropriate ARIA role in its §4 spec; component authors use those.
@@ -593,13 +606,14 @@ Voice reinforces the warm-domestic identity.
 ### Quick reference
 
 ```
-Brand:       Hearth Terracotta  #c7724e (light) / #d4885e (dark)
+Brand:       Hearth Terracotta  #a85230 (light) / #e89468 (dark) — accent text/icons/active
+CTA fill:    Terracotta Shade   #7a3919 (light) / #a85230 (dark) — backs --color-primary-fill
+Tint 10%:    Terracotta Tint    #d4885e (light) / #f2a880 (dark)
 Background:  Warm Stone         #f8f7f5 (light) / #0f0e0d (dark)
 Surface:     Clean Surface      #ffffff (light) / #1c1a18 (dark)
 Text:        Warm Dark          #1c1917 (light) / #f5f0eb (dark)
-Muted:       Stone Muted        #78716c (light) / #a39e98 (dark) — secondary/UI only
-Body-muted:  Deep Stone         #65605b (light)                  — body-weight secondary
-Border:      Warm Divider       #e5e2dc (light) / #2a2725 (dark)
+UI label:    Stone Muted        #78716c (light) / #a39e98 (dark) — backs --color-text-ui-label
+Body muted:  Deep Stone         #65605b (light) / #b5b0aa (dark) — backs --color-text-body-muted
 Success:     Warm Success       #2e7d32 (light) / #66bb6a (dark)
 Danger:      Warm Danger        #b53333 (light) / #e57373 (dark)
 Warning:     Warm Warning       #e65100 (light) / #ffb74d (dark)
@@ -641,6 +655,6 @@ Four high-level prompts matching how agents request UI.
 - Centered vertically in PageContainer
 - `48px` Lucide icon in `64px` circle with `10%` Hearth Terracotta tint bg (the sanctioned exception; don't reuse)
 - Page Title headline (first-run warm, zero-data neutral — §10 voice)
-- Body text in Stone Muted, max-width `~320px`
+- Body text in `var(--color-text-body-muted)`, max-width `~320px`
 - Optional inline Primary Button
 - Applies Moves #4, #5
