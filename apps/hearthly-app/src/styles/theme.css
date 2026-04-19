@@ -1,13 +1,13 @@
 @theme {
-  --color-hearth-terracotta: light-dark(#c7724e, #d4885e);
-  --color-terracotta-shade: light-dark(#a3572e, #c7724e);
-  --color-terracotta-tint: light-dark(#d4885e, #e8a67a);
+  --color-hearth-terracotta: light-dark(#a85230, #e89468);
+  --color-terracotta-shade: light-dark(#7a3919, #a85230);
+  --color-terracotta-tint: light-dark(#d4885e, #f2a880);
   --color-terracotta-contrast: #ffffff;
   --color-warm-stone: light-dark(#f8f7f5, #0f0e0d);
   --color-clean-surface: light-dark(#ffffff, #1c1a18);
   --color-warm-dark: light-dark(#1c1917, #f5f0eb);
   --color-stone-muted: light-dark(#78716c, #a39e98);
-  --color-deep-stone: light-dark(#65605b, #a39e98);
+  --color-deep-stone: light-dark(#65605b, #b5b0aa);
   --color-warm-divider: light-dark(#e5e2dc, #2a2725);
   --color-warm-success: light-dark(#2e7d32, #66bb6a);
   --color-warm-danger: light-dark(#b53333, #e57373);
