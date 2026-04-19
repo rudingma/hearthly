@@ -44,7 +44,7 @@ describe('App', () => {
     await fixture.whenStable();
 
     expect(document.activeElement).toBe(
-      document.querySelector('main[data-testid="app-spec-main"]'),
+      document.querySelector('main[data-testid="app-spec-main"]')
     );
   });
 });
