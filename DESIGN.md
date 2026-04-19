@@ -73,6 +73,8 @@ Components reference role tokens (below), not palette tokens. Role tokens are th
 | `--color-text-body-muted`    | Deep Stone                                     | Muted body-weight secondary text — AA-safe on any surface.     |
 | `--color-text-ui-label`      | Stone Muted                                    | Small UI labels on Clean Surface.                              |
 
+**Brand-surface exceptions** intentionally reference palette tokens directly: the `BrandMark` SVG, side-nav active row, bottom-tab active state, `.badge--primary` (text + 10% tint bg), and avatar backgrounds use `--color-hearth-terracotta` by name — these are places the palette hue itself is the semantic signal, and re-routing them through role tokens would dilute the brand identity boundary.
+
 No `info` color. Informational content uses neutral tints (Stone Muted on Clean Surface) — a cool-blue info token would violate the Chromatic Rule (Move #3).
 
 ## 3. Typography
