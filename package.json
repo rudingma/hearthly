@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "postinstall": "node scripts/patch-ionic-esm.mjs",
     "format:check": "prettier --check .",
     "format:write": "prettier --write ."
   },
@@ -69,7 +68,6 @@
     "@apollo/client": "^4.1.6",
     "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
-    "@ionic/angular": "^8.8.3",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
@@ -78,7 +76,6 @@
     "apollo-angular": "^13.0.0",
     "axios": "^1.6.0",
     "graphql": "^16.13.2",
-    "ionicons": "^8.0.13",
     "lucide-angular": "^1.0.0",
     "postcss": "^8.5.10",
     "reflect-metadata": "^0.1.13",
