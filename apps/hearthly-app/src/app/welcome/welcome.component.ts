@@ -2,13 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
+import { BrandMarkComponent } from '../ui/brand-mark/brand-mark.component';
 import { ButtonDirective } from '../ui/button.directive';
 import { PageContainerComponent } from '../ui/page-container/page-container.component';
 
 @Component({
   selector: 'app-welcome',
   standalone: true,
-  imports: [ButtonDirective, PageContainerComponent],
+  imports: [BrandMarkComponent, ButtonDirective, PageContainerComponent],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.scss',
 })

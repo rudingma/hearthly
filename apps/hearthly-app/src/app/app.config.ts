@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import {
   provideRouter,
+  TitleStrategy,
   withInMemoryScrolling,
   withComponentInputBinding,
 } from '@angular/router';
@@ -17,6 +18,7 @@ import { InMemoryCache, ApolloLink } from '@apollo/client/core';
 import { SetContextLink } from '@apollo/client/link/context';
 import { appRoutes } from './app.routes';
 import { AuthService } from './auth/auth.service';
+import { HearthlyTitleStrategy } from './shell/title-strategy';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
@@ -30,6 +32,9 @@ export const appConfig: ApplicationConfig = {
       }),
       withComponentInputBinding()
     ),
+    // `useExisting` so the router uses our custom strategy AND components
+    // can inject `HearthlyTitleStrategy` directly to read the signal.
+    { provide: TitleStrategy, useExisting: HearthlyTitleStrategy },
     provideHttpClient(),
     provideOAuthClient(),
     provideApollo(() => {

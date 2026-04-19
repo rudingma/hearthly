@@ -20,7 +20,7 @@ export const appRoutes: Route[] = [
             path: 'home',
             loadComponent: () =>
               import('./home/home.component').then((m) => m.HomeComponent),
-            data: { title: 'Home' },
+            title: 'Home',
           },
           {
             path: 'budget',
@@ -28,13 +28,13 @@ export const appRoutes: Route[] = [
               import('./budget/budget.component').then(
                 (m) => m.BudgetComponent
               ),
-            data: { title: 'Budget' },
+            title: 'Budget',
           },
           {
             path: 'lists',
             loadComponent: () =>
               import('./lists/lists.component').then((m) => m.ListsComponent),
-            data: { title: 'Lists' },
+            title: 'Lists',
           },
           {
             path: 'calendar',
@@ -42,7 +42,7 @@ export const appRoutes: Route[] = [
               import('./calendar/calendar.component').then(
                 (m) => m.CalendarComponent
               ),
-            data: { title: 'Calendar' },
+            title: 'Calendar',
           },
           { path: '', redirectTo: 'home', pathMatch: 'full' },
         ],

@@ -8,6 +8,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
 import { AvatarComponent } from '../../ui/avatar/avatar.component';
+import { BrandMarkComponent } from '../../ui/brand-mark/brand-mark.component';
 import { ButtonDirective } from '../../ui/button.directive';
 import { AuthService } from '../../auth/auth.service';
 import { NavigationHistoryService } from '../navigation-history.service';
@@ -16,13 +17,37 @@ import { NavigationHistoryService } from '../navigation-history.service';
   selector: 'app-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LucideAngularModule, AvatarComponent, ButtonDirective],
+  imports: [
+    RouterLink,
+    LucideAngularModule,
+    AvatarComponent,
+    BrandMarkComponent,
+    ButtonDirective,
+  ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
-  /** Named `heading` rather than `title` — the HTML `title` global attribute would otherwise create an ambiguous binding on <app-header title="…">. */
+  /**
+   * Header title text.
+   *
+   * **In-shell routes:** do NOT bind `[heading]` directly. Set the
+   * standard `title` key on the route in `app.routes.ts`; the shell's
+   * `HearthlyTitleStrategy` publishes the current value to a signal which
+   * `ResponsiveShellComponent` binds to this input. A literal bound from
+   * an in-shell page template will be overwritten on navigation.
+   *
+   * **Outside-shell routes** (welcome, account) render their own
+   * `<app-header>` and should bind `[heading]` directly.
+   *
+   * Named `heading` (not `title`) to avoid the HTML global `title`
+   * attribute collision on `<app-header title="…">`.
+   */
   readonly heading = input<string>('Hearthly');
+
+  /** Render a back-arrow in the leading slot. Outside-shell pages set
+   * this `true`; in-shell pages leave it default (`false`) and the
+   * leading slot is filled with the brand mark instead. */
   readonly showBack = input<boolean>(false);
 
   private readonly history = inject(NavigationHistoryService);

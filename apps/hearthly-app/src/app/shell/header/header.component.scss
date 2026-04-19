@@ -31,15 +31,8 @@
   justify-content: center;
 }
 .app-header__brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  // BrandMarkComponent handles display + SVG sizing; we only set the
+  // header-specific box size.
   width: 28px;
   height: 28px;
-
-  svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
 }
