@@ -27,8 +27,12 @@ describe('App', () => {
       providers: [{ provide: Router, useValue: routerStub }],
     }).compileComponents();
 
+    // Synthetic <main> anchored via a unique data-testid so the assertion
+    // doesn't depend on document-order coincidence if a future test renders
+    // its own <main> inside the App fixture.
     const main = document.createElement('main');
     main.setAttribute('tabindex', '-1');
+    main.setAttribute('data-testid', 'app-spec-main');
     document.body.appendChild(main);
 
     const fixture = TestBed.createComponent(App);
@@ -39,6 +43,8 @@ describe('App', () => {
     TestBed.tick();
     await fixture.whenStable();
 
-    expect(document.activeElement).toBe(main);
+    expect(document.activeElement).toBe(
+      document.querySelector('main[data-testid="app-spec-main"]'),
+    );
   });
 });
