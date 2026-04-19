@@ -13,7 +13,6 @@ COPY package.json bun.lock ./
 COPY apps/hearthly-api/package.json ./apps/hearthly-api/
 COPY apps/hearthly-api-e2e/package.json ./apps/hearthly-api-e2e/
 COPY apps/hearthly-app-e2e/package.json ./apps/hearthly-app-e2e/
-COPY scripts/ ./scripts/
 RUN bun install --frozen-lockfile
 
 # Copy workspace source
