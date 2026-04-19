@@ -13,6 +13,7 @@ describe('AuthService', () => {
     setupAutomaticSilentRefresh: ReturnType<typeof vi.fn>;
     logOut: ReturnType<typeof vi.fn>;
   };
+  let mockMeGQL: { fetch: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockOAuthService = {
@@ -23,12 +24,13 @@ describe('AuthService', () => {
       setupAutomaticSilentRefresh: vi.fn(),
       logOut: vi.fn(),
     };
+    mockMeGQL = { fetch: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         AuthService,
         { provide: OAuthService, useValue: mockOAuthService },
-        { provide: MeGQL, useValue: { fetch: vi.fn() } },
+        { provide: MeGQL, useValue: mockMeGQL },
       ],
     });
 
@@ -46,6 +48,43 @@ describe('AuthService', () => {
     it('should call initCodeFlow without args when no idpHint is provided', () => {
       service.login();
       expect(mockOAuthService.initCodeFlow).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('init() e2e bypass', () => {
+    afterEach(() => {
+      delete window.__E2E_USER__;
+    });
+
+    it('seeds currentUser and skips OIDC + me query when window.__E2E_USER__ is set', async () => {
+      const e2eUser = {
+        __typename: 'User' as const,
+        id: 'e2e-1',
+        email: 'e2e@test.local',
+        name: 'E2E User',
+        picture: null,
+      };
+      window.__E2E_USER__ = e2eUser;
+
+      await service.init();
+
+      expect(service.currentUser()).toEqual(e2eUser);
+      expect(service.isAuthenticated()).toBe(true);
+      expect(service.isLoading()).toBe(false);
+      expect(mockOAuthService.configure).not.toHaveBeenCalled();
+      expect(
+        mockOAuthService.loadDiscoveryDocumentAndTryLogin
+      ).not.toHaveBeenCalled();
+      expect(mockMeGQL.fetch).not.toHaveBeenCalled();
+    });
+
+    it('runs the normal OIDC flow when window.__E2E_USER__ is absent', async () => {
+      await service.init();
+
+      expect(mockOAuthService.configure).toHaveBeenCalled();
+      expect(
+        mockOAuthService.loadDiscoveryDocumentAndTryLogin
+      ).toHaveBeenCalled();
     });
   });
 });
