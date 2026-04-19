@@ -9,7 +9,11 @@
   margin-top: 32px;
 }
 .welcome-title {
-  margin: 24px 0 8px;
+  // Use margin-block only so the `.app-page-container--constrained > *`
+  // `margin-inline: auto` rule keeps the 360px box centered in the viewport.
+  // A full `margin: X Y Z` shorthand would set margin-inline to 0 and
+  // defeat the centering.
+  margin-block: 24px 8px;
   font-size: 40px;
   font-weight: 700;
   line-height: 1.1;
@@ -18,7 +22,7 @@
   color: var(--color-warm-dark);
 }
 .welcome-tagline {
-  margin: 0;
+  margin-block: 0;
   font-size: 16px;
   font-weight: 500;
   line-height: 1.5;
@@ -52,6 +56,12 @@
     right: 0;
   }
   span {
+    // `position: relative` + `z-index: 1` lifts the label above the
+    // absolutely-positioned ::before/::after lines. Without it, the
+    // lines (positioned elements, higher paint order) draw on top of
+    // the span's background and the rule cuts through the text.
+    position: relative;
+    z-index: 1;
     display: inline-block;
     padding: 0 12px;
     background: var(--color-warm-stone);

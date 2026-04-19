@@ -11,6 +11,32 @@
     >
       <lucide-icon [img]="ArrowLeftIcon" [size]="20" />
     </button>
+    } @else {
+    <!--
+      Brand mark on flat (tab-root) routes. Fills the 40×40 leading slot
+      that would otherwise feel empty, especially on mobile where the
+      SideNav wordmark isn't visible. See DESIGN.md §4.3 AppHeader.
+    -->
+    <span class="app-header__brand" aria-hidden="true">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M14 48L50 14L86 48V88H14V48Z"
+          stroke="var(--color-hearth-terracotta)"
+          stroke-width="7"
+          stroke-linejoin="round"
+          fill="none"
+        />
+        <rect
+          x="40"
+          y="56"
+          width="20"
+          height="32"
+          rx="10"
+          fill="var(--color-hearth-terracotta)"
+          opacity="0.3"
+        />
+      </svg>
+    </span>
     }
   </div>
   <h1 class="app-header__title">{{ heading() }}</h1>
