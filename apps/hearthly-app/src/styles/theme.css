@@ -70,7 +70,7 @@
   }
   .badge--neutral {
     background: color-mix(in srgb, var(--color-warm-dark) 6%, transparent);
-    color: var(--color-stone-muted);
+    color: var(--color-text-ui-label);
   }
   .badge--success {
     background: color-mix(in srgb, var(--color-warm-success) 12%, transparent);
