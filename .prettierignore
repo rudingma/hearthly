@@ -29,3 +29,6 @@ infrastructure/cluster/k3s_kustomization_backup.yaml
 
 # Scratch dir for AI working artifacts (gitignored — see CLAUDE.md)
 tmp/
+
+# Playwright CLI snapshot cache (gitignored, timestamped YAML dumps)
+.playwright-cli/
