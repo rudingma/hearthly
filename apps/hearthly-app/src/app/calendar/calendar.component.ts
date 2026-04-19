@@ -24,7 +24,7 @@ import { PageContainerComponent } from '../ui/page-container/page-container.comp
         justify-content: center;
         min-height: 60vh;
         text-align: center;
-        color: var(--color-stone-muted);
+        color: var(--color-text-body-muted);
       }
       h2 {
         margin: 16px 0 8px;
