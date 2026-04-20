@@ -32,14 +32,10 @@
   pointer-events: none;
 }
 .bottom-tab-bar a.is-active {
-  color: var(--color-hearth-terracotta);
+  color: var(--color-accent-fg);
 }
 .bottom-tab-bar a.is-active::before {
-  background: color-mix(
-    in srgb,
-    var(--color-hearth-terracotta) 10%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--color-accent-fg) 10%, transparent);
 }
 .bottom-tab-bar a .label {
   font-size: 12px;
