@@ -35,5 +35,24 @@ test.describe('Welcome', () => {
       const critical = await analyzeA11y(page);
       expect(critical).toEqual([]);
     });
+
+    test(`primary button focus-visible snapshot (${scheme})`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/');
+      // Keyboard-focus the Sign In button to trigger :focus-visible and lock
+      // the --color-focus-ring contract (2px outline, 2px offset). Axe only
+      // validates color contrast on the ring — layout regressions (width,
+      // offset, disappearance) would pass axe but fail this pixel check.
+      const signIn = page.getByTestId('sign-in-password');
+      await expect(signIn).toBeVisible();
+      await signIn.focus();
+
+      await expect(signIn).toHaveScreenshot(
+        `welcome-primary-focus-visible-${scheme}.png`,
+        { maxDiffPixelRatio: 0.05 }
+      );
+    });
   }
 });
