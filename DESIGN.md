@@ -64,16 +64,15 @@ Colors implemented as CSS custom properties. Reference by semantic name; never h
 
 Components reference role tokens (below), not palette tokens. Role tokens are the stable API; palette hexes may rotate. Defined in `apps/hearthly-app/src/styles/theme.css`.
 
-| Role token                   | Backed by                                      | Purpose                                                        |
-| ---------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `--color-primary-fill`       | Terracotta Shade                               | Solid-fill CTA background (primary button, PrimaryAction/FAB). |
-| `--color-primary-fill-hover` | `color-mix(in oklch, primary-fill 85%, black)` | Hover/press on CTA fill.                                       |
-| `--color-on-primary-fill`    | `#ffffff`                                      | Text/icon color on solid terracotta fill.                      |
-| `--color-focus-ring`         | Hearth Terracotta                              | Focus outline (2px, 2px offset, `:focus-visible` only).        |
-| `--color-text-body-muted`    | Deep Stone                                     | Muted body-weight secondary text — AA-safe on any surface.     |
-| `--color-text-ui-label`      | Stone Muted                                    | Small UI labels on Clean Surface.                              |
-
-**Brand-surface exceptions** intentionally reference palette tokens directly: the `BrandMark` SVG, side-nav active row, bottom-tab active state, `.badge--primary` (text + 10% tint bg), and avatar backgrounds use `--color-hearth-terracotta` by name — these are places the palette hue itself is the semantic signal, and re-routing them through role tokens would dilute the brand identity boundary.
+| Role token                   | Backed by                                      | Purpose                                                                                                                                                                      |
+| ---------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--color-primary-fill`       | Terracotta Shade                               | Solid-fill CTA background (primary button, PrimaryAction/FAB).                                                                                                               |
+| `--color-primary-fill-hover` | `color-mix(in oklch, primary-fill 85%, black)` | Hover/press on CTA fill.                                                                                                                                                     |
+| `--color-on-primary-fill`    | `#ffffff`                                      | Text/icon color on solid terracotta fill.                                                                                                                                    |
+| `--color-focus-ring`         | Hearth Terracotta                              | Focus outline (2px, 2px offset, `:focus-visible` only).                                                                                                                      |
+| `--color-accent-fg`          | Hearth Terracotta                              | Foreground accent on neutral surface — BrandMark strokes/fills, side-nav + bottom-tab active state, `.badge--primary` (text + 10% tint bg via `color-mix`), avatar initials. |
+| `--color-text-body-muted`    | Deep Stone                                     | Muted body-weight secondary text — AA-safe on any surface.                                                                                                                   |
+| `--color-text-ui-label`      | Stone Muted                                    | Small UI labels on Clean Surface.                                                                                                                                            |
 
 No `info` color. Informational content uses neutral tints (Stone Muted on Clean Surface) — a cool-blue info token would violate the Chromatic Rule (Move #3).
 
