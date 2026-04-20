@@ -38,6 +38,7 @@
   );
   --color-on-primary-fill: var(--color-terracotta-contrast);
   --color-focus-ring: var(--color-hearth-terracotta);
+  --color-accent-fg: var(--color-hearth-terracotta);
   --color-text-body-muted: var(--color-deep-stone);
   --color-text-ui-label: var(--color-stone-muted);
 }
@@ -61,12 +62,8 @@
     line-height: 1.33;
   }
   .badge--primary {
-    background: color-mix(
-      in srgb,
-      var(--color-hearth-terracotta) 10%,
-      transparent
-    );
-    color: var(--color-hearth-terracotta);
+    background: color-mix(in srgb, var(--color-accent-fg) 10%, transparent);
+    color: var(--color-accent-fg);
   }
   .badge--neutral {
     background: color-mix(in srgb, var(--color-warm-dark) 6%, transparent);

@@ -14,7 +14,7 @@
   padding: 24px;
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-hearth-terracotta);
+  color: var(--color-accent-fg);
 }
 .side-nav__list {
   list-style: none;
@@ -29,12 +29,8 @@
   border-radius: 8px;
 }
 .side-nav a[appListItem].is-active {
-  background: color-mix(
-    in srgb,
-    var(--color-hearth-terracotta) 10%,
-    transparent
-  );
-  color: var(--color-hearth-terracotta);
+  background: color-mix(in srgb, var(--color-accent-fg) 10%, transparent);
+  color: var(--color-accent-fg);
 }
 .side-nav__account {
   margin: 8px;
