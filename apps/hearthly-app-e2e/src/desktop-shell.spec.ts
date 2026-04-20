@@ -23,6 +23,13 @@ test.describe('Desktop shell', () => {
 
       const critical = await analyzeA11y(page);
       expect(critical).toEqual([]);
+
+      // Desktop viewport is otherwise pixel-uncovered — this is the only shot
+      // that exercises the SideNav brand chrome (active row, brand title).
+      await expect(page).toHaveScreenshot(`home-desktop-${scheme}.png`, {
+        fullPage: true,
+        maxDiffPixelRatio: 0.05,
+      });
     });
   }
 });
