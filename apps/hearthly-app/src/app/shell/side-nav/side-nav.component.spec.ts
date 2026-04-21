@@ -7,7 +7,7 @@ import { SideNavComponent } from './side-nav.component';
 import { AuthService } from '../../auth/auth.service';
 
 describe('SideNavComponent', () => {
-  it('renders the four primary nav items + Account footer', () => {
+  it('renders the Home primary nav item + Account footer', () => {
     TestBed.configureTestingModule({
       imports: [SideNavComponent, LucideAngularModule],
       providers: [
@@ -29,7 +29,7 @@ describe('SideNavComponent', () => {
     const fixture = TestBed.createComponent(SideNavComponent);
     fixture.detectChanges();
     const links = fixture.nativeElement.querySelectorAll('a[appListItem]');
-    expect(links.length).toBe(5);
+    expect(links.length).toBe(2);
     const nav = fixture.nativeElement.querySelector('nav');
     expect(nav!.getAttribute('aria-label')).toBe('Primary');
   });
