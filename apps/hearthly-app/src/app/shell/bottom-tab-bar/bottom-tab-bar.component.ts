@@ -1,13 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import type { LucideIconData } from 'lucide-angular';
-import {
-  LucideAngularModule,
-  House,
-  Wallet,
-  List,
-  CalendarDays,
-} from 'lucide-angular';
+import { LucideAngularModule, House } from 'lucide-angular';
 
 interface Tab {
   readonly path: string;
@@ -26,8 +20,5 @@ interface Tab {
 export class BottomTabBarComponent {
   protected readonly tabs: readonly Tab[] = [
     { path: '/app/home', icon: House, label: 'Home' },
-    { path: '/app/budget', icon: Wallet, label: 'Budget' },
-    { path: '/app/lists', icon: List, label: 'Lists' },
-    { path: '/app/calendar', icon: CalendarDays, label: 'Calendar' },
   ];
 }

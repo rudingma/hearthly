@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { BottomTabBarComponent } from './bottom-tab-bar.component';
 
 describe('BottomTabBarComponent', () => {
-  it('renders four tab links with aria-label Primary', async () => {
+  it('renders the Home tab with aria-label Primary', async () => {
     TestBed.configureTestingModule({
       imports: [BottomTabBarComponent, LucideAngularModule],
       providers: [provideRouter([])],
@@ -14,6 +14,6 @@ describe('BottomTabBarComponent', () => {
     fixture.detectChanges();
     const nav = fixture.nativeElement.querySelector('nav');
     expect(nav!.getAttribute('aria-label')).toBe('Primary');
-    expect(fixture.nativeElement.querySelectorAll('a').length).toBe(4);
+    expect(fixture.nativeElement.querySelectorAll('a').length).toBe(1);
   });
 });

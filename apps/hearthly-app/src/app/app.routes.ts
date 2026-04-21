@@ -22,28 +22,6 @@ export const appRoutes: Route[] = [
               import('./home/home.component').then((m) => m.HomeComponent),
             title: 'Home',
           },
-          {
-            path: 'budget',
-            loadComponent: () =>
-              import('./budget/budget.component').then(
-                (m) => m.BudgetComponent
-              ),
-            title: 'Budget',
-          },
-          {
-            path: 'lists',
-            loadComponent: () =>
-              import('./lists/lists.component').then((m) => m.ListsComponent),
-            title: 'Lists',
-          },
-          {
-            path: 'calendar',
-            loadComponent: () =>
-              import('./calendar/calendar.component').then(
-                (m) => m.CalendarComponent
-              ),
-            title: 'Calendar',
-          },
           { path: '', redirectTo: 'home', pathMatch: 'full' },
         ],
       },
