@@ -1,6 +1,6 @@
 # Hearthly
 
-Family management app. Infrastructure is live on Kubernetes (Project Setup & Infrastructure milestone complete). Feature development tracked via [GitHub Milestones](https://github.com/rudingma/hearthly/milestones).
+Family management app. Infrastructure, backend foundation, authentication, and app shell are live; feature work is underway. See **[`docs/product-vision.md`](docs/product-vision.md)** for the product vision and [GitHub Milestones](https://github.com/rudingma/hearthly/milestones) for what's in progress.
 
 ## Architecture
 
@@ -189,12 +189,12 @@ hearthly/
 
 ## What's Next
 
+See **[`docs/product-vision.md`](docs/product-vision.md)** for the full product vision and roadmap.
+
 Tracked via [GitHub Milestones](https://github.com/rudingma/hearthly/milestones):
 
-- **Data Layer Foundation** — Drizzle module, repository pattern, test infrastructure
-- **Authentication** — Keycloak, OIDC across the stack
-- **App Shell** — Angular layout, navigation, theming
-- **Family & Household Model** — Data model, multi-tenancy
-- **Observability** — OpenTelemetry → Prometheus/Tempo/Loki
+- **Household Foundation + Tasks (v1)** — Users, households, roles, per-feature grants, shared + personal to-dos
+- **Observability** — OpenTelemetry → Prometheus/Tempo/Loki (parallel track)
+- Future: Groceries → Daily Summary → Calendar → Finance (iterative, picked by real usage)
 
 See also standalone issues for security hardening, Gateway API migration, and infrastructure improvements.
