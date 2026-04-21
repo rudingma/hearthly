@@ -30,14 +30,13 @@ export default defineConfig({
     cwd: workspaceRoot,
   },
   projects: [
+    // Browser matrix intentionally scoped to Chromium (Chrome/Edge) + WebKit
+    // (Safari/iOS). The target user set uses those engines; Firefox is
+    // dropped to halve snapshot maintenance cost without losing real
+    // coverage.
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
     },
 
     {
