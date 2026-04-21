@@ -10,7 +10,7 @@
 
 **Why GraphQL:**
 
-- **Interconnected data model.** Family → members → (chores, budgets, schedules, groceries, medical, school). Nearly every screen traverses this graph differently. GraphQL's resolver composition handles cross-module data naturally via `@ResolveField()`.
+- **Interconnected data model.** Household → members → (tasks, groceries, calendar, finance). Nearly every screen traverses this graph differently. GraphQL's resolver composition handles cross-module data naturally via `@ResolveField()`.
 - **Modular monolith fit.** Each NestJS module defines its own types and resolvers independently. The schema is auto-composed at startup. Modules extend each other's types without coupling — the Budget module adds a `transactions` field to `Family` without the Family module knowing.
 - **Frontend flexibility.** Different screens request exactly the data they need — one query per view, no over-fetching, no custom aggregate endpoints.
 - **Additive evolution.** New modules add types and resolvers. Existing schema doesn't change. Deprecation via `@Field({ deprecationReason })` instead of API versioning.

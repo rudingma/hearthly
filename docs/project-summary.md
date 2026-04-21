@@ -2,7 +2,7 @@
 
 ## Vision
 
-Hearthly is a family management app. It starts as a Haushaltsbuch (household budget tracker) and grows into a full family operating system — finances, groceries, schedules, chores, school, medical appointments. First for parents, later expanding for kids.
+Hearthly is a helper for your daily private life — a consolidated surface for household tasks, groceries, calendar, and finance. See **[`product-vision.md`](./product-vision.md)** for the full vision, target users, permission model, and roadmap.
 
 **Domain:** hearthly.dev
 
@@ -17,32 +17,32 @@ Hearthly is a family management app. It starts as a Haushaltsbuch (household bud
 
 ## Milestones
 
-| Milestone                          | Focus                                                        | Status   |
-| ---------------------------------- | ------------------------------------------------------------ | -------- |
-| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups         | Complete |
-| **Data Layer Foundation**          | Drizzle module, repository pattern, transactions, test infra | Next     |
-| **Authentication**                 | Keycloak, OIDC in NestJS + Angular                           | Planned  |
-| **App Shell**                      | Angular layout, navigation, routing, theming                 | Planned  |
-| **Family & Household Model**       | Data model, multi-tenancy                                    | Planned  |
-| **Observability**                  | OpenTelemetry, Tempo, Loki, app dashboards                   | Planned  |
-| _Future_                           | Business features (budget, groceries, schedules)             | —        |
+| Milestone                          | Focus                                                                            | Status    |
+| ---------------------------------- | -------------------------------------------------------------------------------- | --------- |
+| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups                             | Complete  |
+| **Backend Foundation**             | Drizzle module, repository pattern, transactions, test infra                     | Complete  |
+| **Authentication**                 | Keycloak, OIDC in NestJS + Angular                                               | Complete  |
+| **App Shell**                      | Angular layout, navigation, routing, theming                                     | Complete  |
+| **Household Foundation + Tasks**   | Users, households, roles, per-feature grants, shared + personal to-dos           | Next (v1) |
+| **Observability**                  | OpenTelemetry, Tempo, Loki, app dashboards                                       | Parallel  |
+| _Future features_                  | Groceries → Daily Summary → Calendar → Finance (iterative, picked by real usage) | —         |
 
 ## Tech Stack
 
-| Layer        | Choice                      | Why                                                                                                                                                    |
-| ------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Frontend     | Angular + Ionic + Capacitor | Existing Angular skills. Ionic for mobile-first UI components (tabs, gestures, split-pane). Capacitor wraps web for iOS/Android.                       |
-| Backend      | NestJS + Drizzle ORM        | NestJS mirrors Angular (decorators, modules, DI). Drizzle is SQL-first, type-safe — chosen over Prisma (too much abstraction) and TypeORM (declining). |
-| Database     | PostgreSQL (CloudNativePG)  | Self-hosted on K8s. Hetzner has no managed database.                                                                                                   |
-| Architecture | Modular monolith            | No microservices. Clean module boundaries via service interfaces. Extract only when there's a real reason.                                             |
-| Hosting      | Hetzner Cloud (k3s)         | 2-3x cheaper than DigitalOcean/Civo/Scaleway. Self-managed k3s via kube-hetzner Terraform module.                                                      |
-| Nodes        | ARM (CAX11)                 | Cheaper than x86. 1 CP + 3 workers, 4GB each. ~€32/month total.                                                                                        |
-| Ingress      | Traefik                     | Bundled by kube-hetzner. ingress-nginx retired March 2026. Gateway API migration planned (see GitHub Issues).                                          |
-| GitOps       | ArgoCD (app-of-apps)        | Everything deployed via Git commits. CI never needs cluster credentials.                                                                               |
-| CI/CD        | GitHub Actions → GHCR       | PR: lint+test. Push to main: build → push → ArgoCD syncs. ARM-only builds (cluster is ARM-only).                                                       |
-| Secrets      | Infisical (self-hosted)     | Chosen over Sealed Secrets (less learning value), Vault (unsealing complexity without cloud KMS), ESO (less mature UI).                                |
-| Monitoring   | Prometheus + Grafana        | Infrastructure monitoring live. App-level observability (OpenTelemetry) tracked in Observability milestone.                                            |
-| Backups      | pg_dump CronJob → S3        | Daily, custom format, SHA256 checksums, 30-day S3 lifecycle policy.                                                                                    |
+| Layer        | Choice                                              | Why                                                                                                                                                                                              |
+| ------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Frontend     | Angular + Angular CDK + Tailwind CSS v4 + Capacitor | Existing Angular skills. Angular CDK for behavioral primitives (focus trap, overlay, breakpoints); Tailwind v4 `@theme` for design tokens from `DESIGN.md`. Capacitor wraps web for iOS/Android. |
+| Backend      | NestJS + Drizzle ORM                                | NestJS mirrors Angular (decorators, modules, DI). Drizzle is SQL-first, type-safe — chosen over Prisma (too much abstraction) and TypeORM (declining).                                           |
+| Database     | PostgreSQL (CloudNativePG)                          | Self-hosted on K8s. Hetzner has no managed database.                                                                                                                                             |
+| Architecture | Modular monolith                                    | No microservices. Clean module boundaries via service interfaces. Extract only when there's a real reason.                                                                                       |
+| Hosting      | Hetzner Cloud (k3s)                                 | 2-3x cheaper than DigitalOcean/Civo/Scaleway. Self-managed k3s via kube-hetzner Terraform module.                                                                                                |
+| Nodes        | ARM (CAX11)                                         | Cheaper than x86. 1 CP + 3 workers, 4GB each. ~€32/month total.                                                                                                                                  |
+| Ingress      | Traefik                                             | Bundled by kube-hetzner. ingress-nginx retired March 2026. Gateway API migration planned (see GitHub Issues).                                                                                    |
+| GitOps       | ArgoCD (app-of-apps)                                | Everything deployed via Git commits. CI never needs cluster credentials.                                                                                                                         |
+| CI/CD        | GitHub Actions → GHCR                               | PR: lint+test. Push to main: build → push → ArgoCD syncs. ARM-only builds (cluster is ARM-only).                                                                                                 |
+| Secrets      | Infisical (self-hosted)                             | Chosen over Sealed Secrets (less learning value), Vault (unsealing complexity without cloud KMS), ESO (less mature UI).                                                                          |
+| Monitoring   | Prometheus + Grafana                                | Infrastructure monitoring live. App-level observability (OpenTelemetry) tracked in Observability milestone.                                                                                      |
+| Backups      | pg_dump CronJob → S3                                | Daily, custom format, SHA256 checksums, 30-day S3 lifecycle policy.                                                                                                                              |
 
 ## Key Decisions
 
