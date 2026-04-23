@@ -32,7 +32,9 @@ describe('AuthService', () => {
       events: new Subject<OAuthEvent>(),
     };
     mockMeGQL = { fetch: vi.fn() };
-    mockApollo = { client: { clearStore: vi.fn().mockResolvedValue(undefined) } };
+    mockApollo = {
+      client: { clearStore: vi.fn().mockResolvedValue(undefined) },
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -174,7 +176,9 @@ describe('AuthService.logout (four-step teardown + refresh race guard)', () => {
   it('proceeds with oauthService.logOut() even when clearStore rejects', async () => {
     const svc = TestBed.inject(AuthService);
     await svc.init();
-    apollo.client.clearStore.mockRejectedValueOnce(new Error('cache teardown failed'));
+    apollo.client.clearStore.mockRejectedValueOnce(
+      new Error('cache teardown failed')
+    );
     await svc.logout();
     expect(oauth.logOut).toHaveBeenCalled();
     expect(svc.currentUser()).toBeNull();
@@ -197,6 +201,20 @@ describe('AuthService.logout (four-step teardown + refresh race guard)', () => {
       events.next({ type: 'token_received' } as OAuthEvent);
     });
     await svc.logout();
+    expect(oauth.logOut).toHaveBeenCalledTimes(2);
+  });
+
+  it('also scrubs late silently_refreshed events while logging out (silent-refresh config)', async () => {
+    const svc = TestBed.inject(AuthService);
+    await svc.init();
+
+    oauth.stopAutomaticRefresh.mockImplementation(() => {
+      events.next({ type: 'silently_refreshed' } as OAuthEvent);
+    });
+
+    await svc.logout();
+
+    // logOut called twice: once inside the race-guard handler, once as step 4.
     expect(oauth.logOut).toHaveBeenCalledTimes(2);
   });
 
@@ -247,7 +265,9 @@ describe('AuthService.authState — derived signal', () => {
   });
 
   it('transitions to error when AuthService.init() fails', async () => {
-    oauth.loadDiscoveryDocumentAndTryLogin.mockRejectedValueOnce(new Error('idp down'));
+    oauth.loadDiscoveryDocumentAndTryLogin.mockRejectedValueOnce(
+      new Error('idp down')
+    );
     const svc = TestBed.inject(AuthService);
     await svc.init();
     expect(svc.authState().state).toBe('error');
@@ -282,7 +302,17 @@ describe('AuthService.retry — bootstrap recovery', () => {
     apollo = { client: { clearStore: vi.fn().mockResolvedValue(undefined) } };
     meGQL = {
       fetch: vi.fn().mockReturnValue(
-        of({ data: { me: { __typename: 'User', id: 'u1', email: 'x', name: null, picture: null } } })
+        of({
+          data: {
+            me: {
+              __typename: 'User',
+              id: 'u1',
+              email: 'x',
+              name: null,
+              picture: null,
+            },
+          },
+        })
       ),
     };
     TestBed.configureTestingModule({
@@ -296,7 +326,9 @@ describe('AuthService.retry — bootstrap recovery', () => {
   });
 
   it('recovers from a bootstrap failure on retry', async () => {
-    oauth.loadDiscoveryDocumentAndTryLogin.mockRejectedValueOnce(new Error('idp down'));
+    oauth.loadDiscoveryDocumentAndTryLogin.mockRejectedValueOnce(
+      new Error('idp down')
+    );
     const svc = TestBed.inject(AuthService);
     await svc.init();
     expect(svc.authState().state).toBe('error');
@@ -311,7 +343,9 @@ describe('AuthService.retry — bootstrap recovery', () => {
   });
 
   it('stays in error state when retry also fails', async () => {
-    oauth.loadDiscoveryDocumentAndTryLogin.mockRejectedValue(new Error('still down'));
+    oauth.loadDiscoveryDocumentAndTryLogin.mockRejectedValue(
+      new Error('still down')
+    );
     const svc = TestBed.inject(AuthService);
     await svc.init();
     expect(svc.authState().state).toBe('error');
