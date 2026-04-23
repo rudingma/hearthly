@@ -147,20 +147,8 @@ export class AuthService {
         err
       );
     }
-    // Defensive — angular-oauth2-oidc can throw synchronously from logOut()
-    // on malformed postLogoutRedirectUri or openUri() failure. If the
-    // redirect never started, the sticky flag would leave the app wedged
-    // with the race-guard firing uselessly on every token event; clear it
-    // so the user can retry and the SPA keeps functioning.
-    try {
-      this.oauthService.logOut();
-    } catch (err) {
-      console.error(
-        'AuthService.logout: oauthService.logOut() failed; no redirect in progress',
-        err
-      );
-      this.isLoggingOut = false;
-    }
+    // Defensive — see attemptOidcLogout() for failure handling.
+    this.attemptOidcLogout();
   }
 
   async retry(): Promise<void> {
@@ -183,6 +171,26 @@ export class AuthService {
     }
   }
 
+  /**
+   * Invoke oauthService.logOut() with failure guarding. angular-oauth2-oidc
+   * can throw synchronously (URL validation, openUri() failure). Both the
+   * direct logout() chain and the late-token-event scrubber call this path,
+   * so both must be protected symmetrically. On throw: log, clear
+   * isLoggingOut so the SPA isn't wedged with the race-guard firing against
+   * a failed redirect and the user can retry.
+   */
+  private attemptOidcLogout(): void {
+    try {
+      this.oauthService.logOut();
+    } catch (err) {
+      console.error(
+        'AuthService: oauthService.logOut() failed; no redirect in progress',
+        err
+      );
+      this.isLoggingOut = false;
+    }
+  }
+
   private subscribeToTokenEvents(): void {
     if (this.tokenEventsSubscribed) return;
     this.tokenEventsSubscribed = true;
@@ -200,7 +208,7 @@ export class AuthService {
       )
       .subscribe(() => {
         if (this.isLoggingOut) {
-          this.oauthService.logOut();
+          this.attemptOidcLogout();
         }
       });
   }

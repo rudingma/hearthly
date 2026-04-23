@@ -230,6 +230,30 @@ describe('AuthService.logout (four-step teardown + refresh race guard)', () => {
     expect(oauth.logOut).not.toHaveBeenCalled();
   });
 
+  it('late-event scrubber survives oauthService.logOut() throwing (symmetric with the direct-path guard)', async () => {
+    const svc = TestBed.inject(AuthService);
+    await svc.init();
+    await svc.logout();
+
+    // isLoggingOut is still true (sticky on success path). Now a late token
+    // arrives AND the late scrubber's logOut() throws — the symmetric path
+    // to the round-2 regression. The helper must swallow the throw + clear
+    // the flag so the SPA doesn't wedge.
+    expect((svc as unknown as { isLoggingOut: boolean }).isLoggingOut).toBe(
+      true
+    );
+    oauth.logOut.mockImplementationOnce(() => {
+      throw new Error('late-event logOut failed');
+    });
+    events.next({ type: 'token_received' } as OAuthEvent);
+
+    // Twice: once as the successful logout's step, once as the thrown late-event scrub.
+    expect(oauth.logOut).toHaveBeenCalledTimes(2);
+    expect((svc as unknown as { isLoggingOut: boolean }).isLoggingOut).toBe(
+      false
+    );
+  });
+
   it('resolves cleanly when oauthService.logOut() throws, and clears isLoggingOut so retry works', async () => {
     const svc = TestBed.inject(AuthService);
     await svc.init();
