@@ -1,6 +1,9 @@
 import { inject } from '@angular/core';
 import { type CanMatchFn, Router } from '@angular/router';
-import { HouseholdMembershipService } from './household-membership.service';
+import {
+  HouseholdMembershipService,
+  type HouseholdState,
+} from './household-membership.service';
 import { waitForNonLoading } from '../common/router/wait-for-non-loading';
 
 export const householdMembershipGuard: CanMatchFn = () => {
@@ -8,13 +11,13 @@ export const householdMembershipGuard: CanMatchFn = () => {
   const router = inject(Router);
   return waitForNonLoading(
     svc.state,
-    (s) => s.status === 'loading',
+    (s): s is Extract<HouseholdState, { status: 'loading' }> =>
+      s.status === 'loading',
     (s) => {
       if (s.status === 'error') return router.createUrlTree(['/app/error']);
-      if (s.status === 'ready')
-        return s.households.length > 0 || router.createUrlTree(['/app/start']);
-      // loading was filtered out by waitForNonLoading — unreachable at runtime
-      return router.createUrlTree(['/app/error']);
+      return s.households.length > 0
+        ? true
+        : router.createUrlTree(['/app/start']);
     }
   );
 };

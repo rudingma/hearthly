@@ -14,7 +14,7 @@ describe('waitForNonLoading', () => {
     TestBed.runInInjectionContext(() => {
       waitForNonLoading(
         state,
-        (s) => s.kind === 'loading',
+        (s): s is { kind: 'loading' } => s.kind === 'loading',
         (s) => (s.kind === 'done' ? s.value : -1)
       ).subscribe((v) => {
         settled = true;
@@ -39,7 +39,7 @@ describe('waitForNonLoading', () => {
     TestBed.runInInjectionContext(() => {
       waitForNonLoading(
         state,
-        (s) => s.kind === 'loading',
+        (s): s is { kind: 'loading' } => s.kind === 'loading',
         (s) => s.kind
       ).subscribe((v) => {
         values.push(v);

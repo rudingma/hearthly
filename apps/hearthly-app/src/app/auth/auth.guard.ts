@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { type CanMatchFn, Router, type UrlSegment } from '@angular/router';
-import { AuthService } from './auth.service';
+import { AuthService, type AuthState } from './auth.service';
 import { waitForNonLoading } from '../common/router/wait-for-non-loading';
 
 function isErrorRoute(segments: UrlSegment[]): boolean {
@@ -13,7 +13,7 @@ export const authGuard: CanMatchFn = (_route, segments) => {
   const router = inject(Router);
   return waitForNonLoading(
     auth.authState,
-    (s) => s.state === 'loading',
+    (s): s is Extract<AuthState, { state: 'loading' }> => s.state === 'loading',
     (s) => {
       switch (s.state) {
         case 'authenticated':
@@ -24,8 +24,6 @@ export const authGuard: CanMatchFn = (_route, segments) => {
           return isErrorRoute(segments)
             ? true
             : router.createUrlTree(['/app/error']);
-        default:
-          return router.createUrlTree(['/']);
       }
     }
   );
