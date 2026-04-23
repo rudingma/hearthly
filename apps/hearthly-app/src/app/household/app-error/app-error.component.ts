@@ -42,7 +42,7 @@ export class AppErrorComponent {
         }
       } else {
         await this.householdService.retry();
-        if (this.householdService.status() === 'ready') {
+        if (this.householdService.state().status === 'ready') {
           await this.router.navigateByUrl('/app/home');
         } else {
           this.hasRetried.set(true);

@@ -7,12 +7,12 @@ import { HouseholdMembershipService } from './household-membership.service';
 export const noMembershipGuard: CanMatchFn = () => {
   const svc = inject(HouseholdMembershipService);
   const router = inject(Router);
-  return toObservable(svc.status).pipe(
-    filter((s) => s !== 'loading'),
+  return toObservable(svc.state).pipe(
+    filter((s) => s.status !== 'loading'),
     take(1),
     map((s) => {
-      if (s === 'error') return router.createUrlTree(['/app/error']);
-      return !svc.hasMemberships() || router.createUrlTree(['/app/home']);
+      if (s.status === 'error') return router.createUrlTree(['/app/error']);
+      return s.households.length === 0 || router.createUrlTree(['/app/home']);
     })
   );
 };

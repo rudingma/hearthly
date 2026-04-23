@@ -87,14 +87,14 @@ describe('HouseholdMembershipService', () => {
   it('initial state is loading', () => {
     setupWith({ state: 'loading' });
     const svc = TestBed.inject(HouseholdMembershipService);
-    expect(svc.status()).toBe('loading');
+    expect(svc.state().status).toBe('loading');
   });
 
   it('stays at loading while unauthenticated — no watchQuery is created', () => {
     const h = setupWith({ state: 'unauthenticated' });
     const svc = TestBed.inject(HouseholdMembershipService);
     h.flush();
-    expect(svc.status()).toBe('loading');
+    expect(svc.state().status).toBe('loading');
     expect(h.sessions()).toBe(0);
   });
 
@@ -119,9 +119,11 @@ describe('HouseholdMembershipService', () => {
     const svc = TestBed.inject(HouseholdMembershipService);
     h.flush();
     h.currentSubject().next(buildReady({ myHouseholds: [] }));
-    expect(svc.status()).toBe('ready');
-    expect(svc.hasMemberships()).toBe(false);
-    expect(svc.households()).toEqual([]);
+    const s = svc.state();
+    expect(s.status).toBe('ready');
+    if (s.status === 'ready') {
+      expect(s.households).toEqual([]);
+    }
   });
 
   it('transitions to ready (populated) once authenticated and result arrives', () => {
@@ -135,9 +137,11 @@ describe('HouseholdMembershipService', () => {
         ],
       })
     );
-    expect(svc.status()).toBe('ready');
-    expect(svc.hasMemberships()).toBe(true);
-    expect(svc.households()).toHaveLength(1);
+    const s = svc.state();
+    expect(s.status).toBe('ready');
+    if (s.status === 'ready') {
+      expect(s.households).toHaveLength(1);
+    }
   });
 
   it('enters error state when result.error is populated', () => {
@@ -146,9 +150,11 @@ describe('HouseholdMembershipService', () => {
     h.flush();
     const err = new Error('network');
     h.currentSubject().next(buildError(err));
-    expect(svc.status()).toBe('error');
-    expect(svc.hasMemberships()).toBe(false);
-    expect(svc.error()).toBe(err);
+    const s = svc.state();
+    expect(s.status).toBe('error');
+    if (s.status === 'error') {
+      expect(s.error).toBe(err);
+    }
   });
 
   it('recovers from error when next emission is a success', () => {
@@ -156,7 +162,7 @@ describe('HouseholdMembershipService', () => {
     const svc = TestBed.inject(HouseholdMembershipService);
     h.flush();
     h.currentSubject().next(buildError(new Error('transient')));
-    expect(svc.status()).toBe('error');
+    expect(svc.state().status).toBe('error');
 
     h.currentSubject().next(
       buildReady({
@@ -165,8 +171,11 @@ describe('HouseholdMembershipService', () => {
         ],
       })
     );
-    expect(svc.status()).toBe('ready');
-    expect(svc.hasMemberships()).toBe(true);
+    const s = svc.state();
+    expect(s.status).toBe('ready');
+    if (s.status === 'ready') {
+      expect(s.households).toHaveLength(1);
+    }
   });
 
   it('retry() swallows refetch rejection (no throw)', async () => {
@@ -175,18 +184,18 @@ describe('HouseholdMembershipService', () => {
     h.flush();
     h.currentRefetch().mockRejectedValueOnce(new Error('still down'));
     h.currentSubject().next(buildError(new Error('was down')));
-    expect(svc.status()).toBe('error');
+    expect(svc.state().status).toBe('error');
 
     await expect(svc.retry()).resolves.toBeUndefined();
     expect(h.currentRefetch()).toHaveBeenCalled();
-    expect(svc.status()).toBe('error');
+    expect(svc.state().status).toBe('error');
   });
 
   it('parks at loading when auth is in error state — no watchQuery', () => {
     const h = setupWith({ state: 'error', error: 'auth failed' });
     const svc = TestBed.inject(HouseholdMembershipService);
     h.flush();
-    expect(svc.status()).toBe('loading');
+    expect(svc.state().status).toBe('loading');
     expect(h.sessions()).toBe(0);
   });
 
@@ -194,7 +203,7 @@ describe('HouseholdMembershipService', () => {
     setupWith({ state: 'loading' });
     const svc = TestBed.inject(HouseholdMembershipService);
     await expect(svc.retry()).resolves.toBeUndefined();
-    expect(svc.status()).toBe('loading');
+    expect(svc.state().status).toBe('loading');
   });
 
   it('creates a fresh watchQuery per authenticated session', () => {
@@ -208,12 +217,16 @@ describe('HouseholdMembershipService', () => {
         ],
       })
     );
-    expect(svc.hasMemberships()).toBe(true);
+    const s1 = svc.state();
+    expect(s1.status).toBe('ready');
+    if (s1.status === 'ready') {
+      expect(s1.households).toHaveLength(1);
+    }
     expect(h.sessions()).toBe(1);
 
     h.authState.set({ state: 'unauthenticated' });
     h.flush();
-    expect(svc.status()).toBe('loading');
+    expect(svc.state().status).toBe('loading');
 
     h.authState.set({
       state: 'authenticated',
@@ -223,7 +236,10 @@ describe('HouseholdMembershipService', () => {
     expect(h.sessions()).toBe(2);
 
     h.currentSubject().next(buildReady({ myHouseholds: [] }));
-    expect(svc.status()).toBe('ready');
-    expect(svc.hasMemberships()).toBe(false);
+    const s2 = svc.state();
+    expect(s2.status).toBe('ready');
+    if (s2.status === 'ready') {
+      expect(s2.households).toHaveLength(0);
+    }
   });
 });

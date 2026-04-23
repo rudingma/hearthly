@@ -3,18 +3,24 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { signal } from '@angular/core';
 import { AppErrorComponent } from './app-error.component';
-import { HouseholdMembershipService } from '../household-membership.service';
+import {
+  HouseholdMembershipService,
+  type HouseholdState,
+} from '../household-membership.service';
 import { AuthService, type AuthState } from '../../auth/auth.service';
 
 describe('AppErrorComponent', () => {
-  let householdStatus: ReturnType<typeof signal<'loading' | 'error' | 'ready'>>;
+  let householdState: ReturnType<typeof signal<HouseholdState>>;
   let authState: ReturnType<typeof signal<AuthState>>;
   let householdRetry: ReturnType<typeof vi.fn>;
   let authRetry: ReturnType<typeof vi.fn>;
   let navigateSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
-    householdStatus = signal<'loading' | 'error' | 'ready'>('ready');
+    householdState = signal<HouseholdState>({
+      status: 'ready',
+      households: [],
+    });
     authState = signal<AuthState>({
       state: 'authenticated',
       user: { id: 'u1' } as any,
@@ -27,7 +33,7 @@ describe('AppErrorComponent', () => {
         provideRouter([]),
         {
           provide: HouseholdMembershipService,
-          useValue: { status: householdStatus, retry: householdRetry },
+          useValue: { state: householdState, retry: householdRetry },
         },
         { provide: AuthService, useValue: { authState, retry: authRetry } },
       ],
@@ -39,7 +45,7 @@ describe('AppErrorComponent', () => {
   });
 
   it('renders retry button', () => {
-    householdStatus.set('error');
+    householdState.set({ status: 'error', error: 'down' });
     const f = TestBed.createComponent(AppErrorComponent);
     f.detectChanges();
     const el: HTMLElement = f.nativeElement;
@@ -52,12 +58,12 @@ describe('AppErrorComponent', () => {
   describe('household-layer error (auth authenticated, household error)', () => {
     beforeEach(() => {
       authState.set({ state: 'authenticated', user: { id: 'u1' } as any });
-      householdStatus.set('error');
+      householdState.set({ status: 'error', error: 'down' });
     });
 
     it('on retry success, navigates to /app/home', async () => {
       householdRetry.mockImplementation(async () => {
-        householdStatus.set('ready');
+        householdState.set({ status: 'ready', households: [] });
       });
       const f = TestBed.createComponent(AppErrorComponent);
       f.detectChanges();
@@ -69,7 +75,7 @@ describe('AppErrorComponent', () => {
 
     it('on retry still failing, shows second-try copy and does NOT navigate', async () => {
       householdRetry.mockImplementation(async () => {
-        // status stays 'error'
+        // state stays 'error'
       });
       const f = TestBed.createComponent(AppErrorComponent);
       f.detectChanges();

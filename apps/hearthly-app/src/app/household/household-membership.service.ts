@@ -1,4 +1,4 @@
-import { Injectable, inject, computed, type Signal } from '@angular/core';
+import { Injectable, inject, type Signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -6,9 +6,9 @@ import { AuthService } from '../auth/auth.service';
 import { MyHouseholdsGQL } from '../../generated/graphql';
 import type { MyHouseholdsQuery } from '../../generated/graphql';
 
-type Household = MyHouseholdsQuery['myHouseholds'][number];
+export type Household = MyHouseholdsQuery['myHouseholds'][number];
 
-type HouseholdState =
+export type HouseholdState =
   | { status: 'loading' }
   | { status: 'error'; error: unknown }
   | { status: 'ready'; households: Household[] };
@@ -65,23 +65,21 @@ export class HouseholdMembershipService {
     })
   );
 
-  private readonly state: Signal<HouseholdState> = toSignal(this.source$, {
+  /**
+   * Primary public API — discriminated union of all three states.
+   * Consumers MUST pattern-match on `.status` (exhaustive switch) to read
+   * `households` or `error` — the type system will surface any missing branch.
+   *
+   * Why no `households()` / `hasMemberships()` / `error()` convenience
+   * selectors: collapsing a union into separate lossy signals invites
+   * tenancy bugs (treating `households()===[]` as "no household" when the
+   * real state is loading/error). Display-layer code that wants `households`
+   * locally can derive it with a narrow `computed`; that forces the
+   * consumer to make the state branch explicit in-context.
+   */
+  readonly state: Signal<HouseholdState> = toSignal(this.source$, {
     initialValue: { status: 'loading' } satisfies HouseholdState,
   }) as Signal<HouseholdState>;
-
-  readonly status = computed(() => this.state().status);
-  readonly households = computed<Household[]>(() => {
-    const s = this.state();
-    return s.status === 'ready' ? s.households : [];
-  });
-  readonly error = computed(() => {
-    const s = this.state();
-    return s.status === 'error' ? s.error : null;
-  });
-  readonly hasMemberships = computed<boolean>(() => {
-    const s = this.state();
-    return s.status === 'ready' && s.households.length > 0;
-  });
 
   /**
    * Used by AppErrorComponent's Retry button. Swallows refetch rejection
