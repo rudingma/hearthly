@@ -9,7 +9,30 @@ test.describe('Desktop shell', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await seedAuth(page);
+    await seedAuth(page, {
+      graphqlMocks: {
+        Me: {
+          me: {
+            __typename: 'User',
+            id: 'e2e-user-1',
+            email: 'e2e@hearthly.test',
+            name: 'E2E Tester',
+            picture: null,
+          },
+        },
+        MyHouseholds: {
+          myHouseholds: [
+            {
+              __typename: 'Household',
+              id: 'h-seed',
+              name: 'Seed Household',
+              createdAt: '2026-04-23T00:00:00Z',
+              updatedAt: '2026-04-23T00:00:00Z',
+            },
+          ],
+        },
+      },
+    });
     await page.clock.install({ time: new Date('2026-04-19T10:00:00Z') });
   });
 
