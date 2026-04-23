@@ -1,4 +1,10 @@
-import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
+import {
+  Injectable,
+  inject,
+  signal,
+  computed,
+  DestroyRef,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { filter } from 'rxjs/operators';
@@ -35,6 +41,7 @@ export class AuthService {
   private readonly apollo = inject(Apollo);
   private readonly destroyRef = inject(DestroyRef);
   private isLoggingOut = false;
+  private tokenEventsSubscribed = false;
 
   readonly currentUser = signal<User | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
@@ -78,6 +85,7 @@ export class AuthService {
     }
 
     this.oauthService.configure(authConfig);
+    this.subscribeToTokenEvents();
 
     try {
       await this.oauthService.loadDiscoveryDocumentAndTryLogin();
@@ -87,17 +95,6 @@ export class AuthService {
       }
 
       this.oauthService.setupAutomaticSilentRefresh();
-
-      this.oauthService.events
-        .pipe(
-          filter((e) => e.type === 'token_received'),
-          takeUntilDestroyed(this.destroyRef),
-        )
-        .subscribe(() => {
-          if (this.isLoggingOut) {
-            this.oauthService.logOut();
-          }
-        });
     } catch (err) {
       // Keycloak unreachable or misconfigured at bootstrap. Don't block the
       // Angular app initializer — render the welcome page so the user can
@@ -131,7 +128,10 @@ export class AuthService {
       try {
         await this.apollo.client.clearStore();
       } catch (err) {
-        console.error('AuthService.logout: apollo.clearStore failed; continuing with OIDC logout', err);
+        console.error(
+          'AuthService.logout: apollo.clearStore failed; continuing with OIDC logout',
+          err
+        );
       }
       this.oauthService.logOut();
     } finally {
@@ -144,6 +144,7 @@ export class AuthService {
     this.currentUser.set(null);
     this.isLoading.set(true);
     try {
+      this.subscribeToTokenEvents();
       await this.oauthService.loadDiscoveryDocumentAndTryLogin();
       if (this.oauthService.hasValidAccessToken()) {
         await this.loadUserProfile();
@@ -155,6 +156,28 @@ export class AuthService {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  private subscribeToTokenEvents(): void {
+    if (this.tokenEventsSubscribed) return;
+    this.tokenEventsSubscribed = true;
+    this.oauthService.events
+      .pipe(
+        // Both events indicate a fresh token materialised:
+        // - token_received fires in the refreshToken() path (responseType: 'code')
+        // - silently_refreshed fires in the silentRefresh() iframe path
+        // We guard against both so a future config change can't silently
+        // disarm the logout-race protection.
+        filter(
+          (e) => e.type === 'token_received' || e.type === 'silently_refreshed'
+        ),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        if (this.isLoggingOut) {
+          this.oauthService.logOut();
+        }
+      });
   }
 
   private async loadUserProfile(): Promise<void> {

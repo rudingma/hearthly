@@ -26,7 +26,7 @@ export const authGuard: CanMatchFn = (_route, segments) => {
             ? true
             : router.createUrlTree(['/app/error']);
         default:
-          return false;
+          return router.createUrlTree(['/']);
       }
     })
   );
