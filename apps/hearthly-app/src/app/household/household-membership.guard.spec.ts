@@ -8,7 +8,10 @@ import {
 } from '@angular/router';
 import { signal } from '@angular/core';
 import { firstValueFrom, isObservable } from 'rxjs';
-import { HouseholdMembershipService } from './household-membership.service';
+import {
+  HouseholdMembershipService,
+  type HouseholdState,
+} from './household-membership.service';
 import { householdMembershipGuard } from './household-membership.guard';
 
 function runGuard(guard: CanMatchFn) {
@@ -22,47 +25,46 @@ async function resolve(result: any): Promise<boolean | UrlTree> {
 }
 
 describe('householdMembershipGuard', () => {
-  const statusSig = signal<'loading' | 'error' | 'ready'>('loading');
-  const hasMembershipsSig = signal(false);
+  const stateSig = signal<HouseholdState>({ status: 'loading' });
 
   beforeEach(() => {
-    statusSig.set('loading');
-    hasMembershipsSig.set(false);
+    stateSig.set({ status: 'loading' });
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
         {
           provide: HouseholdMembershipService,
-          useValue: { status: statusSig, hasMemberships: hasMembershipsSig },
+          useValue: { state: stateSig },
         },
       ],
     });
   });
 
   it('redirects to /app/start when no memberships', async () => {
-    statusSig.set('ready');
-    hasMembershipsSig.set(false);
+    stateSig.set({ status: 'ready', households: [] });
     const router = TestBed.inject(Router);
     const result = await resolve(runGuard(householdMembershipGuard));
     expect(router.serializeUrl(result as UrlTree)).toBe('/app/start');
   });
 
   it('allows through when memberships exist', async () => {
-    statusSig.set('ready');
-    hasMembershipsSig.set(true);
+    stateSig.set({
+      status: 'ready',
+      households: [{ id: 'h1', name: 'X', createdAt: 't', updatedAt: 't' }],
+    });
     const result = await resolve(runGuard(householdMembershipGuard));
     expect(result).toBe(true);
   });
 
   it('redirects to /app/error on error state', async () => {
-    statusSig.set('error');
+    stateSig.set({ status: 'error', error: 'down' });
     const router = TestBed.inject(Router);
     const result = await resolve(runGuard(householdMembershipGuard));
     expect(router.serializeUrl(result as UrlTree)).toBe('/app/error');
   });
 
   it('does not settle while status is loading; resolves once it transitions', async () => {
-    statusSig.set('loading');
+    stateSig.set({ status: 'loading' });
     const result$ = TestBed.runInInjectionContext(() =>
       householdMembershipGuard({} as any, [])
     );
@@ -75,8 +77,10 @@ describe('householdMembershipGuard', () => {
     await new Promise((r) => setTimeout(r, 0));
     expect(settled).toBe(false);
 
-    statusSig.set('ready');
-    hasMembershipsSig.set(true);
+    stateSig.set({
+      status: 'ready',
+      households: [{ id: 'h1', name: 'X', createdAt: 't', updatedAt: 't' }],
+    });
     await new Promise((r) => setTimeout(r, 0));
     expect(settled).toBe(true);
     expect(resolvedValue).toBe(true);
