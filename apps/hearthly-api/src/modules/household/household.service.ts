@@ -1,14 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
+import { errMessage } from '../../common/error-utils';
 import { HouseholdRepository } from './household.repository';
 import type { HouseholdRow } from './schema';
-
-function errMessage(e: unknown): string {
-  if (typeof e === 'object' && e && 'message' in e) {
-    return String((e as { message: unknown }).message);
-  }
-  return String(e);
-}
 
 @Injectable()
 export class HouseholdService {
