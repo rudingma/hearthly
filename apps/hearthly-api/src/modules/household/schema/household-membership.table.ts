@@ -42,7 +42,6 @@ export const householdMemberships = pgTable(
       'household_memberships_role_check',
       sql`${table.role} in ('lead', 'member')`
     ),
-    index('household_memberships_user_idx').on(table.userId),
     index('household_memberships_household_idx').on(table.householdId),
   ]
 );
