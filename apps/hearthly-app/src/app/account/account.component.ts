@@ -49,6 +49,6 @@ export class AccountComponent {
   protected readonly LogOutIcon = LogOut;
 
   protected signOut(): void {
-    this.authService.logout();
+    void this.authService.logout();
   }
 }

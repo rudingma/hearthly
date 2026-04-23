@@ -1,10 +1,19 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { filter } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
+import { Apollo } from 'apollo-angular';
 import { authConfig } from './auth.config';
 import { environment } from '../../environments/environment';
 import type { MeQuery } from '../../generated/graphql';
 import { MeGQL } from '../../generated/graphql';
+
+export type AuthState =
+  | { state: 'loading' }
+  | { state: 'unauthenticated' }
+  | { state: 'authenticated'; user: User }
+  | { state: 'error'; error: string };
 
 export type User = MeQuery['me'];
 
@@ -23,6 +32,9 @@ declare global {
 export class AuthService {
   private readonly oauthService = inject(OAuthService);
   private readonly meGQL = inject(MeGQL);
+  private readonly apollo = inject(Apollo);
+  private readonly destroyRef = inject(DestroyRef);
+  private isLoggingOut = false;
 
   readonly currentUser = signal<User | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
@@ -46,6 +58,15 @@ export class AuthService {
   });
   readonly pictureUrl = computed(() => this.currentUser()?.picture ?? null);
 
+  readonly authState = computed<AuthState>(() => {
+    if (this.isLoading()) return { state: 'loading' };
+    const err = this.error();
+    if (err) return { state: 'error', error: err };
+    const user = this.currentUser();
+    if (user) return { state: 'authenticated', user };
+    return { state: 'unauthenticated' };
+  });
+
   async init(): Promise<void> {
     if (environment.e2eBypassEnabled) {
       const e2eUser = this.readE2EUser();
@@ -66,6 +87,17 @@ export class AuthService {
       }
 
       this.oauthService.setupAutomaticSilentRefresh();
+
+      this.oauthService.events
+        .pipe(
+          filter((e) => e.type === 'token_received'),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe(() => {
+          if (this.isLoggingOut) {
+            this.oauthService.logOut();
+          }
+        });
     } catch (err) {
       // Keycloak unreachable or misconfigured at bootstrap. Don't block the
       // Angular app initializer — render the welcome page so the user can
@@ -90,14 +122,39 @@ export class AuthService {
     }
   }
 
-  logout(): void {
-    this.currentUser.set(null);
-    this.oauthService.logOut();
+  async logout(): Promise<void> {
+    this.isLoggingOut = true;
+    try {
+      this.oauthService.stopAutomaticRefresh();
+      this.currentUser.set(null);
+      this.error.set(null);
+      try {
+        await this.apollo.client.clearStore();
+      } catch (err) {
+        console.error('AuthService.logout: apollo.clearStore failed; continuing with OIDC logout', err);
+      }
+      this.oauthService.logOut();
+    } finally {
+      this.isLoggingOut = false;
+    }
   }
 
   async retry(): Promise<void> {
     this.error.set(null);
-    await this.loadUserProfile();
+    this.currentUser.set(null);
+    this.isLoading.set(true);
+    try {
+      await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+      if (this.oauthService.hasValidAccessToken()) {
+        await this.loadUserProfile();
+      }
+      this.oauthService.setupAutomaticSilentRefresh();
+    } catch (err) {
+      console.error('Auth retry failed:', err);
+      this.error.set('Sign-in service is temporarily unavailable');
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   private async loadUserProfile(): Promise<void> {
