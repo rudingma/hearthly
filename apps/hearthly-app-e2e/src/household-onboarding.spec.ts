@@ -2,11 +2,21 @@ import { test, expect } from '@playwright/test';
 import { seedAuth } from '../playwright/auth-stub';
 
 const emptyMe = {
-  Me: { me: { __typename: 'User', id: 'u1', email: 'e2e@hearthly.test', name: 'E2E', picture: null } },
+  Me: {
+    me: {
+      __typename: 'User',
+      id: 'u1',
+      email: 'e2e@hearthly.test',
+      name: 'E2E',
+      picture: null,
+    },
+  },
 };
 
 test.describe('household onboarding', () => {
-  test('1: zero-household user is redirected /app/home → /app/start', async ({ page }) => {
+  test('1: zero-household user is redirected /app/home → /app/start', async ({
+    page,
+  }) => {
     await seedAuth(page, {
       graphqlMocks: {
         ...emptyMe,
@@ -41,13 +51,21 @@ test.describe('household onboarding', () => {
     await expect(page).toHaveURL('/app/home');
   });
 
-  test('3: user with memberships visiting /app/start redirects to /app/home', async ({ page }) => {
+  test('3: user with memberships visiting /app/start redirects to /app/home', async ({
+    page,
+  }) => {
     await seedAuth(page, {
       graphqlMocks: {
         ...emptyMe,
         MyHouseholds: {
           myHouseholds: [
-            { __typename: 'Household', id: 'h1', name: 'X', createdAt: '2026-04-23T00:00:00Z', updatedAt: '2026-04-23T00:00:00Z' },
+            {
+              __typename: 'Household',
+              id: 'h1',
+              name: 'X',
+              createdAt: '2026-04-23T00:00:00Z',
+              updatedAt: '2026-04-23T00:00:00Z',
+            },
           ],
         },
       },
@@ -56,7 +74,9 @@ test.describe('household onboarding', () => {
     await expect(page).toHaveURL('/app/home');
   });
 
-  test('4: zero-household user clicks "I Have an Invite Code" → /app/join stub visible', async ({ page }) => {
+  test('4: zero-household user clicks "I Have an Invite Code" → /app/join stub visible', async ({
+    page,
+  }) => {
     await seedAuth(page, {
       graphqlMocks: { ...emptyMe, MyHouseholds: { myHouseholds: [] } },
     });
@@ -66,7 +86,9 @@ test.describe('household onboarding', () => {
     await expect(page.getByText('Invites are coming soon.')).toBeVisible();
   });
 
-  test('5: whitespace-only name disables submit and fires no mutation', async ({ page }) => {
+  test('5: whitespace-only name disables submit and fires no mutation', async ({
+    page,
+  }) => {
     let createCalls = 0;
     await seedAuth(page, {
       graphqlMocks: {
@@ -94,11 +116,16 @@ test.describe('household onboarding', () => {
     await page.getByTestId('household-name-input').fill('   ');
     const submit = page.getByTestId('household-create-submit');
     await expect(submit).toBeDisabled();
+    // Sleep 200ms to confirm no internal lifecycle tick fires a mutation
+    // after the disable-state settles. The toBeDisabled assertion prevents
+    // user-triggered calls; this guards against accidental programmatic ones.
     await page.waitForTimeout(200);
     expect(createCalls).toBe(0);
   });
 
-  test('6: API outage routes to /app/error, retry recovers → /app/home', async ({ page }) => {
+  test('6: API outage routes to /app/error, retry recovers → /app/home', async ({
+    page,
+  }) => {
     await seedAuth(page, {
       graphqlMocks: {
         ...emptyMe,
@@ -109,7 +136,13 @@ test.describe('household onboarding', () => {
           return {
             data: {
               myHouseholds: [
-                { __typename: 'Household', id: 'h1', name: 'A', createdAt: '2026-04-23T00:00:00Z', updatedAt: '2026-04-23T00:00:00Z' },
+                {
+                  __typename: 'Household',
+                  id: 'h1',
+                  name: 'A',
+                  createdAt: '2026-04-23T00:00:00Z',
+                  updatedAt: '2026-04-23T00:00:00Z',
+                },
               ],
             },
           };
@@ -122,7 +155,9 @@ test.describe('household onboarding', () => {
     await expect(page).toHaveURL('/app/home');
   });
 
-  test('7: auth+household race — guard waits for auth before routing; home content never renders', async ({ page }) => {
+  test('7: auth+household race — guard waits for auth before routing; home content never renders', async ({
+    page,
+  }) => {
     await seedAuth(page, {
       graphqlMocks: {
         ...emptyMe,
@@ -130,7 +165,8 @@ test.describe('household onboarding', () => {
       },
     });
     // Unique marker from HomeComponent's template. Update if HomeComponent's copy changes.
-    const HOME_PAINT_MARKER = 'Welcome to Hearthly — your household management hub.';
+    const HOME_PAINT_MARKER =
+      'Welcome to Hearthly — your household management hub.';
 
     await page.goto('/app/home');
 
@@ -142,7 +178,9 @@ test.describe('household onboarding', () => {
     expect(await page.content()).not.toContain(HOME_PAINT_MARKER);
   });
 
-  test('8: post-create cache sync — browser back on /app/start/new redirects to /app/home (noMembershipGuard)', async ({ page }) => {
+  test('8: post-create cache sync — browser back on /app/start/new redirects to /app/home (noMembershipGuard)', async ({
+    page,
+  }) => {
     const newHH = {
       __typename: 'Household',
       id: 'h1',
@@ -162,14 +200,25 @@ test.describe('household onboarding', () => {
     await page.getByTestId('household-create-submit').click();
     await expect(page).toHaveURL('/app/home');
     await page.goBack();
-    await expect(page).toHaveURL('/app/home'); // noMembershipGuard forwarded back
+    // noMembershipGuard re-evaluates on goBack to /app/start/new. It sees the
+    // just-created household via Apollo's in-memory cache (CreateHousehold's
+    // `update` callback wrote the household into the MyHouseholds query
+    // result) and redirects forward to /app/home. The MyHouseholds mock
+    // still returns [] — if the guard ever switches to network-only and
+    // bypasses cache, this test will fail and point at the wrong thing.
+    await expect(page).toHaveURL('/app/home');
   });
 
-  test('9: retry while still failing stays on /app/error with second-try copy', async ({ page }) => {
+  test('9: retry while still failing stays on /app/error with second-try copy', async ({
+    page,
+  }) => {
     await seedAuth(page, {
       graphqlMocks: {
         ...emptyMe,
-        MyHouseholds: () => ({ status: 200, errors: [{ message: 'still down' }] }),
+        MyHouseholds: () => ({
+          status: 200,
+          errors: [{ message: 'still down' }],
+        }),
       },
     });
     await page.goto('/app/home');
@@ -177,7 +226,9 @@ test.describe('household onboarding', () => {
     await page.getByTestId('household-error-retry').click();
     await expect(page).toHaveURL('/app/error');
     await expect(
-      page.getByText('Still unable to reach Hearthly. Check your connection and try again.'),
+      page.getByText(
+        'Still unable to reach Hearthly. Check your connection and try again.'
+      )
     ).toBeVisible();
   });
 
