@@ -1,0 +1,39 @@
+<app-page-container>
+  <main tabindex="-1" class="start-new">
+    <h1 class="start-new__title">Create Your Household</h1>
+    <p class="start-new__caption">
+      Choose something your household will recognize.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <label class="start-new__label" for="household-name"
+        >Household name</label
+      >
+      <input
+        id="household-name"
+        type="text"
+        formControlName="name"
+        maxlength="80"
+        autofocus
+        autocomplete="off"
+        class="start-new__input"
+        data-testid="household-name-input"
+      />
+
+      @if (submitError()) {
+      <p class="start-new__error" role="alert">{{ submitError() }}</p>
+      }
+
+      <button
+        type="submit"
+        appButton
+        variant="primary"
+        [fullWidth]="true"
+        [disabled]="form.invalid || isSubmitting()"
+        data-testid="household-create-submit"
+      >
+        Create Household
+      </button>
+    </form>
+  </main>
+</app-page-container>
