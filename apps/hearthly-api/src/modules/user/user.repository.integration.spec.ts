@@ -18,7 +18,7 @@ describe('UserRepository (integration)', () => {
   });
 
   afterEach(async () => {
-    await db.execute(sql`TRUNCATE TABLE users`);
+    await db.execute(sql`TRUNCATE TABLE users CASCADE`);
   });
 
   describe('findById', () => {

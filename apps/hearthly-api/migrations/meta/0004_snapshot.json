@@ -61,16 +61,12 @@
         "users_keycloak_id_unique": {
           "name": "users_keycloak_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "keycloak_id"
-          ]
+          "columns": ["keycloak_id"]
         },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -143,12 +139,8 @@
           "name": "household_memberships_user_id_users_id_fk",
           "tableFrom": "household_memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -156,12 +148,8 @@
           "name": "household_memberships_household_id_households_id_fk",
           "tableFrom": "household_memberships",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -171,10 +159,7 @@
         "household_memberships_user_household_key": {
           "name": "household_memberships_user_household_key",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "household_id"
-          ]
+          "columns": ["user_id", "household_id"]
         }
       },
       "policies": {},
