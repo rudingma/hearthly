@@ -14,6 +14,7 @@ import {
 import { validate, appConfig, databaseConfig, authConfig } from '../config';
 import { DatabaseModule } from '../database';
 import { AuthModule } from '../modules/auth/auth.module';
+import { HouseholdModule } from '../modules/household/household.module';
 import { UserModule } from '../modules/user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -71,6 +72,7 @@ const gqlLogger = new Logger('GraphQLSecurity');
       },
     }),
     UserModule,
+    HouseholdModule,
   ],
   controllers: [AppController, HealthController],
   providers: [

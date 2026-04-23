@@ -1,5 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsString, MinLength, MaxLength, Length, Matches } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  MaxLength,
+  Length,
+  Matches,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 @InputType()
