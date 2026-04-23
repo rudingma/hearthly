@@ -152,7 +152,7 @@ type Mutation {
 }
 ```
 
-**Every mutation input carries `clientMutationId: String!`.** Client generates a v4 UUID per submit (via `crypto.randomUUID()`). Purpose: platform-level idempotency — the server-side idempotency middleware (a Postgres-backed `idempotency_keys` table, landed as a separate platform workstream) uses this key to transparently dedupe retries across all mutations. Validation: `@IsUUID('4')` on the input DTO. Adding this field universally now — before the app has dozens of mutations — is cheap; adding it later is a breaking change for every existing mutation.
+**Every mutation input carries `clientMutationId: String!`.** Client generates a v4 UUID per submit (via `crypto.randomUUID()`). Purpose: platform-level idempotency — the server-side idempotency middleware (a Postgres-backed `idempotency_keys` table, landed as a separate platform workstream) uses this key to transparently dedupe retries across all mutations. Validation: length + charset only (`@IsString() @Length(1, 128) @Matches(/^[\w\-:.]+$/)`). The charset constraint is also a log-injection safeguard — services embed clientMutationId into logfmt log lines. The platform workstream (#119) may tighten to a canonical format (UUID v4 / ULID / prefixed opaque) later; if so, the validator tightens at that point. Adding this field universally now — before the app has dozens of mutations — is cheap; adding it later is a breaking change for every existing mutation.
 
 ### Typed domain errors
 
