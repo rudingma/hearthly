@@ -6,3 +6,4 @@
 //   export * from '../modules/<name>/schema';
 
 export * from '../modules/user/schema';
+export * from '../modules/household/schema';
