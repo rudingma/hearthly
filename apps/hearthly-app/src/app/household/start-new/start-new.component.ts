@@ -1,4 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import {
   FormControl,
@@ -22,7 +29,8 @@ import {
   templateUrl: './start-new.component.html',
   styleUrl: './start-new.component.scss',
 })
-export class StartNewComponent {
+export class StartNewComponent implements AfterViewInit {
+  @ViewChild('nameInput') private readonly nameInput!: ElementRef<HTMLInputElement>;
   private readonly createHouseholdGQL = inject(CreateHouseholdGQL);
   private readonly router = inject(Router);
 
@@ -39,6 +47,10 @@ export class StartNewComponent {
 
   readonly isSubmitting = signal(false);
   readonly submitError = signal<string | null>(null);
+
+  ngAfterViewInit(): void {
+    this.nameInput.nativeElement.focus();
+  }
 
   onSubmit(): void {
     if (this.form.invalid || this.isSubmitting()) return;
