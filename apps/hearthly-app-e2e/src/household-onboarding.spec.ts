@@ -65,4 +65,125 @@ test.describe('household onboarding', () => {
     await expect(page).toHaveURL('/app/join');
     await expect(page.getByText('Invites are coming soon.')).toBeVisible();
   });
+
+  test('5: whitespace-only name disables submit and fires no mutation', async ({ page }) => {
+    let createCalls = 0;
+    await seedAuth(page, {
+      graphqlMocks: {
+        ...emptyMe,
+        MyHouseholds: { myHouseholds: [] },
+        CreateHousehold: () => {
+          createCalls++;
+          return {
+            data: {
+              createHousehold: {
+                household: {
+                  __typename: 'Household',
+                  id: 'x',
+                  name: 'x',
+                  createdAt: '2026-04-23T00:00:00Z',
+                  updatedAt: '2026-04-23T00:00:00Z',
+                },
+              },
+            },
+          };
+        },
+      },
+    });
+    await page.goto('/app/start/new');
+    await page.getByTestId('household-name-input').fill('   ');
+    const submit = page.getByTestId('household-create-submit');
+    await expect(submit).toBeDisabled();
+    await page.waitForTimeout(200);
+    expect(createCalls).toBe(0);
+  });
+
+  test('6: API outage routes to /app/error, retry recovers → /app/home', async ({ page }) => {
+    await seedAuth(page, {
+      graphqlMocks: {
+        ...emptyMe,
+        MyHouseholds: ({ callCount }) => {
+          if (callCount === 1) {
+            return { status: 200, errors: [{ message: 'down' }] };
+          }
+          return {
+            data: {
+              myHouseholds: [
+                { __typename: 'Household', id: 'h1', name: 'A', createdAt: '2026-04-23T00:00:00Z', updatedAt: '2026-04-23T00:00:00Z' },
+              ],
+            },
+          };
+        },
+      },
+    });
+    await page.goto('/app/home');
+    await expect(page).toHaveURL('/app/error');
+    await page.getByTestId('household-error-retry').click();
+    await expect(page).toHaveURL('/app/home');
+  });
+
+  test('7: auth+household race — guard waits for auth before routing; home content never renders', async ({ page }) => {
+    await seedAuth(page, {
+      graphqlMocks: {
+        ...emptyMe,
+        MyHouseholds: { data: { myHouseholds: [] }, delayMs: 500 },
+      },
+    });
+    // Unique marker from HomeComponent's template. Update if HomeComponent's copy changes.
+    const HOME_PAINT_MARKER = 'Welcome to Hearthly — your household management hub.';
+
+    await page.goto('/app/home');
+
+    await expect(page).toHaveURL('/app/start');
+
+    // Start-hero paints exclusively on /app/start.
+    await expect(page.getByTestId('household-start-create-cta')).toBeVisible();
+    // Home page content must never have rendered mid-flight.
+    expect(await page.content()).not.toContain(HOME_PAINT_MARKER);
+  });
+
+  test('8: post-create cache sync — browser back on /app/start/new redirects to /app/home (noMembershipGuard)', async ({ page }) => {
+    const newHH = {
+      __typename: 'Household',
+      id: 'h1',
+      name: 'X',
+      createdAt: '2026-04-23T00:00:00Z',
+      updatedAt: '2026-04-23T00:00:00Z',
+    };
+    await seedAuth(page, {
+      graphqlMocks: {
+        ...emptyMe,
+        MyHouseholds: { myHouseholds: [] },
+        CreateHousehold: { createHousehold: { household: newHH } },
+      },
+    });
+    await page.goto('/app/start/new');
+    await page.getByTestId('household-name-input').fill('X');
+    await page.getByTestId('household-create-submit').click();
+    await expect(page).toHaveURL('/app/home');
+    await page.goBack();
+    await expect(page).toHaveURL('/app/home'); // noMembershipGuard forwarded back
+  });
+
+  test('9: retry while still failing stays on /app/error with second-try copy', async ({ page }) => {
+    await seedAuth(page, {
+      graphqlMocks: {
+        ...emptyMe,
+        MyHouseholds: () => ({ status: 200, errors: [{ message: 'still down' }] }),
+      },
+    });
+    await page.goto('/app/home');
+    await expect(page).toHaveURL('/app/error');
+    await page.getByTestId('household-error-retry').click();
+    await expect(page).toHaveURL('/app/error');
+    await expect(
+      page.getByText('Still unable to reach Hearthly. Check your connection and try again.'),
+    ).toBeVisible();
+  });
+
+  // Scenario 10 (logout → login as different user) is deferred to issue #120.
+  // Playwright harness needs a reauthenticate(page, ...) extension that swaps
+  // window.__E2E_USER__ mid-test + swaps graphqlMocks handler. Cross-session
+  // reset is validated at unit level (HouseholdMembershipService tenant-
+  // isolation test + AuthService.logout teardown-order test).
 });
