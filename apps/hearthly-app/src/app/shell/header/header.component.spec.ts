@@ -1,28 +1,26 @@
 import { Location } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { computed, signal } from '@angular/core';
+import { signal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
 import { LucideAngularModule } from 'lucide-angular';
 import { HeaderComponent } from './header.component';
 import { AuthService } from '../../auth/auth.service';
 import { NavigationHistoryService } from '../navigation-history.service';
-
-function authStub() {
-  return {
-    initials: signal('MR'),
-    pictureUrl: signal(null),
-    displayName: signal('Matthias'),
-    currentUser: signal({ email: 'x@y.z' }),
-    isAuthenticated: computed(() => true),
-    isLoading: computed(() => false),
-    error: signal(null),
-  } as unknown as AuthService;
-}
+import { createMockAuthService } from '../../auth/auth.service.test-helpers';
 
 function baseProviders(canGoBack = false) {
+  const { service } = createMockAuthService({
+    state: 'authenticated',
+    user: {
+      name: 'Matthias Rudingsdorfer',
+      email: 'x@y.z',
+      id: '1',
+      picture: null,
+    },
+  });
   return [
-    { provide: AuthService, useValue: authStub() },
+    { provide: AuthService, useValue: service },
     {
       provide: NavigationHistoryService,
       useValue: {
