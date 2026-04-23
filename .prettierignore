@@ -32,3 +32,6 @@ tmp/
 
 # Playwright CLI snapshot cache (gitignored, timestamped YAML dumps)
 .playwright-cli/
+
+# Playwright test artifacts (failure traces, screenshots, error context)
+test-results/
