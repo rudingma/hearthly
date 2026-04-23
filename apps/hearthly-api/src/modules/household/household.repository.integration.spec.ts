@@ -24,6 +24,7 @@ describe('household tables — triggers (integration)', () => {
       .returning();
 
     const beforeUpdate = inserted.updatedAt;
+    // Wait to ensure now() advances between transactions (trigger uses separate tx).
     await new Promise((r) => setTimeout(r, 10));
 
     await db
@@ -54,6 +55,7 @@ describe('household tables — triggers (integration)', () => {
       .returning();
 
     const before = m.updatedAt;
+    // Wait to ensure now() advances between transactions (trigger uses separate tx).
     await new Promise((r) => setTimeout(r, 10));
 
     await db
