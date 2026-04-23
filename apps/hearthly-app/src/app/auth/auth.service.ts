@@ -4,6 +4,7 @@ import {
   signal,
   computed,
   DestroyRef,
+  Signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OAuthService } from 'angular-oauth2-oidc';
@@ -43,15 +44,33 @@ export class AuthService {
   private isLoggingOut = false;
   private tokenEventsSubscribed = false;
 
-  readonly currentUser = signal<User | null>(null);
-  readonly isAuthenticated = computed(() => this.currentUser() !== null);
-  readonly isLoading = signal(true);
-  readonly error = signal<string | null>(null);
+  // Sole source of truth. All public selectors are derived from this.
+  private readonly _state = signal<AuthState>({ state: 'loading' });
+
+  readonly authState: Signal<AuthState> = this._state.asReadonly();
+
+  readonly currentUser = computed<User | null>(() => {
+    const s = this._state();
+    return s.state === 'authenticated' ? s.user : null;
+  });
+
+  readonly isAuthenticated = computed(
+    () => this._state().state === 'authenticated'
+  );
+
+  readonly isLoading = computed(() => this._state().state === 'loading');
+
+  readonly error = computed<string | null>(() => {
+    const s = this._state();
+    return s.state === 'error' ? s.error : null;
+  });
+
   readonly displayName = computed(() => {
     const user = this.currentUser();
     if (!user) return '';
     return user.name || user.email.split('@')[0];
   });
+
   readonly initials = computed(() => {
     const name = this.currentUser()?.name;
     if (name) {
@@ -63,23 +82,14 @@ export class AuthService {
     if (email) return email[0].toUpperCase();
     return '';
   });
-  readonly pictureUrl = computed(() => this.currentUser()?.picture ?? null);
 
-  readonly authState = computed<AuthState>(() => {
-    if (this.isLoading()) return { state: 'loading' };
-    const err = this.error();
-    if (err) return { state: 'error', error: err };
-    const user = this.currentUser();
-    if (user) return { state: 'authenticated', user };
-    return { state: 'unauthenticated' };
-  });
+  readonly pictureUrl = computed(() => this.currentUser()?.picture ?? null);
 
   async init(): Promise<void> {
     if (environment.e2eBypassEnabled) {
       const e2eUser = this.readE2EUser();
       if (e2eUser) {
-        this.currentUser.set(e2eUser);
-        this.isLoading.set(false);
+        this._state.set({ state: 'authenticated', user: e2eUser });
         return;
       }
     }
@@ -89,21 +99,22 @@ export class AuthService {
 
     try {
       await this.oauthService.loadDiscoveryDocumentAndTryLogin();
-
       if (this.oauthService.hasValidAccessToken()) {
         await this.loadUserProfile();
+      } else {
+        this._state.set({ state: 'unauthenticated' });
       }
-
       this.oauthService.setupAutomaticSilentRefresh();
     } catch (err) {
       // Keycloak unreachable or misconfigured at bootstrap. Don't block the
       // Angular app initializer — render the welcome page so the user can
-      // at least see something and retry. The error signal surfaces the
+      // at least see something and retry. The error state surfaces the
       // condition for any UI that wants to show a banner.
       console.error('Auth initialization failed:', err);
-      this.error.set('Sign-in service is temporarily unavailable');
-    } finally {
-      this.isLoading.set(false);
+      this._state.set({
+        state: 'error',
+        error: 'Sign-in service is temporarily unavailable',
+      });
     }
   }
 
@@ -127,8 +138,7 @@ export class AuthService {
     // bootstrap starts fresh.
     this.isLoggingOut = true;
     this.oauthService.stopAutomaticRefresh();
-    this.currentUser.set(null);
-    this.error.set(null);
+    this._state.set({ state: 'unauthenticated' });
     try {
       await this.apollo.client.clearStore();
     } catch (err) {
@@ -154,21 +164,22 @@ export class AuthService {
   }
 
   async retry(): Promise<void> {
-    this.error.set(null);
-    this.currentUser.set(null);
-    this.isLoading.set(true);
+    this._state.set({ state: 'loading' });
+    this.subscribeToTokenEvents();
     try {
-      this.subscribeToTokenEvents();
       await this.oauthService.loadDiscoveryDocumentAndTryLogin();
       if (this.oauthService.hasValidAccessToken()) {
         await this.loadUserProfile();
+      } else {
+        this._state.set({ state: 'unauthenticated' });
       }
       this.oauthService.setupAutomaticSilentRefresh();
     } catch (err) {
       console.error('Auth retry failed:', err);
-      this.error.set('Sign-in service is temporarily unavailable');
-    } finally {
-      this.isLoading.set(false);
+      this._state.set({
+        state: 'error',
+        error: 'Sign-in service is temporarily unavailable',
+      });
     }
   }
 
@@ -197,12 +208,21 @@ export class AuthService {
   private async loadUserProfile(): Promise<void> {
     try {
       const result = await firstValueFrom(this.meGQL.fetch());
-      this.currentUser.set(result.data?.me ?? null);
-      this.error.set(null);
+      const user = result.data?.me;
+      if (user) {
+        this._state.set({ state: 'authenticated', user });
+      } else {
+        this._state.set({
+          state: 'error',
+          error: 'Failed to load user profile',
+        });
+      }
     } catch (err) {
       console.error('Failed to load user profile:', err);
-      this.error.set('Failed to load user profile');
-      this.currentUser.set(null);
+      this._state.set({
+        state: 'error',
+        error: 'Failed to load user profile',
+      });
     }
   }
 }
