@@ -133,16 +133,52 @@ input CompleteChoreInput {
 }
 ```
 
-### Result Types
+### Payload Types (Relay-style convention)
 
-Every mutation returns a union result type. The success case is the payload.
+**Every mutation returns a named payload type** `<Verb><Noun>Payload`. Not a union, not the bare entity. Payload types are extensible — future fields attach without breaking changes (e.g., server-side timestamps, related entities, optimistic-concurrency tokens). This matches the convention used by GitHub's GraphQL API and much of Shopify's Admin API.
 
 ```graphql
-union CreateFamilyResult = CreateFamilySuccess | FamilyNameTakenError
-type CreateFamilySuccess {
+input CreateFamilyInput {
+  name: String!
+  clientMutationId: String!
+}
+
+type CreateFamilyPayload {
   family: Family!
 }
+
+type Mutation {
+  createFamily(input: CreateFamilyInput!): CreateFamilyPayload!
+}
 ```
+
+**Every mutation input carries `clientMutationId: String!`.** Client generates a v4 UUID per submit (via `crypto.randomUUID()`). Purpose: platform-level idempotency — the server-side idempotency middleware (a Postgres-backed `idempotency_keys` table, landed as a separate platform workstream) uses this key to transparently dedupe retries across all mutations. Validation: `@IsUUID('4')` on the input DTO. Adding this field universally now — before the app has dozens of mutations — is cheap; adding it later is a breaking change for every existing mutation.
+
+### Typed domain errors
+
+When a mutation has typed domain errors (e.g., `FamilyNameTakenError`), surface them in one of two patterns:
+
+**Pattern A — `userErrors` field on the payload (Shopify-style):**
+
+```graphql
+type CreateFamilyPayload {
+  family: Family
+  userErrors: [UserError!]!
+}
+```
+
+The consumer checks `userErrors` first; if non-empty, `family` is null. Extensible — you can add new error *types* without schema changes.
+
+**Pattern B — union discriminator wrapping the payload (Apollo-style):**
+
+```graphql
+union CreateFamilyResult = CreateFamilyPayload | FamilyNameTakenError
+type Mutation {
+  createFamily(input: CreateFamilyInput!): CreateFamilyResult!
+}
+```
+
+Pattern A is preferred when error cases are an open set that may grow. Pattern B is preferred when the error cases are a fixed, well-bounded set. Pick once, stay consistent within a mutation's lifetime — migrating A→B is a breaking schema change.
 
 ### Type Namespacing
 
