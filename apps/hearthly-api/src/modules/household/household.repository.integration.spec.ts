@@ -199,7 +199,7 @@ describe('HouseholdRepository (integration)', () => {
         .insert(households)
         .values({ name: 'First' })
         .returning();
-      await new Promise((r) => setTimeout(r, 5));
+      await new Promise((r) => setTimeout(r, 10));
       const [h2] = await db
         .insert(households)
         .values({ name: 'Second' })

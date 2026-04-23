@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, getTableColumns } from 'drizzle-orm';
 import type { DrizzleDB } from '../../database';
 import {
   households,
@@ -41,12 +41,7 @@ export class HouseholdRepository {
 
   async findHouseholdsByUserId(userId: string): Promise<HouseholdRow[]> {
     return this.txHost.tx
-      .select({
-        id: households.id,
-        name: households.name,
-        createdAt: households.createdAt,
-        updatedAt: households.updatedAt,
-      })
+      .select(getTableColumns(households))
       .from(households)
       .innerJoin(
         householdMemberships,

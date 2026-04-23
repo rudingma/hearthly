@@ -77,12 +77,14 @@ const gqlLogger = new Logger('GraphQLSecurity');
     AppService,
     {
       provide: APP_PIPE,
-      useValue: new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transformOptions: { enableImplicitConversion: false },
-      }),
+      useFactory: () =>
+        new ValidationPipe({
+          transform: true,
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          transformOptions: { enableImplicitConversion: false },
+          validationError: { target: false },
+        }),
     },
   ],
 })
