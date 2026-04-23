@@ -10,7 +10,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'app',
-    canActivate: [authGuard],
+    canMatch: [authGuard],
     children: [
       {
         path: '',

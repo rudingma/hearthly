@@ -1,110 +1,94 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Router, UrlTree } from '@angular/router';
-import type {
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot,
+import {
+  Router,
+  UrlSegment,
+  provideRouter,
+  type UrlTree,
 } from '@angular/router';
-import { signal, computed } from '@angular/core';
+import { signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { AuthService, type AuthState } from './auth.service';
 import { authGuard } from './auth.guard';
-import { AuthService } from './auth.service';
 
-function createMockAuthService(
-  overrides: {
-    loading?: boolean;
-    authenticated?: boolean;
-    error?: string | null;
-  } = {}
-) {
-  const currentUser = signal(
-    overrides.authenticated
-      ? { name: 'Test', email: 'test@test.com', id: '1' }
-      : null
-  );
-  return {
-    currentUser,
-    isAuthenticated: computed(() => currentUser() !== null),
-    isLoading: signal(overrides.loading ?? false),
-    error: signal<string | null>(overrides.error ?? null),
-    initials: computed(() => {
-      const name = currentUser()?.name;
-      if (!name) return '';
-      const parts = name.trim().split(/\s+/);
-      if (parts.length === 1) return parts[0][0].toUpperCase();
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }),
-    login: vi.fn(),
-    logout: vi.fn(),
-    retry: vi.fn(),
-    init: vi.fn(),
-  };
-}
+describe('authGuard (CanMatchFn branching on authState)', () => {
+  let authState: ReturnType<typeof signal<AuthState>>;
 
-describe('authGuard', () => {
-  it('should redirect to / when not authenticated', () => {
-    const mockAuth = createMockAuthService();
-    const createUrlTree = vi.fn().mockReturnValue({} as UrlTree);
-
+  beforeEach(() => {
+    authState = signal<AuthState>({ state: 'loading' });
     TestBed.configureTestingModule({
       providers: [
-        { provide: AuthService, useValue: mockAuth },
-        { provide: Router, useValue: { createUrlTree } },
+        provideRouter([]),
+        { provide: AuthService, useValue: { authState } },
       ],
     });
-
-    TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
-    );
-    expect(createUrlTree).toHaveBeenCalledWith(['/']);
-    expect(mockAuth.login).not.toHaveBeenCalled();
   });
 
-  it('should allow access when authenticated', () => {
-    const mockAuth = createMockAuthService({ authenticated: true });
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        { provide: Router, useValue: { createUrlTree: vi.fn() } },
-      ],
-    });
-
+  async function evaluate(
+    segments: UrlSegment[] = []
+  ): Promise<boolean | UrlTree> {
     const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+      authGuard({} as any, segments)
     );
+    return firstValueFrom(result as any) as Promise<boolean | UrlTree>;
+  }
+
+  it('waits until authState is no longer loading', async () => {
+    authState.set({ state: 'authenticated', user: { id: 'u1' } as any });
+    await expect(evaluate()).resolves.toBe(true);
+  });
+
+  it('returns UrlTree("/") when unauthenticated', async () => {
+    authState.set({ state: 'unauthenticated' });
+    const router = TestBed.inject(Router);
+    const result = await evaluate();
+    expect(router.serializeUrl(result as UrlTree)).toBe('/');
+  });
+
+  it('returns UrlTree("/app/error") when auth is in error state — non-error target', async () => {
+    authState.set({ state: 'error', error: 'idp down' });
+    const router = TestBed.inject(Router);
+    const result = await evaluate([
+      new UrlSegment('app', {}),
+      new UrlSegment('home', {}),
+    ]);
+    expect(router.serializeUrl(result as UrlTree)).toBe('/app/error');
+  });
+
+  it('allows through when error state AND target is /app/error', async () => {
+    authState.set({ state: 'error', error: 'idp down' });
+    const result = await evaluate([
+      new UrlSegment('app', {}),
+      new UrlSegment('error', {}),
+    ]);
     expect(result).toBe(true);
   });
 
-  it('should return false when loading', () => {
-    const mockAuth = createMockAuthService({ loading: true });
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        { provide: Router, useValue: { createUrlTree: vi.fn() } },
-      ],
-    });
-
-    const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
-    );
-    expect(result).toBe(false);
+  it('allows through when authenticated', async () => {
+    authState.set({ state: 'authenticated', user: { id: 'u1' } as any });
+    await expect(evaluate()).resolves.toBe(true);
   });
 
-  it('should allow access when error (API down) so component can show error state', () => {
-    const mockAuth = createMockAuthService({
-      error: 'Failed to load user profile',
-    });
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: AuthService, useValue: mockAuth },
-        { provide: Router, useValue: { createUrlTree: vi.fn() } },
-      ],
-    });
-
-    const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+  it('does not settle while authState is loading; resolves once it transitions', async () => {
+    authState.set({ state: 'loading' });
+    const result$ = TestBed.runInInjectionContext(() =>
+      authGuard({} as any, [
+        new UrlSegment('app', {}),
+        new UrlSegment('home', {}),
+      ])
     );
-    expect(result).toBe(true);
+    let settled = false;
+    let resolvedValue: boolean | UrlTree | undefined;
+    (result$ as any).subscribe((v: boolean | UrlTree) => {
+      settled = true;
+      resolvedValue = v;
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(settled).toBe(false);
+
+    authState.set({ state: 'authenticated', user: { id: 'u1' } as any });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(settled).toBe(true);
+    expect(resolvedValue).toBe(true);
   });
 });

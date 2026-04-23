@@ -1,28 +1,33 @@
 import { inject } from '@angular/core';
-import type { CanActivateFn } from '@angular/router';
-import { Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { type CanMatchFn, Router, type UrlSegment } from '@angular/router';
+import { filter, map, take } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
-export const authGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
+function isErrorRoute(segments: UrlSegment[]): boolean {
+  const last = segments[segments.length - 1];
+  return last?.path === 'error';
+}
+
+export const authGuard: CanMatchFn = (_route, segments) => {
+  const auth = inject(AuthService);
   const router = inject(Router);
-
-  // Init still in progress — don't navigate or redirect
-  if (authService.isLoading()) {
-    return false;
-  }
-
-  // If authenticated, allow navigation
-  if (authService.isAuthenticated()) {
-    return true;
-  }
-
-  // If we have a valid token but me query failed (API down), don't redirect
-  // The error state will be shown by the component
-  if (authService.error()) {
-    return true;
-  }
-
-  // No token — redirect to welcome screen (user taps "Sign in" explicitly)
-  return router.createUrlTree(['/']);
+  return toObservable(auth.authState).pipe(
+    filter((s) => s.state !== 'loading'),
+    take(1),
+    map((s) => {
+      switch (s.state) {
+        case 'authenticated':
+          return true;
+        case 'unauthenticated':
+          return router.createUrlTree(['/']);
+        case 'error':
+          return isErrorRoute(segments)
+            ? true
+            : router.createUrlTree(['/app/error']);
+        default:
+          return false;
+      }
+    })
+  );
 };
