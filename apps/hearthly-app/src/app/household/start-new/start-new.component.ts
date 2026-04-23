@@ -48,22 +48,25 @@ export class StartNewComponent {
   // Discriminated phase signal — the sole source of truth for the
   // mutation lifecycle. Impossible combinations (e.g. succeeded+error)
   // are unrepresentable.
-  readonly submit = signal<SubmitPhase>({ phase: 'idle' });
+  readonly submitPhase = signal<SubmitPhase>({ phase: 'idle' });
 
-  // Display-layer selectors derived from `submit`. Templates read these;
-  // the component logic reads `submit()` for full discriminated matching.
+  // Display-layer selectors derived from `submitPhase`. Templates read these;
+  // the component logic reads `submitPhase()` for full discriminated matching.
   protected readonly submitError = computed<string | null>(() => {
-    const s = this.submit();
+    const s = this.submitPhase();
     return s.phase === 'error' ? s.message : null;
   });
 
-  protected readonly submitDisabled = computed(() => {
-    const phase = this.submit().phase;
-    return phase === 'submitting' || phase === 'succeeded';
-  });
+  protected readonly isSubmitting = computed(
+    () => this.submitPhase().phase === 'submitting'
+  );
+
+  protected readonly hasSucceeded = computed(
+    () => this.submitPhase().phase === 'succeeded'
+  );
 
   onSubmit(): void {
-    const phase = this.submit().phase;
+    const phase = this.submitPhase().phase;
     // Early-return on in-flight OR terminal-success. The latter guards
     // a real race: a fast double-click or a cancelled navigation after
     // success could otherwise fire a second createHousehold mutation
@@ -73,7 +76,7 @@ export class StartNewComponent {
       return;
     }
 
-    this.submit.set({ phase: 'submitting' });
+    this.submitPhase.set({ phase: 'submitting' });
 
     const input = {
       name: this.form.controls.name.value,
@@ -102,7 +105,7 @@ export class StartNewComponent {
           // First success is terminal for this component: phase stays
           // 'succeeded' so the button remains disabled even if the
           // navigation promise rejects or resolves to false.
-          this.submit.set({ phase: 'succeeded' });
+          this.submitPhase.set({ phase: 'succeeded' });
           // I1: navigateByUrl returns Promise<boolean>; if it rejects,
           // we'd leak an unhandled promise rejection (subscribe.next is
           // fire-and-forget). Defensive symmetry with the round-2
@@ -113,7 +116,7 @@ export class StartNewComponent {
           });
         },
         error: () => {
-          this.submit.set({
+          this.submitPhase.set({
             phase: 'error',
             message: "Couldn't create household. Please try again.",
           });

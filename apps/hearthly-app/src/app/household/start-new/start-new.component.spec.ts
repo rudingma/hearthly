@@ -40,7 +40,7 @@ describe('StartNewComponent', () => {
     const comp = f.componentInstance;
     comp.form.controls.name.setValue('   ');
     expect(comp.form.valid).toBe(false);
-    expect(comp.submit().phase).toBe('idle');
+    expect(comp.submitPhase().phase).toBe('idle');
   });
 
   it('sends a clientMutationId formatted as UUID v4 on submit', () => {
@@ -61,7 +61,7 @@ describe('StartNewComponent', () => {
     f.componentInstance.form.controls.name.setValue('Foo');
     f.componentInstance.onSubmit();
     await Promise.resolve();
-    expect(f.componentInstance.submit().phase).toBe('succeeded');
+    expect(f.componentInstance.submitPhase().phase).toBe('succeeded');
     expect(navigateSpy).toHaveBeenCalledWith('/app/home');
   });
 
@@ -72,7 +72,7 @@ describe('StartNewComponent', () => {
     f.componentInstance.form.controls.name.setValue('Fail Case');
     f.componentInstance.onSubmit();
     await Promise.resolve();
-    const s = f.componentInstance.submit();
+    const s = f.componentInstance.submitPhase();
     expect(s.phase).toBe('error');
     if (s.phase === 'error') {
       expect(s.message).toBe("Couldn't create household. Please try again.");
@@ -86,7 +86,7 @@ describe('StartNewComponent', () => {
     f.componentInstance.onSubmit();
     await Promise.resolve();
     expect(mutateFn).toHaveBeenCalledTimes(1);
-    expect(f.componentInstance.submit().phase).toBe('succeeded');
+    expect(f.componentInstance.submitPhase().phase).toBe('succeeded');
 
     // User fast-double-clicks or a cancelled navigation re-exposes the button.
     f.componentInstance.onSubmit();
@@ -168,7 +168,7 @@ describe('StartNewComponent', () => {
     f.componentInstance.onSubmit();
     await Promise.resolve();
     await Promise.resolve(); // double microtask: subscribe.next → navigate.catch
-    expect(f.componentInstance.submit().phase).toBe('succeeded');
+    expect(f.componentInstance.submitPhase().phase).toBe('succeeded');
     expect(consoleSpy).toHaveBeenCalledWith(
       'StartNew: post-create navigation failed',
       expect.any(Error)

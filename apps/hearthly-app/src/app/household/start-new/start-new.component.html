@@ -44,7 +44,7 @@
         appButton
         variant="primary"
         [fullWidth]="true"
-        [disabled]="form.invalid || submitDisabled()"
+        [disabled]="form.invalid || isSubmitting() || hasSucceeded()"
         data-testid="household-create-submit"
       >
         Create Household

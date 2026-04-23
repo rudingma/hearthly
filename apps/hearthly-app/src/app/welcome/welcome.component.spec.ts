@@ -1,31 +1,20 @@
 import { TestBed } from '@angular/core/testing';
-import { signal, computed } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { WelcomeComponent } from './welcome.component';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
+import { createMockAuthService } from '../auth/auth.service.test-helpers';
 
 describe('WelcomeComponent', () => {
-  const mockAuthService = {
-    currentUser: signal(null),
-    isAuthenticated: computed(() => false),
-    isLoading: signal(false),
-    error: signal<string | null>(null),
-    initials: computed(() => ''),
-    displayName: computed(() => ''),
-    pictureUrl: computed(() => null),
-    login: vi.fn(),
-    logout: vi.fn(),
-    retry: vi.fn(),
-    init: vi.fn(),
-  };
+  let authMock: ReturnType<typeof createMockAuthService>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    authMock = createMockAuthService({ state: 'unauthenticated' });
     await TestBed.configureTestingModule({
       imports: [WelcomeComponent],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
+        { provide: AuthService, useValue: authMock.service },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -43,7 +32,7 @@ describe('WelcomeComponent', () => {
       '[data-testid="sign-in-google"]'
     );
     button.click();
-    expect(mockAuthService.login).toHaveBeenCalledWith('google');
+    expect(authMock.service.login).toHaveBeenCalledWith('google');
   });
 
   it('should show dev fallback button when enablePasswordAuth is true', () => {
@@ -96,7 +85,7 @@ describe('WelcomeComponent', () => {
         '[data-testid="sign-in-password"]'
       );
       button.click();
-      expect(mockAuthService.login).toHaveBeenCalledWith();
+      expect(authMock.service.login).toHaveBeenCalledWith();
     } finally {
       (
         environment as unknown as { enablePasswordAuth: boolean }
@@ -105,17 +94,16 @@ describe('WelcomeComponent', () => {
   });
 
   it('should redirect to /app/home if already authenticated', () => {
-    const authenticatedMock = {
-      ...mockAuthService,
-      currentUser: signal({ name: 'Test', email: 'test@test.com', id: '1' }),
-      isAuthenticated: computed(() => true),
-    };
+    const authenticatedMock = createMockAuthService({
+      state: 'authenticated',
+      user: { name: 'Test', email: 'test@test.com', id: '1', picture: null },
+    });
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [WelcomeComponent],
       providers: [
-        { provide: AuthService, useValue: authenticatedMock },
+        { provide: AuthService, useValue: authenticatedMock.service },
         provideRouter([]),
       ],
     });
