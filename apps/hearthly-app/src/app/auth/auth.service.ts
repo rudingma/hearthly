@@ -120,14 +120,11 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    // isLoggingOut is sticky-for-the-page. Once set, NEVER cleared: the
-    // oauthService.logOut() call sets location.href to redirect, and the
-    // browser takes non-trivial time to tear down the SPA. During that
-    // window, any late silent-refresh event must still be scrubbed.
-    // Resetting the flag in a `finally` block (e.g. after `logOut()`
-    // returned) creates a race where the guard is off while the app is
-    // still alive. A new AuthService instance at the next bootstrap
-    // starts fresh.
+    // isLoggingOut is sticky on the happy path — once oauthService.logOut()
+    // starts the browser redirect, the flag must stay true until teardown
+    // so late silent-refresh events during the redirect window get scrubbed
+    // by the event subscription. A new AuthService instance at next
+    // bootstrap starts fresh.
     this.isLoggingOut = true;
     this.oauthService.stopAutomaticRefresh();
     this.currentUser.set(null);
@@ -140,7 +137,20 @@ export class AuthService {
         err
       );
     }
-    this.oauthService.logOut();
+    // Defensive — angular-oauth2-oidc can throw synchronously from logOut()
+    // on malformed postLogoutRedirectUri or openUri() failure. If the
+    // redirect never started, the sticky flag would leave the app wedged
+    // with the race-guard firing uselessly on every token event; clear it
+    // so the user can retry and the SPA keeps functioning.
+    try {
+      this.oauthService.logOut();
+    } catch (err) {
+      console.error(
+        'AuthService.logout: oauthService.logOut() failed; no redirect in progress',
+        err
+      );
+      this.isLoggingOut = false;
+    }
   }
 
   async retry(): Promise<void> {

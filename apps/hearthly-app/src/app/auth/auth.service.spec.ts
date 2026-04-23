@@ -229,6 +229,30 @@ describe('AuthService.logout (four-step teardown + refresh race guard)', () => {
     events.next({ type: 'token_received' } as OAuthEvent);
     expect(oauth.logOut).not.toHaveBeenCalled();
   });
+
+  it('resolves cleanly when oauthService.logOut() throws, and clears isLoggingOut so retry works', async () => {
+    const svc = TestBed.inject(AuthService);
+    await svc.init();
+
+    oauth.logOut.mockImplementationOnce(() => {
+      throw new Error('postLogoutRedirectUri misconfigured');
+    });
+
+    // Must NOT reject — the caller (AccountComponent) does `void this.authService.logout()`,
+    // so a rejection would surface as unhandled.
+    await expect(svc.logout()).resolves.toBeUndefined();
+
+    // A second logout attempt should work normally.
+    oauth.logOut.mockImplementationOnce(() => {
+      // succeeds this time
+    });
+    await svc.logout();
+    expect(oauth.logOut).toHaveBeenCalledTimes(2);
+
+    // Race-guard is armed for the NEW (successful) logout, not stuck from the failed one.
+    events.next({ type: 'token_received' } as OAuthEvent);
+    expect(oauth.logOut).toHaveBeenCalledTimes(3);
+  });
 });
 
 describe('AuthService.authState — derived signal', () => {

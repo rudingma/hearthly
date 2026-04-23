@@ -74,6 +74,22 @@ describe('StartNewComponent', () => {
     expect(f.componentInstance.isSubmitting()).toBe(false);
   });
 
+  it('second onSubmit() after success does not fire a second mutation', async () => {
+    const f = TestBed.createComponent(StartNewComponent);
+    f.detectChanges();
+    f.componentInstance.form.controls.name.setValue('Foo');
+    f.componentInstance.onSubmit();
+    await Promise.resolve();
+    expect(mutateFn).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance.hasSucceeded()).toBe(true);
+
+    // User fast-double-clicks or a cancelled navigation re-exposes the button.
+    f.componentInstance.onSubmit();
+    await Promise.resolve();
+    // Still 1 — guarded by hasSucceeded() early-return.
+    expect(mutateFn).toHaveBeenCalledTimes(1);
+  });
+
   it('destroyed component does not navigate when a late mutation response arrives', async () => {
     const subject = new Subject<unknown>();
     mutateFn.mockReturnValue(subject.asObservable());
