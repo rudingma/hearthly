@@ -17,7 +17,7 @@ import {
 } from '@angular/forms';
 import { PageContainerComponent } from '../../ui/page-container/page-container.component';
 import { ButtonDirective } from '../../ui/button.directive';
-import { trimmedNonEmptyValidator } from '../validators/trimmed-non-empty.validator';
+import { trimmedNonEmptyValidator } from '../../common/validators/trimmed-non-empty.validator';
 import {
   CreateHouseholdGQL,
   MyHouseholdsDocument,
