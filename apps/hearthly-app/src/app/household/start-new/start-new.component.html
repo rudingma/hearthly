@@ -15,11 +15,24 @@
           type="text"
           formControlName="name"
           maxlength="80"
-          #nameInput
           autocomplete="off"
           class="start-new__input"
           data-testid="household-name-input"
+          [attr.aria-invalid]="showNameError() ? 'true' : null"
+          [attr.aria-describedby]="
+            showNameError() ? 'household-name-error' : null
+          "
         />
+        @if (showNameError()) {
+        <p
+          id="household-name-error"
+          class="start-new__field-error"
+          role="alert"
+          data-testid="household-name-error"
+        >
+          Please enter a household name.
+        </p>
+        }
       </div>
 
       @if (submitError()) {
@@ -31,7 +44,7 @@
         appButton
         variant="primary"
         [fullWidth]="true"
-        [disabled]="form.invalid || isSubmitting() || hasSucceeded()"
+        [disabled]="form.invalid || submitDisabled()"
         data-testid="household-create-submit"
       >
         Create Household

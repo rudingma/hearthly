@@ -63,4 +63,11 @@
     line-height: 1.43;
     margin: 0;
   }
+
+  &__field-error {
+    color: var(--color-warm-danger);
+    font-size: 14px;
+    line-height: 1.43;
+    margin: 4px 0 0;
+  }
 }

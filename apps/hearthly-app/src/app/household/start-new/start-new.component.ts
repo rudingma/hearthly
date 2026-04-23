@@ -1,12 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  DestroyRef,
-  ElementRef,
-  inject,
-  signal,
-  ViewChild,
-} from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
@@ -24,6 +16,12 @@ import {
   type MyHouseholdsQuery,
 } from '../../../generated/graphql';
 
+export type SubmitPhase =
+  | { phase: 'idle' }
+  | { phase: 'submitting' }
+  | { phase: 'error'; message: string }
+  | { phase: 'succeeded' };
+
 @Component({
   selector: 'app-household-start-new',
   standalone: true,
@@ -31,9 +29,7 @@ import {
   templateUrl: './start-new.component.html',
   styleUrl: './start-new.component.scss',
 })
-export class StartNewComponent implements AfterViewInit {
-  @ViewChild('nameInput')
-  private readonly nameInput!: ElementRef<HTMLInputElement>;
+export class StartNewComponent {
   private readonly createHouseholdGQL = inject(CreateHouseholdGQL);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -49,18 +45,35 @@ export class StartNewComponent implements AfterViewInit {
     }),
   });
 
-  readonly isSubmitting = signal(false);
-  readonly hasSucceeded = signal(false);
-  readonly submitError = signal<string | null>(null);
+  // Discriminated phase signal — the sole source of truth for the
+  // mutation lifecycle. Impossible combinations (e.g. succeeded+error)
+  // are unrepresentable.
+  readonly submit = signal<SubmitPhase>({ phase: 'idle' });
 
-  ngAfterViewInit(): void {
-    this.nameInput.nativeElement.focus();
-  }
+  // Display-layer selectors derived from `submit`. Templates read these;
+  // the component logic reads `submit()` for full discriminated matching.
+  protected readonly submitError = computed<string | null>(() => {
+    const s = this.submit();
+    return s.phase === 'error' ? s.message : null;
+  });
+
+  protected readonly submitDisabled = computed(() => {
+    const phase = this.submit().phase;
+    return phase === 'submitting' || phase === 'succeeded';
+  });
 
   onSubmit(): void {
-    if (this.form.invalid || this.isSubmitting() || this.hasSucceeded()) return;
-    this.isSubmitting.set(true);
-    this.submitError.set(null);
+    const phase = this.submit().phase;
+    // Early-return on in-flight OR terminal-success. The latter guards
+    // a real race: a fast double-click or a cancelled navigation after
+    // success could otherwise fire a second createHousehold mutation
+    // with a fresh clientMutationId — platform idempotency is deferred
+    // to #119 so the server would create a duplicate household row.
+    if (this.form.invalid || phase === 'submitting' || phase === 'succeeded') {
+      return;
+    }
+
+    this.submit.set({ phase: 'submitting' });
 
     const input = {
       name: this.form.controls.name.value,
@@ -86,18 +99,35 @@ export class StartNewComponent implements AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          // First success is terminal. Keep the submit button disabled for
-          // the rest of this component's lifetime so a fast double-click
-          // or a cancelled navigation can't trigger a second createHousehold
-          // mutation — the server has no idempotency layer yet (deferred to
-          // #119), so a duplicate mutation creates a second household row.
-          this.hasSucceeded.set(true);
-          this.router.navigateByUrl('/app/home');
+          // First success is terminal for this component: phase stays
+          // 'succeeded' so the button remains disabled even if the
+          // navigation promise rejects or resolves to false.
+          this.submit.set({ phase: 'succeeded' });
+          // I1: navigateByUrl returns Promise<boolean>; if it rejects,
+          // we'd leak an unhandled promise rejection (subscribe.next is
+          // fire-and-forget). Defensive symmetry with the round-2
+          // oauthService.logOut() fix: log, don't rollback state — the
+          // mutation succeeded; the user just needs to refresh.
+          this.router.navigateByUrl('/app/home').catch((err) => {
+            console.error('StartNew: post-create navigation failed', err);
+          });
         },
         error: () => {
-          this.submitError.set("Couldn't create household. Please try again.");
-          this.isSubmitting.set(false);
+          this.submit.set({
+            phase: 'error',
+            message: "Couldn't create household. Please try again.",
+          });
         },
       });
+  }
+
+  // I2 — inline form-validation a11y helper. Shows the error only after
+  // the field has been touched (blurred), matching Angular Material's
+  // default UX pattern. Re-runs each CD cycle because touched/invalid
+  // are tracked via Angular forms, not signals — that's idiomatic for
+  // reactive forms today.
+  protected showNameError(): boolean {
+    const c = this.form.controls.name;
+    return c.touched && c.invalid;
   }
 }
