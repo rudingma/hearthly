@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { StartNewComponent } from './start-new.component';
 import { CreateHouseholdGQL } from '../../../generated/graphql';
 
@@ -72,5 +72,37 @@ describe('StartNewComponent', () => {
     await Promise.resolve();
     expect(f.componentInstance.submitError()).not.toBeNull();
     expect(f.componentInstance.isSubmitting()).toBe(false);
+  });
+
+  it('destroyed component does not navigate when a late mutation response arrives', async () => {
+    const subject = new Subject<unknown>();
+    mutateFn.mockReturnValue(subject.asObservable());
+
+    const f = TestBed.createComponent(StartNewComponent);
+    f.detectChanges();
+    f.componentInstance.form.controls.name.setValue('Foo');
+    f.componentInstance.onSubmit();
+
+    f.destroy();
+
+    // Late response arrives after component is destroyed.
+    subject.next({
+      data: {
+        createHousehold: {
+          household: {
+            __typename: 'Household',
+            id: 'h1',
+            name: 'Foo',
+            createdAt: '',
+            updatedAt: '',
+          },
+        },
+      },
+    });
+    subject.complete();
+    await Promise.resolve();
+
+    // navigateByUrl was never invoked for the late response.
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 });
