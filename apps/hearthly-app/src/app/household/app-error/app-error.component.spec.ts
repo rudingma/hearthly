@@ -15,26 +15,37 @@ describe('AppErrorComponent', () => {
 
   beforeEach(async () => {
     householdStatus = signal<'loading' | 'error' | 'ready'>('ready');
-    authState = signal<AuthState>({ state: 'authenticated', user: { id: 'u1' } as any });
+    authState = signal<AuthState>({
+      state: 'authenticated',
+      user: { id: 'u1' } as any,
+    });
     householdRetry = vi.fn().mockResolvedValue(undefined);
     authRetry = vi.fn().mockResolvedValue(undefined);
     await TestBed.configureTestingModule({
       imports: [AppErrorComponent],
       providers: [
         provideRouter([]),
-        { provide: HouseholdMembershipService, useValue: { status: householdStatus, retry: householdRetry } },
+        {
+          provide: HouseholdMembershipService,
+          useValue: { status: householdStatus, retry: householdRetry },
+        },
         { provide: AuthService, useValue: { authState, retry: authRetry } },
       ],
     }).compileComponents();
     const router = TestBed.inject(Router);
-    navigateSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true) as any;
+    navigateSpy = vi
+      .spyOn(router, 'navigateByUrl')
+      .mockResolvedValue(true) as any;
   });
 
   it('renders retry button', () => {
     householdStatus.set('error');
     const f = TestBed.createComponent(AppErrorComponent);
     f.detectChanges();
-    const btn = f.nativeElement.querySelector<HTMLButtonElement>('[data-testid="household-error-retry"]');
+    const el: HTMLElement = f.nativeElement;
+    const btn = el.querySelector<HTMLButtonElement>(
+      '[data-testid="household-error-retry"]'
+    );
     expect(btn).not.toBeNull();
   });
 
