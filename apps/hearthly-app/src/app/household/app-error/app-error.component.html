@@ -1,8 +1,8 @@
-<app-page-container>
-  <main tabindex="-1" class="app-error">
-    <div class="app-error__card">
+<main tabindex="-1" class="app-error">
+  <app-page-container>
+    <div class="card app-error__card">
       @if (failurePlane() === 'auth') {
-      <h2 class="app-error__title">Can't sign you in right now.</h2>
+      <h1 class="app-error__title">Can't sign you in right now.</h1>
       @if (hasRetried()) {
       <p class="app-error__body">
         Still can't reach the sign-in service. Check your connection and try
@@ -13,7 +13,7 @@
         Something went wrong signing you in. Please try again in a moment.
       </p>
       } } @else {
-      <h2 class="app-error__title">Can't reach Hearthly.</h2>
+      <h1 class="app-error__title">Can't reach Hearthly.</h1>
       @if (hasRetried()) {
       <p class="app-error__body">
         Still unable to reach Hearthly. Check your connection and try again.
@@ -35,5 +35,5 @@
         {{ isRetrying() ? 'Retrying…' : 'Retry' }}
       </button>
     </div>
-  </main>
-</app-page-container>
+  </app-page-container>
+</main>
