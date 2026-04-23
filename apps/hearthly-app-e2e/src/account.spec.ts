@@ -6,7 +6,30 @@ test.describe('Account', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test.beforeEach(async ({ page }) => {
-    await seedAuth(page);
+    await seedAuth(page, {
+      graphqlMocks: {
+        Me: {
+          me: {
+            __typename: 'User',
+            id: 'e2e-user-1',
+            email: 'e2e@hearthly.test',
+            name: 'E2E Tester',
+            picture: null,
+          },
+        },
+        MyHouseholds: {
+          myHouseholds: [
+            {
+              __typename: 'Household',
+              id: 'h-seed',
+              name: 'Seed Household',
+              createdAt: '2026-04-23T00:00:00Z',
+              updatedAt: '2026-04-23T00:00:00Z',
+            },
+          ],
+        },
+      },
+    });
   });
 
   for (const scheme of ['light', 'dark'] as const) {
