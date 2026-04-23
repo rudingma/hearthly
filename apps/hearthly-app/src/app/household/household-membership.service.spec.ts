@@ -171,6 +171,21 @@ describe('HouseholdMembershipService', () => {
     expect(svc.status()).toBe('error');
   });
 
+  it('parks at loading when auth is in error state — no watchQuery', () => {
+    const h = setupWith({ state: 'error', error: 'auth failed' });
+    const svc = TestBed.inject(HouseholdMembershipService);
+    h.flush();
+    expect(svc.status()).toBe('loading');
+    expect(h.sessions()).toBe(0);
+  });
+
+  it('retry() is a no-op when no active query (pre-auth)', async () => {
+    setupWith({ state: 'loading' });
+    const svc = TestBed.inject(HouseholdMembershipService);
+    await expect(svc.retry()).resolves.toBeUndefined();
+    expect(svc.status()).toBe('loading');
+  });
+
   it('creates a fresh watchQuery per authenticated session', () => {
     const h = setupWith(AUTHENTICATED);
     const svc = TestBed.inject(HouseholdMembershipService);
