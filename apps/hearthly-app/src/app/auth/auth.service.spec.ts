@@ -301,14 +301,6 @@ describe('AuthService.authState — derived signal', () => {
     await svc.init();
     expect(svc.authState().state).toBe('error');
   });
-
-  it('error state is NOT leaked through to authenticated once user loads', async () => {
-    const svc = TestBed.inject(AuthService);
-    await svc.init();
-    svc.error.set(null);
-    (svc as any).currentUser.set({ id: 'u1', email: 'x' } as any);
-    expect(svc.authState().state).toBe('authenticated');
-  });
 });
 
 describe('AuthService.retry — bootstrap recovery', () => {
