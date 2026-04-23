@@ -59,3 +59,4 @@ apps/hearthly-app/src/generated/
 # Create tmp/<task-name>/ as needed for reference downloads, screenshots, notes.
 # Delete after the PR merges. Never commit.
 tmp/
+.worktrees/
