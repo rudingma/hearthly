@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { seedAuth } from '../playwright/auth-stub';
 
 const emptyMe = {
@@ -237,4 +238,51 @@ test.describe('household onboarding', () => {
   // window.__E2E_USER__ mid-test + swaps graphqlMocks handler. Cross-session
   // reset is validated at unit level (HouseholdMembershipService tenant-
   // isolation test + AuthService.logout teardown-order test).
+});
+
+test.describe('household onboarding — visual regression + a11y', () => {
+  for (const { route, name } of [
+    { route: '/app/start', name: 'start' },
+    { route: '/app/start/new', name: 'start-new' },
+    { route: '/app/join', name: 'join-stub' },
+    { route: '/app/error', name: 'app-error' },
+  ]) {
+    test(`desktop snapshot + axe: ${name}`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await seedAuth(page, {
+        graphqlMocks: {
+          ...emptyMe,
+          MyHouseholds:
+            name === 'app-error'
+              ? () => ({ status: 200, errors: [{ message: 'down' }] })
+              : { myHouseholds: [] },
+        },
+      });
+      await page.goto(route);
+      await expect(page).toHaveScreenshot(`${name}-desktop.png`, {
+        fullPage: true,
+        maxDiffPixelRatio: 0.01,
+      });
+      const axe = await new AxeBuilder({ page }).analyze();
+      expect(axe.violations).toEqual([]);
+    });
+
+    test(`mobile snapshot: ${name}`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await seedAuth(page, {
+        graphqlMocks: {
+          ...emptyMe,
+          MyHouseholds:
+            name === 'app-error'
+              ? () => ({ status: 200, errors: [{ message: 'down' }] })
+              : { myHouseholds: [] },
+        },
+      });
+      await page.goto(route);
+      await expect(page).toHaveScreenshot(`${name}-mobile.png`, {
+        fullPage: true,
+        maxDiffPixelRatio: 0.01,
+      });
+    });
+  }
 });
