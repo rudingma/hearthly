@@ -21,7 +21,7 @@ export class AppErrorComponent {
   readonly hasRetried = signal(false);
 
   readonly failurePlane = computed<'auth' | 'household'>(() =>
-    this.authService.authState().state === 'error' ? 'auth' : 'household',
+    this.authService.authState().state === 'error' ? 'auth' : 'household'
   );
 
   async onRetry(): Promise<void> {
