@@ -1,4 +1,5 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -72,6 +73,17 @@ const gqlLogger = new Logger('GraphQLSecurity');
     UserModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transformOptions: { enableImplicitConversion: false },
+      }),
+    },
+  ],
 })
 export class AppModule {}
