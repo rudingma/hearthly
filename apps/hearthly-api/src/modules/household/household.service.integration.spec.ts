@@ -16,7 +16,7 @@ vi.spyOn(TransactionHost, 'getInstance').mockReturnValue({
   withTransaction: (
     _propagation: unknown,
     _opts: unknown,
-    fn: () => Promise<unknown>,
+    fn: () => Promise<unknown>
   ) => fn(),
 } as unknown as TransactionHost<any>);
 

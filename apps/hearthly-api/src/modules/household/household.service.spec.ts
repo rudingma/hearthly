@@ -9,8 +9,11 @@ import { HouseholdRepository } from './household.repository';
 // use direct instantiation and stub the @Transactional() decorator's
 // runtime requirement (TransactionHost singleton) via vi.spyOn.
 vi.spyOn(TransactionHost, 'getInstance').mockReturnValue({
-  withTransaction: (_propagation: unknown, _opts: unknown, fn: () => Promise<unknown>) =>
-    fn(),
+  withTransaction: (
+    _propagation: unknown,
+    _opts: unknown,
+    fn: () => Promise<unknown>
+  ) => fn(),
 } as unknown as TransactionHost<any>);
 
 describe('HouseholdService', () => {
@@ -52,9 +55,9 @@ describe('HouseholdService', () => {
         role: 'lead',
       });
       // Order: household must be inserted before membership so we have the household.id FK.
-      expect(
-        repo.insertHousehold.mock.invocationCallOrder[0],
-      ).toBeLessThan(repo.insertMembership.mock.invocationCallOrder[0]);
+      expect(repo.insertHousehold.mock.invocationCallOrder[0]).toBeLessThan(
+        repo.insertMembership.mock.invocationCallOrder[0]
+      );
     });
 
     it('rethrows when membership insert fails', async () => {
