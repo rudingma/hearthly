@@ -1,0 +1,10 @@
+mutation CreateHousehold($input: CreateHouseholdInput!) {
+  createHousehold(input: $input) {
+    household {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+}
