@@ -120,23 +120,27 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
+    // isLoggingOut is sticky-for-the-page. Once set, NEVER cleared: the
+    // oauthService.logOut() call sets location.href to redirect, and the
+    // browser takes non-trivial time to tear down the SPA. During that
+    // window, any late silent-refresh event must still be scrubbed.
+    // Resetting the flag in a `finally` block (e.g. after `logOut()`
+    // returned) creates a race where the guard is off while the app is
+    // still alive. A new AuthService instance at the next bootstrap
+    // starts fresh.
     this.isLoggingOut = true;
+    this.oauthService.stopAutomaticRefresh();
+    this.currentUser.set(null);
+    this.error.set(null);
     try {
-      this.oauthService.stopAutomaticRefresh();
-      this.currentUser.set(null);
-      this.error.set(null);
-      try {
-        await this.apollo.client.clearStore();
-      } catch (err) {
-        console.error(
-          'AuthService.logout: apollo.clearStore failed; continuing with OIDC logout',
-          err
-        );
-      }
-      this.oauthService.logOut();
-    } finally {
-      this.isLoggingOut = false;
+      await this.apollo.client.clearStore();
+    } catch (err) {
+      console.error(
+        'AuthService.logout: apollo.clearStore failed; continuing with OIDC logout',
+        err
+      );
     }
+    this.oauthService.logOut();
   }
 
   async retry(): Promise<void> {

@@ -184,16 +184,6 @@ describe('AuthService.logout (four-step teardown + refresh race guard)', () => {
     expect(svc.currentUser()).toBeNull();
   });
 
-  it('isLoggingOut flag resets to false even if clearStore rejects', async () => {
-    const svc = TestBed.inject(AuthService);
-    await svc.init();
-    apollo.client.clearStore.mockRejectedValueOnce(new Error('x'));
-    await svc.logout();
-    apollo.client.clearStore.mockResolvedValueOnce(undefined as any);
-    await svc.logout();
-    expect(oauth.logOut).toHaveBeenCalledTimes(2);
-  });
-
   it('scrubs late token_received events while logging out', async () => {
     const svc = TestBed.inject(AuthService);
     await svc.init();
@@ -215,6 +205,21 @@ describe('AuthService.logout (four-step teardown + refresh race guard)', () => {
     await svc.logout();
 
     // logOut called twice: once inside the race-guard handler, once as step 4.
+    expect(oauth.logOut).toHaveBeenCalledTimes(2);
+  });
+
+  it('scrubs token_received events that arrive AFTER oauthService.logOut() returns (redirect-window race)', async () => {
+    const svc = TestBed.inject(AuthService);
+    await svc.init();
+
+    await svc.logout();
+
+    // Simulate the browser still alive after logOut() returned synchronously
+    // but before the redirect fully tears down the SPA.
+    events.next({ type: 'token_received' } as OAuthEvent);
+
+    // Two calls total: once as the last step of logout(), once by the
+    // race-guard scrubbing the late event.
     expect(oauth.logOut).toHaveBeenCalledTimes(2);
   });
 

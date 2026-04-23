@@ -46,9 +46,11 @@ function buildError(err: Error): Result {
 function setupWith(authInitial: AuthState = { state: 'loading' }) {
   const subjects: Subject<Result>[] = [];
   const refetchFns: Array<ReturnType<typeof vi.fn>> = [];
+  const watchOptions: unknown[] = [];
   const authState = signal<AuthState>(authInitial);
   const gql = {
-    watch: (_opts?: unknown) => {
+    watch: (opts?: unknown) => {
+      watchOptions.push(opts);
       const subject = new Subject<Result>();
       const refetch = vi.fn(async () => buildReady({ myHouseholds: [] }));
       subjects.push(subject);
@@ -70,6 +72,7 @@ function setupWith(authInitial: AuthState = { state: 'loading' }) {
     currentSubject: () => subjects[subjects.length - 1],
     currentRefetch: () => refetchFns[refetchFns.length - 1],
     sessions: () => subjects.length,
+    lastWatchOptions: () => watchOptions[watchOptions.length - 1],
     /** Flush pending Angular effects (effect() / toObservable scheduling). */
     flush: () => TestBed.flushEffects(),
   };
@@ -101,6 +104,14 @@ describe('HouseholdMembershipService', () => {
     h.authState.set(AUTHENTICATED);
     h.flush();
     expect(h.sessions()).toBe(1);
+    expect(h.lastWatchOptions()).toEqual(
+      expect.objectContaining({
+        fetchPolicy: 'network-only',
+        nextFetchPolicy: 'cache-first',
+        errorPolicy: 'all',
+        notifyOnNetworkStatusChange: false,
+      })
+    );
   });
 
   it('transitions to ready (empty) once authenticated and result arrives', () => {

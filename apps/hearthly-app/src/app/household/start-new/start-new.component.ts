@@ -1,11 +1,13 @@
 import {
   AfterViewInit,
   Component,
+  DestroyRef,
   ElementRef,
   inject,
   signal,
   ViewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   FormControl,
@@ -34,6 +36,7 @@ export class StartNewComponent implements AfterViewInit {
   private readonly nameInput!: ElementRef<HTMLInputElement>;
   private readonly createHouseholdGQL = inject(CreateHouseholdGQL);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly form = new FormGroup({
     name: new FormControl<string>('', {
@@ -79,8 +82,10 @@ export class StartNewComponent implements AfterViewInit {
           });
         },
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
+          this.isSubmitting.set(false);
           this.router.navigateByUrl('/app/home');
         },
         error: () => {
