@@ -13,11 +13,6 @@ export class UserResolver {
     description: 'Returns the currently authenticated user',
   })
   async me(@CurrentUser() jwt: JwtPayload): Promise<User> {
-    return this.userService.getOrSyncByKeycloakId({
-      sub: jwt.sub,
-      email: jwt.email,
-      name: jwt.name,
-      picture: jwt.picture,
-    });
+    return this.userService.getOrSyncByKeycloakId(jwt);
   }
 }
