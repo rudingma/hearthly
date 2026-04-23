@@ -24,7 +24,7 @@ export class HouseholdService {
   async create(
     userId: string,
     name: string,
-    clientMutationId: string,
+    clientMutationId: string
   ): Promise<HouseholdRow> {
     try {
       const household = await this.repo.insertHousehold({ name });
@@ -34,12 +34,14 @@ export class HouseholdService {
         role: 'lead',
       });
       this.logger.log(
-        `event=household.created userId=${userId} householdId=${household.id} clientMutationId=${clientMutationId}`,
+        `event=household.created userId=${userId} householdId=${household.id} clientMutationId=${clientMutationId}`
       );
       return household;
     } catch (err) {
       this.logger.error(
-        `event=household.create_failed userId=${userId} clientMutationId=${clientMutationId} err=${errMessage(err)}`,
+        `event=household.create_failed userId=${userId} clientMutationId=${clientMutationId} err=${errMessage(
+          err
+        )}`
       );
       throw err;
     }
