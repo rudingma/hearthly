@@ -54,7 +54,7 @@ export class StartNewComponent {
       .mutate({
         variables: { input },
         update: (cache, { data }) => {
-          const created = data?.createHousehold?.household;
+          const created = data?.createHousehold.household;
           if (!created) return;
           const existing =
             cache.readQuery<MyHouseholdsQuery>({
