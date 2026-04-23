@@ -6,15 +6,6 @@ import { HouseholdService } from '../household.service';
 import { CurrentUser, type JwtPayload } from '../../auth';
 import { UserService } from '../../user/user.service';
 
-function jwtToClaims(jwt: JwtPayload) {
-  return {
-    sub: jwt.sub,
-    email: jwt.email,
-    name: jwt.name,
-    picture: jwt.picture,
-  };
-}
-
 @Resolver(() => Household)
 export class HouseholdResolver {
   constructor(
@@ -26,7 +17,7 @@ export class HouseholdResolver {
     description: 'Returns households the current user is a member of',
   })
   async myHouseholds(@CurrentUser() jwt: JwtPayload): Promise<Household[]> {
-    const user = await this.userService.getOrSyncByKeycloakId(jwtToClaims(jwt));
+    const user = await this.userService.getOrSyncByKeycloakId(jwt);
     return this.householdService.listForUser(user.id);
   }
 
@@ -35,7 +26,7 @@ export class HouseholdResolver {
     @CurrentUser() jwt: JwtPayload,
     @Args('input') input: CreateHouseholdInput
   ): Promise<CreateHouseholdPayload> {
-    const user = await this.userService.getOrSyncByKeycloakId(jwtToClaims(jwt));
+    const user = await this.userService.getOrSyncByKeycloakId(jwt);
     const household = await this.householdService.create(
       user.id,
       input.name,
