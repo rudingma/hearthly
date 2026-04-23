@@ -16,14 +16,18 @@ describe('StartComponent', () => {
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('h1')?.textContent).toContain('Welcome to Hearthly');
-    expect(el.textContent).toContain('Hearthly organizes shared household life');
+    expect(el.querySelector('h1')?.textContent).toContain(
+      'Welcome to Hearthly'
+    );
+    expect(el.textContent).toContain(
+      'Hearthly organizes shared household life'
+    );
 
     const create = el.querySelector<HTMLAnchorElement>(
-      '[data-testid="household-start-create-cta"]',
+      '[data-testid="household-start-create-cta"]'
     );
     const join = el.querySelector<HTMLAnchorElement>(
-      '[data-testid="household-start-join-cta"]',
+      '[data-testid="household-start-join-cta"]'
     );
     expect(create?.getAttribute('href')).toBe('/app/start/new');
     expect(join?.getAttribute('href')).toBe('/app/join');

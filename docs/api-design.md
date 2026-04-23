@@ -167,7 +167,7 @@ type CreateFamilyPayload {
 }
 ```
 
-The consumer checks `userErrors` first; if non-empty, `family` is null. Extensible — you can add new error *types* without schema changes.
+The consumer checks `userErrors` first; if non-empty, `family` is null. Extensible — you can add new error _types_ without schema changes.
 
 **Pattern B — union discriminator wrapping the payload (Apollo-style):**
 

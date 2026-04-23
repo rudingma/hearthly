@@ -30,7 +30,8 @@ import {
   styleUrl: './start-new.component.scss',
 })
 export class StartNewComponent implements AfterViewInit {
-  @ViewChild('nameInput') private readonly nameInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('nameInput')
+  private readonly nameInput!: ElementRef<HTMLInputElement>;
   private readonly createHouseholdGQL = inject(CreateHouseholdGQL);
   private readonly router = inject(Router);
 
