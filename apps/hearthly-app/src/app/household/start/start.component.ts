@@ -7,10 +7,15 @@ import { ButtonDirective } from '../../ui/button.directive';
 @Component({
   selector: 'app-household-start',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, PageContainerComponent, ButtonDirective],
+  imports: [
+    RouterLink,
+    LucideAngularModule,
+    PageContainerComponent,
+    ButtonDirective,
+  ],
   templateUrl: './start.component.html',
   styleUrl: './start.component.scss',
 })
 export class StartComponent {
-  protected readonly HomeIcon = House;
+  protected readonly HouseIcon = House;
 }
