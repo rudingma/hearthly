@@ -40,6 +40,7 @@ describe('StartNewComponent', () => {
     const comp = f.componentInstance;
     comp.form.controls.name.setValue('   ');
     expect(comp.form.valid).toBe(false);
+    expect(comp.submit().phase).toBe('idle');
   });
 
   it('sends a clientMutationId formatted as UUID v4 on submit', () => {
@@ -60,18 +61,22 @@ describe('StartNewComponent', () => {
     f.componentInstance.form.controls.name.setValue('Foo');
     f.componentInstance.onSubmit();
     await Promise.resolve();
+    expect(f.componentInstance.submit().phase).toBe('succeeded');
     expect(navigateSpy).toHaveBeenCalledWith('/app/home');
   });
 
-  it('shows inline error and resets isSubmitting on mutation failure', async () => {
+  it('shows inline error on mutation failure, phase transitions to error', async () => {
     mutateFn.mockReturnValue(throwError(() => new Error('boom')));
     const f = TestBed.createComponent(StartNewComponent);
     f.detectChanges();
     f.componentInstance.form.controls.name.setValue('Fail Case');
     f.componentInstance.onSubmit();
     await Promise.resolve();
-    expect(f.componentInstance.submitError()).not.toBeNull();
-    expect(f.componentInstance.isSubmitting()).toBe(false);
+    const s = f.componentInstance.submit();
+    expect(s.phase).toBe('error');
+    if (s.phase === 'error') {
+      expect(s.message).toBe("Couldn't create household. Please try again.");
+    }
   });
 
   it('second onSubmit() after success does not fire a second mutation', async () => {
@@ -81,12 +86,12 @@ describe('StartNewComponent', () => {
     f.componentInstance.onSubmit();
     await Promise.resolve();
     expect(mutateFn).toHaveBeenCalledTimes(1);
-    expect(f.componentInstance.hasSucceeded()).toBe(true);
+    expect(f.componentInstance.submit().phase).toBe('succeeded');
 
     // User fast-double-clicks or a cancelled navigation re-exposes the button.
     f.componentInstance.onSubmit();
     await Promise.resolve();
-    // Still 1 — guarded by hasSucceeded() early-return.
+    // Still 1 — guarded by phase === 'succeeded' early-return.
     expect(mutateFn).toHaveBeenCalledTimes(1);
   });
 
@@ -120,5 +125,54 @@ describe('StartNewComponent', () => {
 
     // navigateByUrl was never invoked for the late response.
     expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not show name error before the field is touched', () => {
+    const f = TestBed.createComponent(StartNewComponent);
+    f.detectChanges();
+    const el: HTMLElement = f.nativeElement;
+    f.componentInstance.form.controls.name.setValue('   '); // invalid
+    f.detectChanges();
+    expect(el.querySelector('[data-testid="household-name-error"]')).toBeNull();
+    expect(
+      el.querySelector('#household-name')?.getAttribute('aria-invalid')
+    ).toBeNull();
+  });
+
+  it('shows name error and aria-invalid once the field is touched and invalid', () => {
+    const f = TestBed.createComponent(StartNewComponent);
+    f.detectChanges();
+    const el: HTMLElement = f.nativeElement;
+    const input = el.querySelector<HTMLInputElement>('#household-name')!;
+    f.componentInstance.form.controls.name.setValue('   ');
+    f.componentInstance.form.controls.name.markAsTouched();
+    f.detectChanges();
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-describedby')).toBe('household-name-error');
+    expect(
+      el.querySelector('[data-testid="household-name-error"]')
+    ).not.toBeNull();
+  });
+
+  it('post-create navigation rejection is logged and does not throw', async () => {
+    const f = TestBed.createComponent(StartNewComponent);
+    f.detectChanges();
+    const router = TestBed.inject(Router);
+    const consoleSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    vi.spyOn(router, 'navigateByUrl').mockRejectedValueOnce(
+      new Error('nav failed')
+    );
+    f.componentInstance.form.controls.name.setValue('Foo');
+    f.componentInstance.onSubmit();
+    await Promise.resolve();
+    await Promise.resolve(); // double microtask: subscribe.next → navigate.catch
+    expect(f.componentInstance.submit().phase).toBe('succeeded');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'StartNew: post-create navigation failed',
+      expect.any(Error)
+    );
+    consoleSpy.mockRestore();
   });
 });

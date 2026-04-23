@@ -3,7 +3,7 @@
     <div class="card app-error__card">
       @if (failurePlane() === 'auth') {
       <h1 class="app-error__title">Can't sign you in right now.</h1>
-      @if (hasRetried()) {
+      @if (hasFailed()) {
       <p class="app-error__body">
         Still can't reach the sign-in service. Check your connection and try
         again.
@@ -14,7 +14,7 @@
       </p>
       } } @else {
       <h1 class="app-error__title">Can't reach Hearthly.</h1>
-      @if (hasRetried()) {
+      @if (hasFailed()) {
       <p class="app-error__body">
         Still unable to reach Hearthly. Check your connection and try again.
       </p>

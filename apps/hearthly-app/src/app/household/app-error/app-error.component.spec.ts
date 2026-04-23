@@ -82,7 +82,7 @@ describe('AppErrorComponent', () => {
       await f.componentInstance.onRetry();
       f.detectChanges();
       expect(navigateSpy).not.toHaveBeenCalled();
-      expect(f.componentInstance.hasRetried()).toBe(true);
+      expect(f.componentInstance.retryPhase().phase).toBe('failed');
     });
   });
 
@@ -112,7 +112,7 @@ describe('AppErrorComponent', () => {
       await f.componentInstance.onRetry();
       f.detectChanges();
       expect(navigateSpy).not.toHaveBeenCalled();
-      expect(f.componentInstance.hasRetried()).toBe(true);
+      expect(f.componentInstance.retryPhase().phase).toBe('failed');
     });
 
     // LOAD-BEARING round-5 fix: IdP recovers but user isn't signed in →
@@ -126,7 +126,7 @@ describe('AppErrorComponent', () => {
       await f.componentInstance.onRetry();
       expect(authRetry).toHaveBeenCalled();
       expect(navigateSpy).toHaveBeenCalledWith('/');
-      expect(f.componentInstance.hasRetried()).toBe(false);
+      expect(f.componentInstance.retryPhase().phase).not.toBe('failed');
     });
   });
 });
