@@ -93,6 +93,7 @@ Priorities beyond v1 are expected to shift based on real usage.
 - **Not a kids-only or teens-only app.** Kids inherit the adult app with restricted grants — no dedicated "kid mode."
 - **Not engagement-hacking.** No streaks, XP, nudges, manufactured urgency, push-for-retention.
 - **Not multi-tenant SaaS.** The multi-household model is personal (one user in multiple households they belong to), not organizational.
+- **Not offline-first.** Mutations go to the server synchronously; no client-side mutation queue, no background sync on reconnect, no optimistic UI beyond the immediate Apollo cache write. Households are typically used in homes (reliable connectivity) rather than on the road. If this decision ever needs revisiting, the trigger is a concrete user complaint — not speculation — and the reopen scope covers queue + conflict resolution + replay-on-reconnect as a cohesive workstream, not bolted on per-feature.
 
 ## 11. Quality bar & motivation hierarchy
 
