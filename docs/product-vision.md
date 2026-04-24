@@ -20,6 +20,17 @@ Consolidate the small daily tools an adult household already uses — lists, tas
 - **Household** = group of members. A user can belong to multiple households and switch between them (Trade Republic-style account switcher).
 - Sharing happens at the household level. Within a household, each feature is granted per member.
 
+### Architectural orientation — Slack-style hard gate
+
+Feature data lives **inside** a household, not on the user. This orients Hearthly toward the Slack / WhatsApp / Notion onboarding pattern rather than the Discord / Notion-solo pattern:
+
+- A user with zero households has no feature surface to render. They land on a dedicated onboarding screen (`/app/start`) with two entry points — create a household, or enter an invite code.
+- Household-scoped routes (`/app/home`, future `/app/tasks`, `/app/groceries`, …) sit behind a `householdMembershipGuard`. Deep-linking without a household redirects to onboarding.
+- User-scoped routes (`/app/account` — sign out, profile, future theme/DND) are the one exception; they work without a household, the way Slack's account settings work without a workspace selected.
+- Per-feature notification settings are per-membership (not per-user), because the same user can belong to multiple households and may want different notification policies in each.
+
+This orientation was locked in Story A of the Household Foundation milestone (#113). Every future feature brainstorm inherits it as a given.
+
 ## 4. Permissions
 
 - **Two household roles:** `lead` (can invite, grant, configure — typically the adult couple) and `member` (uses what's been granted).

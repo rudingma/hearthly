@@ -14,7 +14,30 @@ test.describe('Home', () => {
     // Order matters: seedAuth's addInitScript and page.clock.install both run
     // before page navigation. seedAuth seeds window.__E2E_USER__; clock.install
     // freezes time to 10:00 UTC → HomeComponent.greeting = "Good morning".
-    await seedAuth(page);
+    await seedAuth(page, {
+      graphqlMocks: {
+        Me: {
+          me: {
+            __typename: 'User',
+            id: 'e2e-user-1',
+            email: 'e2e@hearthly.test',
+            name: 'E2E Tester',
+            picture: null,
+          },
+        },
+        MyHouseholds: {
+          myHouseholds: [
+            {
+              __typename: 'Household',
+              id: 'h-seed',
+              name: 'Seed Household',
+              createdAt: '2026-04-23T00:00:00Z',
+              updatedAt: '2026-04-23T00:00:00Z',
+            },
+          ],
+        },
+      },
+    });
     await page.clock.install({ time: new Date('2026-04-19T10:00:00Z') });
   });
 

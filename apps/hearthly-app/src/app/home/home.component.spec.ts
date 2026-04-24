@@ -1,32 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { signal, computed } from '@angular/core';
 import { HomeComponent } from './home.component';
 import { AuthService } from '../auth/auth.service';
+import { createMockAuthService } from '../auth/auth.service.test-helpers';
 
 describe('HomeComponent', () => {
-  const currentUser = signal({
-    name: 'Matthias',
-    email: 'dev@hearthly.dev',
-    id: '1',
-  });
-  const mockAuthService = {
-    currentUser,
-    isAuthenticated: computed(() => true),
-    isLoading: signal(false),
-    error: signal<string | null>(null),
-    displayName: computed(() => currentUser()?.name ?? ''),
-    initials: computed(() => 'M'),
-    pictureUrl: computed(() => null),
-    login: vi.fn(),
-    logout: vi.fn(),
-    retry: vi.fn(),
-    init: vi.fn(),
-  };
+  let authMock: ReturnType<typeof createMockAuthService>;
 
   beforeEach(async () => {
+    authMock = createMockAuthService({
+      state: 'authenticated',
+      user: {
+        name: 'Matthias',
+        email: 'dev@hearthly.dev',
+        id: '1',
+        picture: null,
+      },
+    });
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
-      providers: [{ provide: AuthService, useValue: mockAuthService }],
+      providers: [{ provide: AuthService, useValue: authMock.service }],
     }).compileComponents();
   });
 

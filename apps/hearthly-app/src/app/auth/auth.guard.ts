@@ -1,28 +1,30 @@
 import { inject } from '@angular/core';
-import type { CanActivateFn } from '@angular/router';
-import { Router } from '@angular/router';
-import { AuthService } from './auth.service';
+import { type CanMatchFn, Router, type UrlSegment } from '@angular/router';
+import { AuthService, type AuthState } from './auth.service';
+import { waitForNonLoading } from '../common/router/wait-for-non-loading';
 
-export const authGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
+function isErrorRoute(segments: UrlSegment[]): boolean {
+  const last = segments[segments.length - 1];
+  return last?.path === 'error';
+}
+
+export const authGuard: CanMatchFn = (_route, segments) => {
+  const auth = inject(AuthService);
   const router = inject(Router);
-
-  // Init still in progress — don't navigate or redirect
-  if (authService.isLoading()) {
-    return false;
-  }
-
-  // If authenticated, allow navigation
-  if (authService.isAuthenticated()) {
-    return true;
-  }
-
-  // If we have a valid token but me query failed (API down), don't redirect
-  // The error state will be shown by the component
-  if (authService.error()) {
-    return true;
-  }
-
-  // No token — redirect to welcome screen (user taps "Sign in" explicitly)
-  return router.createUrlTree(['/']);
+  return waitForNonLoading(
+    auth.authState,
+    (s): s is Extract<AuthState, { state: 'loading' }> => s.state === 'loading',
+    (s) => {
+      switch (s.state) {
+        case 'authenticated':
+          return true;
+        case 'unauthenticated':
+          return router.createUrlTree(['/']);
+        case 'error':
+          return isErrorRoute(segments)
+            ? true
+            : router.createUrlTree(['/app/error']);
+      }
+    }
+  );
 };

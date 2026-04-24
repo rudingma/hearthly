@@ -1,0 +1,8 @@
+query MyHouseholds {
+  myHouseholds {
+    id
+    name
+    createdAt
+    updatedAt
+  }
+}

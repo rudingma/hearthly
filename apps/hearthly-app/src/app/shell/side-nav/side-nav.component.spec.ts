@@ -1,28 +1,29 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { computed, signal } from '@angular/core';
 import { describe, expect, it } from 'vitest';
 import { LucideAngularModule } from 'lucide-angular';
 import { SideNavComponent } from './side-nav.component';
 import { AuthService } from '../../auth/auth.service';
+import { createMockAuthService } from '../../auth/auth.service.test-helpers';
 
 describe('SideNavComponent', () => {
   it('renders the Home primary nav item + Account footer', () => {
+    const { service } = createMockAuthService({
+      state: 'authenticated',
+      user: {
+        name: 'Matthias Rudingsdorfer',
+        email: 'x@y.z',
+        id: '1',
+        picture: null,
+      },
+    });
     TestBed.configureTestingModule({
       imports: [SideNavComponent, LucideAngularModule],
       providers: [
         provideRouter([]),
         {
           provide: AuthService,
-          useValue: {
-            initials: signal('MR'),
-            pictureUrl: signal(null),
-            displayName: signal('Matthias'),
-            currentUser: signal({ email: 'x@y.z' }),
-            isAuthenticated: computed(() => true),
-            isLoading: computed(() => false),
-            error: signal(null),
-          } as unknown as AuthService,
+          useValue: service,
         },
       ],
     });

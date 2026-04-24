@@ -46,6 +46,10 @@ docs/superpowers/
 __screenshots__/
 
 test-output
+
+# Playwright test artifacts (failure traces, screenshots)
+test-results/
+
 infrastructure/cluster/k3s_kubeconfig.yaml
 infrastructure/cluster/k3s_kustomization_backup.yaml
 
@@ -59,3 +63,4 @@ apps/hearthly-app/src/generated/
 # Create tmp/<task-name>/ as needed for reference downloads, screenshots, notes.
 # Delete after the PR merges. Never commit.
 tmp/
+.worktrees/
