@@ -12,7 +12,7 @@ import { HouseholdRepository } from './household.repository';
 // We verify the happy path only — atomicity (that insertMembership failing
 // rolls back the household insert) is NOT verified by this test.
 //
-// ⚠️ KNOWN TEST GAP — tracked as follow-up. A real rollback proof requires
+// ⚠️ KNOWN TEST GAP — tracked as follow-up (#123). A real rollback proof requires
 // wiring ClsModule.forRoot() + TransactionalAdapterDrizzleOrm with a PGlite-
 // backed connection, running the test inside ClsService.run(), and forcing
 // insertMembership to throw to observe the household roll back. That setup is

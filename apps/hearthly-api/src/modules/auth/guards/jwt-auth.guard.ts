@@ -13,6 +13,7 @@ import { jwtVerify, createRemoteJWKSet } from 'jose';
 import type { JWTVerifyGetKey } from 'jose';
 import { authConfig } from '../../../config';
 import type { AuthConfig } from '../../../config';
+import { errMessage } from '../../../common/error-utils';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import type { JwtPayload } from '../interfaces/jwt-payload.interface';
 
@@ -62,11 +63,7 @@ export class JwtAuthGuard implements CanActivate {
       });
       payload = result.payload;
     } catch (error) {
-      this.logger.warn(
-        `JWT verification failed: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
-      );
+      this.logger.warn(`JWT verification failed: ${errMessage(error)}`);
       throw new UnauthorizedException('Invalid or expired token');
     }
 
