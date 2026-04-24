@@ -1,4 +1,5 @@
-import { Logger, Module } from '@nestjs/common';
+import { Logger, Module, ValidationPipe } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -13,6 +14,7 @@ import {
 import { validate, appConfig, databaseConfig, authConfig } from '../config';
 import { DatabaseModule } from '../database';
 import { AuthModule } from '../modules/auth/auth.module';
+import { HouseholdModule } from '../modules/household/household.module';
 import { UserModule } from '../modules/user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -70,8 +72,22 @@ const gqlLogger = new Logger('GraphQLSecurity');
       },
     }),
     UserModule,
+    HouseholdModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useFactory: () =>
+        new ValidationPipe({
+          transform: true,
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          transformOptions: { enableImplicitConversion: false },
+          validationError: { target: false },
+        }),
+    },
+  ],
 })
 export class AppModule {}

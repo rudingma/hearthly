@@ -9,6 +9,7 @@ import { printSchema, lexicographicSortSchema } from 'graphql';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { UserResolver } from './modules/user/resolvers/user.resolver';
+import { HouseholdResolver } from './modules/household/resolvers/household.resolver';
 
 async function generateSchema() {
   const app = await NestFactory.create(GraphQLSchemaBuilderModule, {
@@ -17,9 +18,12 @@ async function generateSchema() {
   await app.init();
 
   const gqlSchemaFactory = app.get(GraphQLSchemaFactory);
-  const schema = await gqlSchemaFactory.create([UserResolver], {
-    scalarsMap: [{ type: () => Date, scalar: GraphQLISODateTime }],
-  });
+  const schema = await gqlSchemaFactory.create(
+    [UserResolver, HouseholdResolver],
+    {
+      scalarsMap: [{ type: () => Date, scalar: GraphQLISODateTime }],
+    }
+  );
 
   // Sort the schema to match `sortSchema: true` in AppModule
   const sorted = lexicographicSortSchema(schema);

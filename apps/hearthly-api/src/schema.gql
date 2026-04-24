@@ -2,14 +2,37 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateHouseholdInput {
+  clientMutationId: String!
+  name: String!
+}
+
+type CreateHouseholdPayload {
+  household: Household!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+type Household {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  createHousehold(input: CreateHouseholdInput!): CreateHouseholdPayload!
+}
+
 type Query {
   """Returns the currently authenticated user"""
   me: User!
+
+  """Returns households the current user is a member of"""
+  myHouseholds: [Household!]!
 }
 
 type User {

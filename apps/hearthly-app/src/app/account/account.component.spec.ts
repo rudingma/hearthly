@@ -1,47 +1,32 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { signal, computed } from '@angular/core';
 import { AccountComponent } from './account.component';
 import { AuthService } from '../auth/auth.service';
 import { NavigationHistoryService } from '../shell/navigation-history.service';
+import { createMockAuthService } from '../auth/auth.service.test-helpers';
+import { signal } from '@angular/core';
 
 describe('AccountComponent', () => {
-  const currentUser = signal<{
-    name: string;
-    email: string;
-    id: string;
-    picture?: string | null;
-  } | null>({
+  const testUser = {
     name: 'Matthias Rudingsdorfer',
     email: 'dev@hearthly.dev',
     id: '1',
-  });
-  const mockAuthService = {
-    currentUser,
-    isAuthenticated: computed(() => true),
-    isLoading: signal(false),
-    error: signal<string | null>(null),
-    displayName: computed(() => currentUser()?.name ?? ''),
-    initials: computed(() => 'MR'),
-    pictureUrl: computed(() => currentUser()?.picture ?? null),
-    login: vi.fn(),
-    logout: vi.fn(),
-    retry: vi.fn(),
-    init: vi.fn(),
+    picture: null as string | null,
   };
+
+  let authMock: ReturnType<typeof createMockAuthService>;
   const mockHistory = { canGoBack: signal(true) };
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    currentUser.set({
-      name: 'Matthias Rudingsdorfer',
-      email: 'dev@hearthly.dev',
-      id: '1',
+    authMock = createMockAuthService({
+      state: 'authenticated',
+      user: testUser,
     });
     await TestBed.configureTestingModule({
       imports: [AccountComponent],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
+        { provide: AuthService, useValue: authMock.service },
         { provide: NavigationHistoryService, useValue: mockHistory },
         provideRouter([]),
       ],
@@ -68,7 +53,7 @@ describe('AccountComponent', () => {
       'button[data-testid="sign-out-button"]'
     );
     button.click();
-    expect(mockAuthService.logout).toHaveBeenCalled();
+    expect(authMock.service.logout).toHaveBeenCalled();
   });
 
   it('renders <main tabindex="-1"> wrapper (outside-shell route contract)', () => {

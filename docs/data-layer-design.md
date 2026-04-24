@@ -293,10 +293,12 @@ export class DatabaseService implements OnModuleDestroy {
 - Review generated SQL before committing. Drizzle Kit might drop+recreate a column instead of renaming.
 - One schema change = one migration file. Don't batch unrelated changes.
 - Seed data is separate. Use a `database/seeds/` directory, not migration files.
+- **Manually edited migrations are immutable — don't regenerate them.** If a migration contains hand-appended SQL (triggers, plpgsql functions, data migrations, anything Drizzle's TypeScript schema can't express), NEVER delete and regenerate it. Drizzle's snapshot does not record these statements, so regenerating would silently drop them. Use a **follow-up migration** to fix divergence instead.
+- **Migration file naming:** new migrations use `NNNN_<issue>_<snake_case_desc>.sql` via the `--name` flag (e.g. `npx drizzle-kit generate --name=113_create_households`). Existing historical migrations with random Drizzle names or hyphenated names stay as-is (migrations are immutable).
 
 **Handling branch conflicts:**
 
-If two devs change schemas on different branches and both merge to main: delete both generated migration folders, run `npx drizzle-kit generate` fresh on main, and commit. This is Drizzle Kit's weakest point vs. Liquibase, but in practice with modules owning separate tables, conflicts are rare.
+If two devs change schemas on different branches and both merge to main: delete both generated migration folders (only if neither contains hand-edited SQL — see immutability rule above) and run `npx drizzle-kit generate` fresh on main, then commit. If one or both migrations contain manual SQL, resolve by writing a follow-up migration rather than regenerating. This is Drizzle Kit's weakest point vs. Liquibase, but in practice with modules owning separate tables, conflicts are rare.
 
 ---
 

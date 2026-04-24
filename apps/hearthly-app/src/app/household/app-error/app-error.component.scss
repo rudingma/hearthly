@@ -1,0 +1,28 @@
+.app-error {
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px;
+
+  &__card {
+    padding: 24px;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-warm-dark);
+    margin: 0;
+  }
+
+  &__body {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-text-body-muted);
+    margin: 0;
+  }
+}

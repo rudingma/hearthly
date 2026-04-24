@@ -1,0 +1,39 @@
+<main tabindex="-1" class="app-error">
+  <app-page-container>
+    <div class="card app-error__card">
+      @if (failurePlane() === 'auth') {
+      <h1 class="app-error__title">Can't sign you in right now.</h1>
+      @if (hasFailed()) {
+      <p class="app-error__body">
+        Still can't reach the sign-in service. Check your connection and try
+        again.
+      </p>
+      } @else {
+      <p class="app-error__body">
+        Something went wrong signing you in. Please try again in a moment.
+      </p>
+      } } @else {
+      <h1 class="app-error__title">Can't reach Hearthly.</h1>
+      @if (hasFailed()) {
+      <p class="app-error__body">
+        Still unable to reach Hearthly. Check your connection and try again.
+      </p>
+      } @else {
+      <p class="app-error__body">
+        Something went wrong loading your households. Please try again in a
+        moment.
+      </p>
+      } }
+      <button
+        type="button"
+        appButton
+        variant="primary"
+        [disabled]="isRetrying()"
+        (click)="onRetry()"
+        data-testid="household-error-retry"
+      >
+        {{ isRetrying() ? 'Retrying…' : 'Retry' }}
+      </button>
+    </div>
+  </app-page-container>
+</main>
