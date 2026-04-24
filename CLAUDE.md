@@ -31,6 +31,8 @@ Family management app. See `docs/project-summary.md` for architecture decisions 
 3. Helm charts: `helm template <name> <path>` to verify rendering
 4. **UI/design changes only — manual DESIGN.md review (not CI-checkable):** open `DESIGN.md` and verify the change respects the relevant spec — tokens used by semantic name (§2), typography roles (§3), component specs (§4), spacing/radius (§5), elevation level (§6), motion/haptic rules (§7), and the eight Signature Moves (§1). If the design intentionally diverges, update `DESIGN.md` in the same PR.
 
+**Local gate coverage note:** `npx nx lint <app>` targets one project at a time. `hearthly-app-e2e` has its own lint target that per-project invocations miss — caught by CI on #113. Run `npx nx run-many -t lint` to cover all projects at once when touching shared configuration or rules.
+
 ```bash
 # Initial setup
 bun install                       # Install all dependencies

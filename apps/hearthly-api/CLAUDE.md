@@ -33,6 +33,7 @@ Root module: `src/app/app.module.ts`. Each domain module lives under `src/module
 - Repositories use `TransactionHost` (never direct `@Inject(DRIZZLE)`). `TransactionHost` requires a CLS context — do not call repository methods from cron jobs or startup code without wrapping in `ClsService.run()`.
 - New schemas must be re-exported from `src/database/schema.ts`
 - Auth module exports via barrel `src/modules/auth/index.ts`: `Public`, `CurrentUser`, `JwtPayload`. Import from the barrel, not individual files.
+- **Error-message extraction:** `src/common/error-utils.ts` → `errMessage(unknown)`. Use instead of hand-rolled `error instanceof Error ? error.message : 'Unknown error'`.
 - Reference: `docs/data-layer-design.md`
 
 ## Drizzle Migrations
@@ -47,9 +48,12 @@ Run from `apps/hearthly-api/` (not repo root):
 
 **Column conventions:** `text` over `varchar`, `timestamptz` over `timestamp`
 
+- **`updated_at` triggers are mandatory** on every new table with that column — see `docs/data-layer-design.md` §3.
+
 ## Configuration
 
 - **Env validation uses Zod** (not class-validator). Config split into `appConfig`, `databaseConfig`, `authConfig` via `registerAs()` in `src/config/`. Inject via `@Inject(appConfig.KEY)` with the corresponding type.
+- **Input DTOs** use `class-validator` with a global `ValidationPipe` (wired via `APP_PIPE` + `useFactory` in `src/app/app.module.ts`). See `docs/api-design.md` §3 for the full setup and option rationale.
 - **Build uses webpack** (see `webpack.config.js`). Migrations bundled via `assets` config. Output is a single JS bundle.
 
 ## Authentication (OIDC / Keycloak)
