@@ -126,9 +126,12 @@ export async function seedAuth(
       await new Promise((r) => setTimeout(r, resp.delayMs));
     }
 
-    const envelope: Record<string, unknown> = {};
-    if (resp.errors !== undefined) envelope.errors = resp.errors;
-    envelope.data = resp.data ?? null;
+    const envelope: { data: unknown; errors?: unknown[] } = {
+      data: resp.data ?? null,
+    };
+    if (resp.errors !== undefined) {
+      envelope.errors = resp.errors;
+    }
 
     await route.fulfill({
       status: resp.status ?? 200,

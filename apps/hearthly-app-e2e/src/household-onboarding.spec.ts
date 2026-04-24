@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { analyzeA11y } from '../playwright/axe';
-import { seedAuth } from '../playwright/auth-stub';
+import { seedAuth, type GraphqlResponderInput } from '../playwright/auth-stub';
 
 const emptyMe = {
   Me: {
@@ -130,7 +130,7 @@ test.describe('household onboarding', () => {
     await seedAuth(page, {
       graphqlMocks: {
         ...emptyMe,
-        MyHouseholds: ({ callCount }) => {
+        MyHouseholds: ({ callCount }: GraphqlResponderInput) => {
           if (callCount === 1) {
             return { status: 200, errors: [{ message: 'down' }] };
           }
