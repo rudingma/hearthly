@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: ghcr.io/rudingma/hearthly-app
-  tag: sha-5cf64ce5b2dda2be7a3dfcd182ded91156985676
+  tag: sha-1cc6fedd64c3257e4ced705ef3c7272298f31afc
   pullPolicy: IfNotPresent
 
 service:
