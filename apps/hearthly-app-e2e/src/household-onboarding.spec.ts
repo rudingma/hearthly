@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { analyzeA11y } from '../playwright/axe';
 import { seedAuth } from '../playwright/auth-stub';
 
 const emptyMe = {
@@ -117,10 +117,10 @@ test.describe('household onboarding', () => {
     await page.getByTestId('household-name-input').fill('   ');
     const submit = page.getByTestId('household-create-submit');
     await expect(submit).toBeDisabled();
-    // Sleep 200ms to confirm no internal lifecycle tick fires a mutation
-    // after the disable-state settles. The toBeDisabled assertion prevents
-    // user-triggered calls; this guards against accidental programmatic ones.
-    await page.waitForTimeout(200);
+    // Try Enter to trigger form submission. Form.invalid early-returns in
+    // onSubmit() — no mutation should fire. The wire-level createCalls
+    // counter is the load-bearing assertion.
+    await page.getByTestId('household-name-input').press('Enter');
     expect(createCalls).toBe(0);
   });
 
@@ -263,8 +263,8 @@ test.describe('household onboarding — visual regression + a11y', () => {
         fullPage: true,
         maxDiffPixelRatio: 0.01,
       });
-      const axe = await new AxeBuilder({ page }).analyze();
-      expect(axe.violations).toEqual([]);
+      const critical = await analyzeA11y(page);
+      expect(critical).toEqual([]);
     });
 
     test(`mobile snapshot: ${name}`, async ({ page }) => {
