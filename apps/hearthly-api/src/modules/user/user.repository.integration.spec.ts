@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
-import { sql } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 import { createTestDb, TestDb } from '../../../test/support/test-db';
 import { users } from './schema';
 import { UserRepository } from './user.repository';
@@ -159,6 +159,31 @@ describe('UserRepository (integration)', () => {
 
       const allUsers = await db.select().from(users);
       expect(allUsers).toHaveLength(1);
+    });
+  });
+
+  describe('touch_updated_at trigger', () => {
+    it('bumps users.updated_at on UPDATE (parity with households + household_memberships)', async () => {
+      const [inserted] = await db
+        .insert(users)
+        .values({ keycloakId: 'kc-touch', email: 'touch@example.com' })
+        .returning();
+
+      const before = inserted.updatedAt;
+      // Wait to ensure now() advances between transactions (trigger uses separate tx).
+      await new Promise((r) => setTimeout(r, 10));
+
+      await db
+        .update(users)
+        .set({ name: 'Touched' })
+        .where(eq(users.id, inserted.id));
+
+      const [after] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, inserted.id));
+
+      expect(after.updatedAt.getTime()).toBeGreaterThan(before.getTime());
     });
   });
 });

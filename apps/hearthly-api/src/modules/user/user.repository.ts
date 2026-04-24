@@ -49,7 +49,8 @@ export class UserRepository {
           email: claims.email,
           name: sql`coalesce(${users.name}, ${claims.name})`,
           picture: sql`coalesce(${users.picture}, ${claims.picture ?? null})`,
-          updatedAt: sql`now()`,
+          // updated_at is bumped by the users_touch_updated_at trigger
+          // (migration 0005_113_users_touch_updated_at_trigger.sql).
         },
       })
       .returning();
