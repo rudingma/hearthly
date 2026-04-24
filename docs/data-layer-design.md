@@ -295,6 +295,7 @@ export class DatabaseService implements OnModuleDestroy {
 - Seed data is separate. Use a `database/seeds/` directory, not migration files.
 - **Manually edited migrations are immutable — don't regenerate them.** If a migration contains hand-appended SQL (triggers, plpgsql functions, data migrations, anything Drizzle's TypeScript schema can't express), NEVER delete and regenerate it. Drizzle's snapshot does not record these statements, so regenerating would silently drop them. Use a **follow-up migration** to fix divergence instead.
 - **Migration file naming:** new migrations use `NNNN_<issue>_<snake_case_desc>.sql` via the `--name` flag (e.g. `npx drizzle-kit generate --name=113_create_households`). Existing historical migrations with random Drizzle names or hyphenated names stay as-is (migrations are immutable).
+- **`updated_at` triggers are mandatory** — every new table with an `updated_at` column must ship with a `BEFORE UPDATE ... EXECUTE FUNCTION touch_updated_at()` trigger in its create migration. The function itself lives globally (created in `0004_113_create_households.sql`; `users` retrofit in `0005_113_users_touch_updated_at_trigger.sql`). Application code must NOT set `updated_at` manually — trust the trigger.
 
 **Handling branch conflicts:**
 

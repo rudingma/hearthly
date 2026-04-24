@@ -17,15 +17,15 @@ Hearthly is a helper for your daily private life — a consolidated surface for 
 
 ## Milestones
 
-| Milestone                          | Focus                                                                            | Status    |
-| ---------------------------------- | -------------------------------------------------------------------------------- | --------- |
-| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups                             | Complete  |
-| **Backend Foundation**             | Drizzle module, repository pattern, transactions, test infra                     | Complete  |
-| **Authentication**                 | Keycloak, OIDC in NestJS + Angular                                               | Complete  |
-| **App Shell**                      | Angular layout, navigation, routing, theming                                     | Complete  |
-| **Household Foundation + Tasks**   | Users, households, roles, per-feature grants, shared + personal to-dos           | Next (v1) |
-| **Observability**                  | OpenTelemetry, Tempo, Loki, app dashboards                                       | Parallel  |
-| _Future features_                  | Groceries → Daily Summary → Calendar → Finance (iterative, picked by real usage) | —         |
+| Milestone                          | Focus                                                                            | Status           |
+| ---------------------------------- | -------------------------------------------------------------------------------- | ---------------- |
+| **Project Setup & Infrastructure** | Cluster, CI/CD, GitOps, secrets, monitoring, backups                             | Complete         |
+| **Backend Foundation**             | Drizzle module, repository pattern, transactions, test infra                     | Complete         |
+| **Authentication**                 | Keycloak, OIDC in NestJS + Angular                                               | Complete         |
+| **App Shell**                      | Angular layout, navigation, routing, theming                                     | Complete         |
+| **Household Foundation + Tasks**   | Users, households, roles, per-feature grants, shared + personal to-dos           | In progress (v1) |
+| **Observability**                  | OpenTelemetry, Tempo, Loki, app dashboards                                       | Parallel         |
+| _Future features_                  | Groceries → Daily Summary → Calendar → Finance (iterative, picked by real usage) | —                |
 
 ## Tech Stack
 
@@ -43,6 +43,18 @@ Hearthly is a helper for your daily private life — a consolidated surface for 
 | Secrets      | Infisical (self-hosted)                             | Chosen over Sealed Secrets (less learning value), Vault (unsealing complexity without cloud KMS), ESO (less mature UI).                                                                          |
 | Monitoring   | Prometheus + Grafana                                | Infrastructure monitoring live. App-level observability (OpenTelemetry) tracked in Observability milestone.                                                                                      |
 | Backups      | pg_dump CronJob → S3                                | Daily, custom format, SHA256 checksums, 30-day S3 lifecycle policy.                                                                                                                              |
+
+## Design References
+
+| Topic                                                        | Document                    |
+| ------------------------------------------------------------ | --------------------------- |
+| API design (GraphQL, mutations, error handling, codegen)     | `docs/api-design.md`        |
+| Data layer (Drizzle, migrations, repositories, transactions) | `docs/data-layer-design.md` |
+| Angular patterns (state, guards, lifecycle, forms, testing)  | `docs/frontend-patterns.md` |
+
+## Shipped milestones — notable patterns
+
+- **Story A — Household Foundation (#113, PR #121, merged 2026-04-24):** established discriminated-union service state, `CanMatchFn` + `waitForNonLoading` guards, phase-signal component lifecycle, Apollo mutation lifecycle shape, OIDC hardening, shared test factory (`createMockAuthService`), form a11y convention, `class-validator` global `ValidationPipe`, `errMessage` utility, and mandatory `updated_at` trigger convention. Details in `docs/frontend-patterns.md` and `docs/api-design.md` §3.
 
 ## Key Decisions
 

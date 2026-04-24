@@ -195,7 +195,25 @@ Prefix types only when the bare name is ambiguous in the unified schema.
 
 ### Input Validation
 
-Handled by NestJS `ValidationPipe` + `class-validator` before the resolver runs. Invalid inputs never reach your code. GraphQL returns them in the `errors` array automatically.
+Handled by a global `ValidationPipe` wired via `APP_PIPE` + `useFactory` (DI-friendly — participates in the NestJS DI lifecycle, unlike `useValue` which creates the pipe before the container is ready). Configured in `apps/hearthly-api/src/app/app.module.ts`:
+
+```typescript
+{
+  provide: APP_PIPE,
+  useFactory: () =>
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,              // strip unknown properties — mass-assignment defense
+      forbidNonWhitelisted: true,   // throw on unknown properties — fail loudly
+      transformOptions: { enableImplicitConversion: false }, // explicit types only
+      validationError: { target: false }, // omit the DTO instance from error responses (DTO-leak prevention)
+    }),
+}
+```
+
+Every `@InputType()` DTO is validated automatically before the resolver runs. Invalid inputs never reach resolver code — GraphQL returns errors in the `errors` array. Field-level validation uses `class-validator` decorators (`@IsString`, `@Length`, `@Matches`, `@MinLength`, `@MaxLength`) and `class-transformer` for coercion (`@Transform`). See `apps/hearthly-api/src/modules/household/inputs/create-household.input.ts` for a worked example.
+
+**Config validation uses Zod** (not `class-validator`) — see `apps/hearthly-api/src/config/`. The split is intentional: Zod validates environment at startup time (non-DI context); `class-validator` validates request inputs at runtime (DI context, globally via `APP_PIPE`).
 
 ### Domain Errors
 
@@ -250,6 +268,8 @@ async createFamily(@Args('input') input: CreateFamilyInput): Promise<typeof Crea
 ### Infrastructure Errors
 
 Database failures, unhandled exceptions, etc. These bubble up as exceptions, NestJS serializes them into the GraphQL `errors` array, and the frontend shows a generic error message.
+
+**Error message extraction:** use `errMessage(unknown)` from `apps/hearthly-api/src/common/error-utils.ts` to safely extract a string from any thrown value — handles `Error` instances, plain objects with `message`, and primitives. Replaces hand-rolled `error instanceof Error ? error.message : 'Unknown error'`.
 
 ### Frontend Consumption
 

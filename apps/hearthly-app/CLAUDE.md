@@ -45,6 +45,19 @@ Two environment files with a shared `Environment` interface:
   - `NavigationHistoryService` (provided in root) — tracks router history depth and drives the `HeaderComponent` back-button `canGoBack()` signal.
   - `DESKTOP_MEDIA` / `DESKTOP_MIN_WIDTH_PX` — exported from `src/app/ui/breakpoints.ts`. Single source of truth for the 993px shell breakpoint, referenced by both `ResponsiveShellComponent`'s `BreakpointObserver` and the `--breakpoint-desktop` token in `theme.css`.
 
+## Patterns
+
+Canonical reference: `docs/frontend-patterns.md`. Key rules:
+
+- **Service state:** public API is `Signal<DiscriminatedUnion>`. Consumers pattern-match — no lossy convenience selectors. Examples: `HouseholdMembershipService.state`, `AuthService.authState`.
+- **Single-writable:** services with derived selectors use a private `WritableSignal` + `.asReadonly()` for the public API. All derived values are `computed()`. Never write to a derived signal.
+- **Route guards:** use `CanMatchFn` + `waitForNonLoading<S,R>` from `src/app/common/router/wait-for-non-loading.ts`. Pattern-match on discriminated state with an exhaustive switch. `authGuard` passes `/app/error` through to avoid redirect loops.
+- **Component lifecycle:** phase signals — `readonly <concept>Phase = signal<PhaseType>({ phase: 'idle' })`. Derived display booleans: `is<State>` / `has<State>`. Templates read derived; logic reads the phase signal.
+- **Apollo mutations:** always `.pipe(takeUntilDestroyed(destroyRef))`. Cache writes in `update:` callback. Set terminal phase (`succeeded`) before `navigateByUrl`; catch nav rejection.
+- **AuthService tests:** use `createMockAuthService` from `src/app/auth/auth.service.test-helpers.ts`. No hand-rolled mocks.
+- **Form a11y:** `[attr.aria-invalid]` + `[attr.aria-describedby]` bound to `showXError()` (touched && invalid). Error element: `role="alert"` + stable `id`.
+- **Shared code:** `src/app/common/validators/`, `src/app/common/router/`.
+
 ## Testing
 
 - **Mock `AuthService` with real signals**: Use `signal()` and `computed()` objects, not plain mocks. Every test touching a component that consumes `AuthService` needs this.
