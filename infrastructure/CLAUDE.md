@@ -20,6 +20,7 @@ All external traffic routes through Kubernetes Gateway API (HTTPRoute).
 - **Config:** Listeners in `cluster/main.tf` (`traefik_merge_values`). HTTPRoutes in each app's Helm chart.
 - **Adding a new service:** Add a `websecure-*` listener in `traefik_merge_values` (with hostname, certificateRefs), then create an HTTPRoute in the service's Helm chart referencing the listener via `sectionName`.
 - **cert-manager ClusterIssuer is NOT ArgoCD-managed** — requires manual bootstrap: `kubectl apply -f infrastructure/cluster-services/cert-manager/clusterissuer.yaml`
+- **Traefik + Gateway API CRDs are a PINNED COMPATIBILITY SET — never let either float.** Traefik is pinned in `cluster/main.tf` (`traefik_version`/`traefik_image_tag`); the Gateway API CRDs are explicitly owned at a matching version by the `gateway-api-crds` ArgoCD app (`cluster-services/gateway-api-crds/`, vendored `standard-install.yaml`). A k3s auto-upgrade once bumped Traefik to v3.7.1 (needs Gateway API v1.5.1, `TLSRoute` Standard at `v1`) while CRDs lagged at v1.4.0 → Traefik built zero HTTP routers → full ingress outage (#131). Upgrade Traefik and the CRD bundle **together**, deliberately. Traefik chart ≥ v40 (v3.7) no longer bundles the CRDs.
 
 ## ArgoCD
 
