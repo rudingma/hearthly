@@ -97,7 +97,7 @@ Default-deny both ingress and egress per namespace. 35 policies across 6 namespa
 
 - **CI:** `ci.yml` — lint, test, build affected (x86, Node.js 24)
 - **Deploy:** `deploy.yml` — builds API, App, Keycloak on ARM64 runners, Trivy scan before push
-- **Terraform:** `terraform.yml` — plan on PR (posted as comment), apply on merge. CI fetches secrets via Infisical OIDC (identity ID and project slug hardcoded in workflow).
+- **Terraform:** `terraform.yml` — plan on PR (posted as comment), apply on merge. CI reads bootstrap secrets from **GitHub Encrypted Secrets** (NOT Infisical) — see `cluster/BOOTSTRAP.md`. Infisical runs inside the cluster Terraform repairs, so fetching bootstrap creds from it was a proven circular dependency during the 2026-05 outage (#131, Task C.4). The duplicated secrets (`S3_*`, `KEYCLOAK_ADMIN_PASSWORD`) stay in Infisical for in-cluster consumers; rotate in Infisical **and** re-set the GitHub Secret.
 - **ARM64 runners require public repo** — if repo goes private, Docker build jobs fail
 - **Terraform concurrency:** serialized per module (`cancel-in-progress: false`) — Hetzner S3 has no state locking. **No manual `terraform apply` while CI is running.**
 

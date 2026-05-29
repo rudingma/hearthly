@@ -16,12 +16,18 @@ on:
 permissions:
   contents: read
   pull-requests: write
-  id-token: write
 
-env:
-  INFISICAL_IDENTITY_ID: '2a105da8-c31f-4244-b1f0-a72d5379bf4f'
-  INFISICAL_DOMAIN: 'https://secrets.hearthly.dev'
-  INFISICAL_PROJECT_SLUG: 'hearthly-uv-ci'
+# Bootstrap secrets come from GitHub Encrypted Secrets, NOT Infisical.
+# Rationale (#131, Task C.4): Infisical runs *inside* the cluster this workflow
+# builds/repairs. Fetching bootstrap creds from it created a proven circular
+# dependency — a sick cluster (or flapping ingress) broke Terraform, which was
+# the tool meant to fix the cluster. The recovery path must not depend on the
+# thing being recovered. See infrastructure/cluster/BOOTSTRAP.md.
+#
+# Secrets are scoped to the individual steps that need them (least privilege),
+# so the PR-comment step carries no secrets in its environment. Terraform plan
+# text is passed to actions/github-script via env: (data), never interpolated
+# into the script body, to avoid a plan-text -> JS injection / secret-exfil path.
 
 jobs:
   changes:
@@ -55,18 +61,11 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v4
 
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
-
       - name: Configure backend
         working-directory: infrastructure/cluster
+        env:
+          S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
         run: |
           cat > backend.conf <<EOF
           access_key = "$S3_ACCESS_KEY"
@@ -75,6 +74,8 @@ jobs:
           sed -i 's/^ *//' backend.conf
 
       - name: Setup SSH key
+        env:
+          HCLOUD_SSH_PRIVATE_KEY: ${{ secrets.HCLOUD_SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
           printenv HCLOUD_SSH_PRIVATE_KEY > ~/.ssh/id_ed25519
@@ -90,16 +91,19 @@ jobs:
         working-directory: infrastructure/cluster
         run: terraform plan -input=false -no-color -out=tfplan
         env:
-          TF_VAR_hcloud_token: ${{ env.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
 
       - name: Post plan to PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+          ACTOR: ${{ github.actor }}
         with:
           script: |
-            let plan = `${{ steps.plan.outputs.stdout }}`;
+            let plan = process.env.PLAN || '';
             if (plan.length > 60000) plan = plan.substring(0, 60000) + '\n... (truncated)';
-            const output = `#### Terraform Plan — \`infrastructure/cluster\`\n\`\`\`\n${plan}\n\`\`\`\n*Triggered by @${{ github.actor }}*`;
+            const output = `#### Terraform Plan — \`infrastructure/cluster\`\n\`\`\`\n${plan}\n\`\`\`\n*Triggered by @${process.env.ACTOR}*`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -119,18 +123,11 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v4
 
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
-
       - name: Configure backend
         working-directory: infrastructure/cluster
+        env:
+          S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
         run: |
           cat > backend.conf <<EOF
           access_key = "$S3_ACCESS_KEY"
@@ -139,6 +136,8 @@ jobs:
           sed -i 's/^ *//' backend.conf
 
       - name: Setup SSH key
+        env:
+          HCLOUD_SSH_PRIVATE_KEY: ${{ secrets.HCLOUD_SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
           printenv HCLOUD_SSH_PRIVATE_KEY > ~/.ssh/id_ed25519
@@ -153,7 +152,7 @@ jobs:
         working-directory: infrastructure/cluster
         run: terraform apply -input=false -auto-approve
         env:
-          TF_VAR_hcloud_token: ${{ env.HCLOUD_TOKEN }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
 
   # --- Keycloak config module ---
   plan-keycloak-config:
@@ -168,18 +167,11 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v4
 
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
-
       - name: Configure backend
         working-directory: infrastructure/keycloak-config
+        env:
+          S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
         run: |
           cat > backend.conf <<EOF
           access_key = "$S3_ACCESS_KEY"
@@ -196,18 +188,21 @@ jobs:
         working-directory: infrastructure/keycloak-config
         run: terraform plan -input=false -no-color -out=tfplan
         env:
-          TF_VAR_keycloak_admin_password: ${{ env.KEYCLOAK_ADMIN_PASSWORD }}
-          TF_VAR_google_client_id: ${{ env.GOOGLE_CLIENT_ID }}
-          TF_VAR_google_client_secret: ${{ env.GOOGLE_CLIENT_SECRET }}
+          TF_VAR_keycloak_admin_password: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+          TF_VAR_google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
 
       - name: Post plan to PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+          ACTOR: ${{ github.actor }}
         with:
           script: |
-            let plan = `${{ steps.plan.outputs.stdout }}`;
+            let plan = process.env.PLAN || '';
             if (plan.length > 60000) plan = plan.substring(0, 60000) + '\n... (truncated)';
-            const output = `#### Terraform Plan — \`infrastructure/keycloak-config\`\n\`\`\`\n${plan}\n\`\`\`\n*Triggered by @${{ github.actor }}*`;
+            const output = `#### Terraform Plan — \`infrastructure/keycloak-config\`\n\`\`\`\n${plan}\n\`\`\`\n*Triggered by @${process.env.ACTOR}*`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -227,18 +222,11 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v4
 
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
-
       - name: Configure backend
         working-directory: infrastructure/keycloak-config
+        env:
+          S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
         run: |
           cat > backend.conf <<EOF
           access_key = "$S3_ACCESS_KEY"
@@ -254,6 +242,6 @@ jobs:
         working-directory: infrastructure/keycloak-config
         run: terraform apply -input=false -auto-approve
         env:
-          TF_VAR_keycloak_admin_password: ${{ env.KEYCLOAK_ADMIN_PASSWORD }}
-          TF_VAR_google_client_id: ${{ env.GOOGLE_CLIENT_ID }}
-          TF_VAR_google_client_secret: ${{ env.GOOGLE_CLIENT_SECRET }}
+          TF_VAR_keycloak_admin_password: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+          TF_VAR_google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
