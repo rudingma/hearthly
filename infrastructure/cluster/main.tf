@@ -80,16 +80,32 @@ module "kube-hetzner" {
   # Use stable k3s release channel
   initial_k3s_channel = "stable"
 
+  # PIN Traefik — a load-bearing ingress must never float on a k3s/chart
+  # auto-upgrade. An unpinned bump to v3.7.1 (needs Gateway API v1.5.1, TLSRoute
+  # Standard at v1) against v1.4.0 CRDs caused the 2026-05-29 ingress outage
+  # (zero HTTP routers, all hosts 404). Pinned to the version that is running
+  # and healthy. Traefik and the Gateway API CRDs are a COMPATIBILITY SET:
+  # bump this together with infrastructure/cluster-services/gateway-api-crds/.
+  # See issue #131.
+  traefik_version   = "40.2.0"
+  traefik_image_tag = "v3.7.1"
+
   # Gateway API: enable Traefik's kubernetesGateway provider.
-  # CRDs are bundled by the Traefik Helm chart; cert-manager Gateway API
-  # support is enabled automatically by kube-hetzner when this flag is set.
+  # CRDs are owned explicitly by the gateway-api-crds ArgoCD app (the v40 chart
+  # no longer bundles them); cert-manager Gateway API support is enabled
+  # automatically by kube-hetzner when this flag is set.
   traefik_provider_kubernetes_gateway_enabled = true
 
   # Deep-merge into defaults (preserves LB annotations, proxy protocol,
   # resource limits, PDB that traefik_values would silently drop).
-  # v2.19+ defaults are v39-compatible (no globalArguments, correct
-  # ports.web.http.redirections path), so merge-only is sufficient.
   traefik_merge_values = <<-EOT
+providers:
+  kubernetesGateway:
+    enabled: true
+    # Hearthly uses only HTTPRoute. false keeps TCPRoute out of the watch set.
+    # (TLSRoute is Standard in Gateway API v1.5, so this does not exclude it —
+    # that is satisfied by the owned v1.5.1 CRDs, not by this flag.)
+    experimentalChannel: false
 gateway:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
