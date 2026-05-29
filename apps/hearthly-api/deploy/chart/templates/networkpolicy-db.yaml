@@ -10,6 +10,37 @@ spec:
       cnpg.io/cluster: hearthly-db
   policyTypes:
     - Ingress
+    - Egress
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Allow egress to the K8s API server. The CNPG instance manager watches its
+    # Cluster CR via the API server; without this it crash-loops on startup
+    # ("dial 10.43.0.1:443: connection refused" under default-deny) — root cause
+    # of the 2026-05 outage recovery block. kube-router evaluates egress AFTER
+    # kube-proxy DNAT, so both the ClusterIP (pre-DNAT) and the control-plane
+    # node IP (post-DNAT) are required. See issue #128 and infrastructure/CLAUDE.md.
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.apiServer.clusterIP }}/32
+        - ipBlock:
+            cidr: {{ .Values.apiServer.nodeIP }}/32
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 6443
+          protocol: TCP
   ingress:
     # Allow traffic from hearthly-api (PostgreSQL queries)
     - from:
