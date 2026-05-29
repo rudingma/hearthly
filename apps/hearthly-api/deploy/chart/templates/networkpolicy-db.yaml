@@ -42,6 +42,18 @@ spec:
         - port: 6443
           protocol: TCP
   ingress:
+    # Allow intra-cluster replication: standby -> primary for pg_basebackup +
+    # streaming replication on 5432. CNPG instances all carry the label
+    # cnpg.io/cluster=hearthly-db. Without this the replica join hangs on
+    # "dial hearthly-db-rw:5432: connection refused" under default-deny —
+    # required once instances>1 (HA, architecture plan A.1). See issue #131.
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: hearthly-db
+      ports:
+        - port: 5432
+          protocol: TCP
     # Allow traffic from hearthly-api (PostgreSQL queries)
     - from:
         - podSelector:
