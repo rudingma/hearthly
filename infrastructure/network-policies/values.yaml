@@ -13,3 +13,11 @@ apiServer:
   # compatibility with different CNI behaviors.
   clusterIP: 10.43.0.1
   nodeIP: 10.255.0.101
+
+# Node host-network subnets (kube-hetzner splits the default 10.0.0.0/8 network
+# into /16 subnets: agents take the first, the control plane the last). Prometheus
+# scrapes node-exporter (:9100) and kubelet (:10250) at these node IPs, which are
+# host-network targets that namespaceSelector cannot match — they need an ipBlock.
+nodeSubnets:
+  agents: 10.0.0.0/16
+  controlPlane: 10.255.0.0/16
