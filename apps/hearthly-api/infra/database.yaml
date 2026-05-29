@@ -4,7 +4,14 @@ metadata:
   name: hearthly-db
   namespace: hearthly
 spec:
-  instances: 1
+  instances: 2
+
+  # Async replication: prioritise write availability over zero-RPO. We accept
+  # <= a few seconds of data loss on a hard primary failure rather than block
+  # writes when a standby is unhealthy. (Default minSync/maxSync = 0 is async;
+  # stated explicitly so the RPO decision is visible in Git.) See issue #131.
+  minSyncReplicas: 0
+  maxSyncReplicas: 0
 
   postgresql:
     parameters:
@@ -27,3 +34,11 @@ spec:
     initdb:
       database: hearthly
       owner: hearthly
+
+  # Keep the two instances on different nodes so a single node loss (or a kured
+  # drain) never takes the whole cluster down. required = hard constraint; with
+  # 3 schedulable workers there is always a second node for the standby.
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: required
