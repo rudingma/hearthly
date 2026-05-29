@@ -14,6 +14,9 @@ apps/*/deploy/chart/templates/
 apps/hearthly-app/src/generated/
 apps/hearthly-api/src/schema.gql
 
+# Vendored upstream Gateway API CRD bundle (do not reformat upstream YAML)
+infrastructure/cluster-services/gateway-api-crds/standard-install.yaml
+
 # Lockfiles
 bun.lock
 
