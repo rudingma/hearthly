@@ -16,12 +16,13 @@ on:
 permissions:
   contents: read
   pull-requests: write
-  id-token: write
 
-env:
-  INFISICAL_IDENTITY_ID: '2a105da8-c31f-4244-b1f0-a72d5379bf4f'
-  INFISICAL_DOMAIN: 'https://secrets.hearthly.dev'
-  INFISICAL_PROJECT_SLUG: 'hearthly-uv-ci'
+# Bootstrap secrets come from GitHub Encrypted Secrets, NOT Infisical.
+# Rationale (#131, Task C.4): Infisical runs *inside* the cluster this workflow
+# builds/repairs. Fetching bootstrap creds from it created a proven circular
+# dependency — a sick cluster (or flapping ingress) broke Terraform, which was
+# the tool meant to fix the cluster. The recovery path must not depend on the
+# thing being recovered. See infrastructure/cluster/BOOTSTRAP.md.
 
 jobs:
   changes:
@@ -50,20 +51,15 @@ jobs:
     concurrency:
       group: terraform-cluster
       cancel-in-progress: false
+    env:
+      S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
+      HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      HCLOUD_SSH_PRIVATE_KEY: ${{ secrets.HCLOUD_SSH_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: hashicorp/setup-terraform@v4
-
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/cluster
@@ -114,20 +110,15 @@ jobs:
     concurrency:
       group: terraform-cluster
       cancel-in-progress: false
+    env:
+      S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
+      HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+      HCLOUD_SSH_PRIVATE_KEY: ${{ secrets.HCLOUD_SSH_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: hashicorp/setup-terraform@v4
-
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/cluster
@@ -163,20 +154,16 @@ jobs:
     concurrency:
       group: terraform-keycloak-config
       cancel-in-progress: false
+    env:
+      S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
+      KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: hashicorp/setup-terraform@v4
-
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/keycloak-config
@@ -222,20 +209,16 @@ jobs:
     concurrency:
       group: terraform-keycloak-config
       cancel-in-progress: false
+    env:
+      S3_ACCESS_KEY: ${{ secrets.TF_S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.TF_S3_SECRET_KEY }}
+      KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: hashicorp/setup-terraform@v4
-
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.15
-        with:
-          method: 'oidc'
-          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
-          domain: ${{ env.INFISICAL_DOMAIN }}
-          env-slug: 'prod'
-          project-slug: ${{ env.INFISICAL_PROJECT_SLUG }}
-          secret-path: '/'
 
       - name: Configure backend
         working-directory: infrastructure/keycloak-config
