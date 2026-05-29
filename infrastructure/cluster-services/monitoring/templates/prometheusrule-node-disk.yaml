@@ -11,10 +11,27 @@ spec:
         # MicroOS accumulates OS-update snapshots; if kured cannot drain a
         # node they are never reaped and the 40 GB root fills until kubelet
         # mass-evicts pods. Alert well before eviction (~8-15% free).
+        #
+        # Derived from node-exporter's btrfs collector, NOT node_filesystem_*:
+        # the filesystem collector fails on these nodes ("open
+        # /host/proc/1/mountinfo: permission denied" — the confined container
+        # cannot read host PID 1's mountinfo under MicroOS's enforcing SELinux),
+        # so node_filesystem_* series do not exist. The btrfs collector reads
+        # via the btrfs ioctls and works. See issue #131.
+        #
+        # df-equivalent free fraction for a single-device btrfs root with the
+        # MicroOS default profile (Data=single, Metadata/System=DUP):
+        #   free = device_size - used_data - 2*(size_metadata + size_system)
+        # Verified against `df` / `btrfs fi usage` on all four nodes (±1%).
+        # `by (instance)` collapses the differing label sets (device vs
+        # block_group_type) so the arithmetic matches per node.
         - alert: NodeRootDiskFillingFast
           expr: >-
-            (node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} /
-             node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}) < 0.30
+            (
+              max by (instance) (node_btrfs_device_size_bytes)
+              - max by (instance) (node_btrfs_used_bytes{block_group_type="data"})
+              - 2 * sum by (instance) (node_btrfs_size_bytes{block_group_type=~"metadata|system"})
+            ) / max by (instance) (node_btrfs_device_size_bytes) < 0.30
           for: 15m
           labels:
             severity: warning
@@ -27,8 +44,11 @@ spec:
               docs/superpowers/plans/2026-05-28-incident-recovery-runbook.md
         - alert: NodeRootDiskCritical
           expr: >-
-            (node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} /
-             node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}) < 0.15
+            (
+              max by (instance) (node_btrfs_device_size_bytes)
+              - max by (instance) (node_btrfs_used_bytes{block_group_type="data"})
+              - 2 * sum by (instance) (node_btrfs_size_bytes{block_group_type=~"metadata|system"})
+            ) / max by (instance) (node_btrfs_device_size_bytes) < 0.15
           for: 5m
           labels:
             severity: critical
