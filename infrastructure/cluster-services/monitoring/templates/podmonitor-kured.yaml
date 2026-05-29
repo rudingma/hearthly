@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kured
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: kured
+spec:
+  # kured runs as a raw DaemonSet in kube-system (installed by kube-hetzner),
+  # not by this chart, so we select it cross-namespace by its pod label.
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      name: kured
+  podMetricsEndpoints:
+    # kured declares a named container port `metrics` on :8080.
+    - port: metrics
+      interval: 30s
