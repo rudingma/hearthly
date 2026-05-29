@@ -4,7 +4,12 @@ metadata:
   name: keycloak-db
   namespace: keycloak
 spec:
-  instances: 1
+  instances: 2
+
+  # Async replication: write availability over zero-RPO (see hearthly-db).
+  # Default minSync/maxSync = 0 is async; stated explicitly. See issue #131.
+  minSyncReplicas: 0
+  maxSyncReplicas: 0
 
   postgresql:
     parameters:
@@ -27,3 +32,10 @@ spec:
     initdb:
       database: keycloak
       owner: keycloak
+
+  # Keep the two instances on different nodes (single node loss / kured drain
+  # never takes the cluster down). See hearthly-db / architecture plan A.2.
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: required
