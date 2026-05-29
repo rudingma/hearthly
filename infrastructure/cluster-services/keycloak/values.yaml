@@ -12,6 +12,15 @@ service:
   httpPort: 8080
   managementPort: 9000
 
+# K8s API server addresses for the keycloak-db CNPG instance egress policy.
+# kube-router evaluates egress AFTER kube-proxy DNAT, so both the ClusterIP
+# (pre-DNAT) and the control-plane node IP (post-DNAT) are required. Keep in
+# sync with infrastructure/network-policies/values.yaml. Update nodeIP if the
+# control-plane node is replaced.
+apiServer:
+  clusterIP: 10.43.0.1
+  nodeIP: 10.255.0.101
+
 route:
   enabled: true
   host: auth.hearthly.dev
