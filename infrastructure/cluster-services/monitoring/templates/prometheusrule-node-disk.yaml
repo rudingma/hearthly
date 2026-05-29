@@ -1,0 +1,78 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: node-disk-and-reboot
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: node-disk
+      rules:
+        # --- Root-disk fill (the 2026-05 outage cause) -------------------
+        # MicroOS accumulates OS-update snapshots; if kured cannot drain a
+        # node they are never reaped and the 40 GB root fills until kubelet
+        # mass-evicts pods. Alert well before eviction (~8-15% free).
+        - alert: NodeRootDiskFillingFast
+          expr: >-
+            (node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} /
+             node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}) < 0.30
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Node {{ "{{" }} $labels.instance {{ "}}" }} root filesystem under 30% free
+            description: >-
+              Investigate before kubelet eviction (~8-15% free). Likely cause:
+              snapper snapshot accumulation. Runbook:
+              docs/superpowers/plans/2026-05-28-incident-recovery-runbook.md
+        - alert: NodeRootDiskCritical
+          expr: >-
+            (node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} /
+             node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}) < 0.15
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Node {{ "{{" }} $labels.instance {{ "}}" }} root filesystem under 15% free — eviction imminent
+            description: >-
+              Run infrastructure/cluster/scripts/snapper-tune.sh on the node or
+              expand the disk now.
+        - alert: NodeDiskPressure
+          expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Node {{ "{{" }} $labels.node {{ "}}" }} DiskPressure=True
+            description: >-
+              Kubelet is evicting pods. See recovery runbook Phase 1.
+        # --- kured health (only meaningful once kured is un-paused, A.4) --
+        # While kured is parked (DaemonSet desired=0 during the post-outage
+        # freeze) desired==ready==0, so KuredDown does NOT fire. After A.4
+        # un-pauses kured, desired>0 and this catches a degraded reboot loop.
+        - alert: KuredDown
+          expr: >-
+            kube_daemonset_status_number_ready{daemonset="kured",namespace="kube-system"}
+              < kube_daemonset_status_desired_number_scheduled{daemonset="kured",namespace="kube-system"}
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              kured DaemonSet degraded — automatic reboots are not happening
+            description: >-
+              Without kured, MicroOS update snapshots accumulate. This preceded
+              the 2026-05 outage.
+        - alert: NodeRebootDebt
+          expr: kured_reboot_required == 1
+          for: 24h
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Node {{ "{{" }} $labels.instance {{ "}}" }} has needed a reboot for >24h
+            description: >-
+              kured flags reboot-required but the node has not rebooted. Verify
+              drains can succeed (CNPG HA, no AllowedDisruptions=0 PDBs).

@@ -76,7 +76,8 @@ Two independent alerting paths push notifications via ntfy.sh:
 - **ntfy topic:** Infisical (`NTFY_TOPIC`), intentionally decoupled between cluster and GitHub Actions.
 - **Custom rules:** See `cluster-services/monitoring/templates/prometheusrule-*.yaml`
 - **Admission webhooks:** cert-manager issues webhook TLS cert. k3s quirks: webhook port must be 8443 (not 10250), NetworkPolicy must allow ingress from any source on that port.
-- **CRD selectors:** `ruleSelectorNilUsesHelmValues: false` + `serviceMonitorSelectorNilUsesHelmValues: false`
+- **CRD selectors:** `ruleSelectorNilUsesHelmValues: false` + `serviceMonitorSelectorNilUsesHelmValues: false` + `podMonitorSelectorNilUsesHelmValues: false` (so the kured PodMonitor in kube-system is discovered without a release label)
+- **Node disk alerts:** `prometheusrule-node-disk.yaml` (root-disk fill, DiskPressure, kured health) + `podmonitor-kured.yaml` scrape kured's `:8080/metrics`. kured-derived alerts (`KuredDown`, `NodeRebootDebt`) only fire once kured is un-paused (architecture Phase A.4); disk alerts work immediately.
 - **Grafana gotchas:** Uses `namespaceOverride: monitoring` (ArgoCD renders in argocd namespace, causes drift without this). Uses `Recreate` strategy (hcloud-volumes are ReadWriteOnce — RollingUpdate fails).
 
 ## NetworkPolicies

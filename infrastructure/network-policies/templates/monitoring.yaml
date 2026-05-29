@@ -56,8 +56,26 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # Scrape targets (pod metrics endpoints) in every namespace.
     - to:
         - namespaceSelector: {}
+    # K8s API server (ClusterIP before DNAT + node IP after DNAT). Prometheus
+    # needs this for Kubernetes service discovery — without it SD returns zero
+    # endpoints and Prometheus scrapes NOTHING (0 active targets), silently
+    # blinding all in-cluster alerting. The namespaceSelector rule above does
+    # NOT cover it: kube-router evaluates egress post-DNAT, so the destination
+    # is the node IP (a non-pod address) which no namespaceSelector matches.
+    # Same root cause as the 2026-05 outage's CNPG egress gap. See issue #131.
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.apiServer.clusterIP }}/32
+        - ipBlock:
+            cidr: {{ .Values.apiServer.nodeIP }}/32
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 6443
+          protocol: TCP
 ---
 # Grafana: allow egress to K8s API server (sidecars watch ConfigMaps/Secrets)
 apiVersion: networking.k8s.io/v1
