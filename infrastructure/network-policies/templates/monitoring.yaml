@@ -76,6 +76,22 @@ spec:
           protocol: TCP
         - port: 6443
           protocol: TCP
+    # Node host-network scrape targets: node-exporter (:9100) and kubelet
+    # (:10250, incl. cadvisor/probes). These listen on the node IPs, which are
+    # host-network addresses no namespaceSelector matches — without this,
+    # node_filesystem_* / cadvisor / kubelet metrics are all missing and the
+    # node-disk alerts have no data. kube-router REJECTs the denied egress, so
+    # the symptom is "connection refused" on :9100 / :10250.
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.nodeSubnets.agents }}
+        - ipBlock:
+            cidr: {{ .Values.nodeSubnets.controlPlane }}
+      ports:
+        - port: 9100
+          protocol: TCP
+        - port: 10250
+          protocol: TCP
 ---
 # Grafana: allow egress to K8s API server (sidecars watch ConfigMaps/Secrets)
 apiVersion: networking.k8s.io/v1
@@ -119,6 +135,50 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # K8s API server (ClusterIP before DNAT + node IP after DNAT)
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.apiServer.clusterIP }}/32
+        - ipBlock:
+            cidr: {{ .Values.apiServer.nodeIP }}/32
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 6443
+          protocol: TCP
+---
+# kube-state-metrics: allow egress to K8s API server.
+# ksm opens a client to the API server at startup to list/watch objects; under
+# default-deny with no egress rule it crash-loops on
+# "dial 10.43.0.1:443: connect: connection refused", taking ALL kube_* metrics
+# (and every alert that depends on them) offline. Same DNAT caveat as above.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ksm-api-egress
+  namespace: monitoring
+  labels:
+    {{- include "network-policies.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  policyTypes:
+    - Egress
+  egress:
+    # DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
     # K8s API server (ClusterIP before DNAT + node IP after DNAT)
     - to:
         - ipBlock:
