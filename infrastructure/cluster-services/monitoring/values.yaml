@@ -290,11 +290,20 @@ kube-prometheus-stack:
         memory: 64Mi
 
   # --- kube-state-metrics ---
+  # CPU limit raised 100m->300m: KSM bursts hard during its initial all-namespace
+  # list/watch. At 100m it was CFS-throttled enough that the /livez + /readyz HTTP
+  # handlers exceeded the 5s probe timeout, so the kubelet liveness-killed it in a
+  # crashloop (exit 2, NOT OOM) — leaving kube_* metrics absent and blinding most
+  # kube-prometheus-stack alerts. Nodes have ample CPU headroom (was ~16% used), so
+  # the container limit, not the node, was the bottleneck. Memory limit 64Mi->128Mi
+  # for headroom watching secrets/configmaps cluster-wide. (Distinct from the
+  # API-egress crashloop noted in infrastructure/CLAUDE.md — that one can't reach
+  # the API at all; this one syncs fine then dies on probe timeout.)
   kube-state-metrics:
     resources:
       requests:
         cpu: 20m
         memory: 32Mi
       limits:
-        cpu: 100m
-        memory: 64Mi
+        cpu: 300m
+        memory: 128Mi
