@@ -66,7 +66,7 @@ All external traffic routes through Kubernetes Gateway API (HTTPRoute).
 - **Operator:** CloudNativePG v1.28.1 (namespace: cnpg-system)
 - **hearthly-db:** hearthly namespace, 10Gi. `DATABASE_URL` from K8s Secret `hearthly-db-app`. Backups: daily pg_dump at 02:00 UTC → `hearthly-backups` S3 bucket.
 - **keycloak-db:** keycloak namespace, 5Gi. Credentials in K8s Secret `keycloak-db-app`. Backups: daily at 03:00 UTC → same bucket, prefix `keycloak-db-`.
-- **PV reclaim:** Retain on both (patched manually).
+- **PV reclaim:** Both CNPG clusters use the **`hcloud-volumes-retain`** StorageClass (`reclaimPolicy: Retain`, declarative in `cluster-services/storageclasses/`, its own ArgoCD app). This governs **newly provisioned** volumes only. The 4 existing DB PVs (hearthly-db-1/2, keycloak-db-1/2) keep their reclaim policy from creation and were patched to `Retain` out-of-band — **audit note:** the original manual patch (2026-05) covered only the primaries (db-1); the Phase A HA standbys (db-2) were on `Delete` until patched to `Retain` on 2026-05-30 (architecture plan D.5). Existing dynamically-provisioned PVs cannot be GitOps-managed; verify with `kubectl get pv -o custom-columns=NAME:.metadata.name,CLAIM:.spec.claimRef.name,RECLAIM:.spec.persistentVolumeReclaimPolicy`.
 
 ## Alerting & Monitoring
 
