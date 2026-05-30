@@ -110,6 +110,8 @@ cd infrastructure/cluster && terraform plan
 cd infrastructure/cluster && terraform apply
 ```
 
+- **Cold recovery (rebuild from nothing):** `infrastructure/cluster/runbook-cold-recovery.md` — clean clone → `terraform apply` with no reachable cluster → hand off to the ArgoCD cold-bootstrap runbook. Bootstrap creds inventory in `BOOTSTRAP.md`.
+
 ## Known Issues
 
 - **WSL2 + kube-hetzner CRLF:** Terraform module files download with CRLF on WSL2, breaking heredocs. Fix: `find .terraform/modules/kube-hetzner -name "*.tf" -exec sed -i 's/\r$//' {} +` (also .sh, .yaml, .tpl). Re-run after `terraform init`.
