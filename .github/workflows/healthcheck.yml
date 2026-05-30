@@ -41,6 +41,10 @@ jobs:
 
           check_endpoint "https://hearthly.dev/" "200"
           check_endpoint "https://api.hearthly.dev/health" "200"
+          # Deep, DB-backed readiness (C.6): /health is shallow (process-alive
+          # only), so a DB outage would not surface there. /health/deep runs a
+          # SELECT 1 and returns 503 if the DB is unreachable.
+          check_endpoint "https://api.hearthly.dev/health/deep" "200"
           check_endpoint "https://auth.hearthly.dev/" "302"
           check_endpoint "https://grafana.hearthly.dev/" "302"
           check_endpoint "https://argocd.hearthly.dev/" "200"
