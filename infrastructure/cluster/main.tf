@@ -1,5 +1,6 @@
 terraform {
-  required_version = ">= 1.5.0"
+  # use_lockfile (native S3 state locking) requires Terraform >= 1.10.
+  required_version = ">= 1.10.0"
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
@@ -24,6 +25,15 @@ terraform {
     skip_region_validation      = true
     skip_requesting_account_id  = true
     use_path_style              = true
+
+    # Native S3 state locking (Task C.5 / #126): writes a <key>.tflock object
+    # via S3 conditional writes — no DynamoDB, state stays in Hetzner. Enforces
+    # locking for BOTH CI and manual applies, replacing the convention-only
+    # mitigation. NOTE: if Hetzner's Ceph S3 rejects the lock write with
+    # `XAmzContentSHA256Mismatch`, add `skip_s3_checksum = true` here (the
+    # documented Ceph workaround). Verified by this module's `terraform plan`
+    # on PR — a plan only acquires+releases the lock; it never mutates state.
+    use_lockfile = true
   }
 }
 

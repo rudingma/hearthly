@@ -1,5 +1,6 @@
 terraform {
-  required_version = ">= 1.5.0"
+  # use_lockfile (native S3 state locking) requires Terraform >= 1.10.
+  required_version = ">= 1.10.0"
   required_providers {
     keycloak = {
       source  = "mrparkers/keycloak"
@@ -24,6 +25,11 @@ terraform {
     skip_region_validation      = true
     skip_requesting_account_id  = true
     use_path_style              = true
+
+    # Native S3 state locking (Task C.5 / #126) — see the cluster module's
+    # backend block for the full rationale + the Hetzner-Ceph `skip_s3_checksum`
+    # fallback if the lock write returns `XAmzContentSHA256Mismatch`.
+    use_lockfile = true
   }
 }
 
