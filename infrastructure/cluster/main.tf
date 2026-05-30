@@ -90,6 +90,17 @@ module "kube-hetzner" {
   traefik_version   = "40.2.0"
   traefik_image_tag = "v3.7.1"
 
+  # PIN the add-ons that otherwise float to GitHub "latest" via github_release
+  # data sources when unset (data.tf). The module re-renders ALL of these into
+  # terraform_data.kustomization; since pinning Traefik forces that kustomization
+  # to re-apply, any newly-released hccm/CSI/kured would silently roll in during
+  # the same maintenance event — the exact uncontrolled-float class that took
+  # ingress down (#131). Pinned to the versions currently running and healthy;
+  # bump deliberately. (kured tag has no leading "v"; hccm/CSI tags do.)
+  hetzner_ccm_version = "v1.30.1"
+  hetzner_csi_version = "v2.20.0"
+  kured_version       = "1.21.0"
+
   # Gateway API: enable Traefik's kubernetesGateway provider.
   # CRDs are owned explicitly by the gateway-api-crds ArgoCD app (the v40 chart
   # no longer bundles them); cert-manager Gateway API support is enabled
