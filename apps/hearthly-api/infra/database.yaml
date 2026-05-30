@@ -42,3 +42,7 @@ spec:
     enablePodAntiAffinity: true
     topologyKey: kubernetes.io/hostname
     podAntiAffinityType: required
+
+  # NOTE: CNPG metrics are scraped via a manually-managed PodMonitor (see
+  # podmonitor.yaml in this directory), NOT spec.monitoring.enablePodMonitor —
+  # that field is deprecated in CNPG and scheduled for removal. See issue #131.
