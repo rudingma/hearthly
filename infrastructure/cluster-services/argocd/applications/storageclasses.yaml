@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: storageclasses
+  namespace: argocd
+  # Sync before stateful consumers so the Retain StorageClass exists before any
+  # CNPG cluster provisions a volume against it (cold bootstrap).
+  annotations:
+    argocd.argoproj.io/sync-wave: '-2'
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rudingma/hearthly.git
+    targetRevision: main
+    path: infrastructure/cluster-services/storageclasses
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system # StorageClass is cluster-scoped; namespace is ignored
+  syncPolicy:
+    automated:
+      # prune INTENTIONALLY false: a StorageClass referenced by bound PVs must
+      # not be auto-deleted (it would orphan provisioning + block expansion).
+      # Removal must be deliberate.
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

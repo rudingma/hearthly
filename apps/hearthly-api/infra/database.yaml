@@ -20,7 +20,10 @@ spec:
 
   storage:
     size: 10Gi
-    storageClass: hcloud-volumes
+    # Retain on accidental PVC/Cluster deletion (see storageclasses/). Applies to
+    # volumes provisioned from here on; existing PVs keep their reclaim policy and
+    # were patched to Retain out-of-band (audit note in infrastructure/CLAUDE.md).
+    storageClass: hcloud-volumes-retain
 
   resources:
     requests:
