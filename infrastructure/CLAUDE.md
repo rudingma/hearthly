@@ -4,7 +4,7 @@
 
 - **Location:** nbg1 (Nuremberg)
 - **Nodes:** 1x CAX11 control plane + 3x CAX11 workers (ARM, 4 GB each)
-- **k3s:** v1.34.5 (stable channel, auto-upgrades enabled)
+- **k3s:** v1.35.5 (stable channel, auto-upgrades enabled — system-upgrade-controller at replicas=1)
 - **Traefik LB IP:** 46.225.42.23 (IPv4), 2a01:4f8:1c1f:72d7::1 (IPv6)
 - **Module:** kube-hetzner `~> 2.19.1` (see `cluster/main.tf` for exact constraint)
 - **Terraform state:** Hetzner Object Storage (S3 backend, bucket: hearthly-tfstate). Separate state per directory.
