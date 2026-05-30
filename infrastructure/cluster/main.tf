@@ -101,6 +101,33 @@ module "kube-hetzner" {
   hetzner_csi_version = "v2.20.0"
   kured_version       = "1.21.0"
 
+  # Give the CSI driver system-cluster-critical priority so kubelet evicts it
+  # LAST under node pressure. During the 2026-05 outage the CSI node plugin was
+  # evicted -> the driver deregistered from kubelet -> PVs could not attach
+  # (issue #131). controller (provisioning) and node (attach/mount) both matter.
+  # NOTE: setting hetzner_csi_values REPLACES the module default (locals.tf, which
+  # is ONLY the node affinity), so the control-plane + robot exclusion is
+  # replicated here verbatim (we do not schedule on the control plane). Chart
+  # v2.20.0 exposes controller.priorityClassName + node.priorityClassName.
+  # Architecture plan C.2.
+  hetzner_csi_values = <<-EOT
+controller:
+  priorityClassName: system-cluster-critical
+node:
+  priorityClassName: system-cluster-critical
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: "node-role.kubernetes.io/control-plane"
+                operator: DoesNotExist
+              - key: "instance.hetzner.cloud/provided-by"
+                operator: NotIn
+                values:
+                  - robot
+EOT
+
   # Gateway API: enable Traefik's kubernetesGateway provider.
   # CRDs are owned explicitly by the gateway-api-crds ArgoCD app (the v40 chart
   # no longer bundles them); cert-manager Gateway API support is enabled
