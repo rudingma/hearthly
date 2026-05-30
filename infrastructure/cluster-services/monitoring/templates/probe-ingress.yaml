@@ -1,0 +1,30 @@
+# Probe each public ingress host through blackbox-exporter. The `release: monitoring`
+# label is required for the Prometheus operator's probeSelector to pick it up
+# (same convention as the kured PodMonitor). See issue #131.
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: ingress-hosts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    release: monitoring
+spec:
+  jobName: ingress-blackbox
+  interval: 30s
+  scrapeTimeout: 10s
+  module: ingress_http
+  prober:
+    url: blackbox-exporter.{{ .Release.Namespace }}.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - https://hearthly.dev/
+        - https://api.hearthly.dev/health
+        - https://auth.hearthly.dev/
+        - https://argocd.hearthly.dev/
+        - https://grafana.hearthly.dev/
+        - https://secrets.hearthly.dev/
+      labels:
+        probe_group: ingress
