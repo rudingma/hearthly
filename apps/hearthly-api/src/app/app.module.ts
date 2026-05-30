@@ -19,6 +19,7 @@ import { UserModule } from '../modules/user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthController } from './health.controller';
+import { DeepHealthController } from './deep-health.controller';
 
 const gqlLogger = new Logger('GraphQLSecurity');
 
@@ -74,7 +75,7 @@ const gqlLogger = new Logger('GraphQLSecurity');
     UserModule,
     HouseholdModule,
   ],
-  controllers: [AppController, HealthController],
+  controllers: [AppController, HealthController, DeepHealthController],
   providers: [
     AppService,
     {
