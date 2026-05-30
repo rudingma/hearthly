@@ -29,6 +29,7 @@ All external traffic routes through Kubernetes Gateway API (HTTPRoute).
 - **Repo access:** HTTPS + GitHub token (SSH blocked by Hetzner firewall). Token in K8s Secret `hearthly-repo` in argocd namespace.
 - **Applications:** root (app-of-apps), hearthly-api, hearthly-app, hearthly-db, keycloak, keycloak-db, monitoring, infisical, network-policies, argocd (self-managing). All auto-sync + self-heal.
 - **Adding a new ArgoCD app:** Create an Application manifest in `infrastructure/cluster-services/argocd/applications/`.
+- **Single-replica by design (D.3 / Option B):** HA would only guard against one ArgoCD pod dying (self-heals); it does nothing for dead CSI / full disk / dead CP. Resilience comes from the **cold-bootstrap runbook**, not redundancy — `docs/runbooks/argocd-cold-bootstrap.md` (rebuild ArgoCD + hand back to GitOps without depending on ArgoCD).
 
 ## Keycloak (Identity Provider)
 
