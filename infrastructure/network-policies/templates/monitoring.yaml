@@ -284,9 +284,14 @@ spec:
         - port: 443
           protocol: TCP
 ---
-# Deadman heartbeat CronJob (D.2): egress to DNS + ntfy.sh (publish heartbeat).
-# Its query to in-cluster Alertmanager (:9093) is intra-namespace and already
-# covered by allow-monitoring-intra-namespace. See issue #131.
+# Deadman heartbeat CronJob (D.2): egress to DNS + in-cluster Alertmanager
+# (:9093, to confirm Watchdog is firing) + ntfy.sh (publish heartbeat).
+# NOTE: the Alertmanager hop MUST be allowed via namespaceSelector, not relied
+# upon from allow-monitoring-intra-namespace's `podSelector: {}` — under
+# kube-router that podSelector egress does NOT actually reach the Alertmanager
+# pod (verified: even a plain monitoring pod gets connection-refused/timeout).
+# Prometheus reaches Alertmanager the same way (allow-prometheus-scraping uses a
+# namespaceSelector). See issue #131.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -313,6 +318,15 @@ spec:
         - port: 53
           protocol: UDP
         - port: 53
+          protocol: TCP
+    # In-cluster Alertmanager API (read the active Watchdog alert). Must be a
+    # namespaceSelector (podSelector {} is ineffective under kube-router here).
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 9093
           protocol: TCP
     # External HTTPS — publish the heartbeat to ntfy.sh
     - to:
