@@ -1,5 +1,11 @@
 ## ArgoCD Helm chart values for Hearthly
 ## Chart: argo/argo-cd v9.4.17 (ArgoCD v3.3.6)
+##
+## Single-replica by deliberate decision (D.3 / Option B, issue #131). HA would
+## only protect against one ArgoCD pod dying (self-heals anyway) — not the
+## failure modes that actually take the cluster down (dead CSI, full disk, dead
+## CP). Resilience comes from the cold-bootstrap runbook, not in-cluster
+## redundancy. Recovery: docs/runbooks/argocd-cold-bootstrap.md
 
 global:
   domain: argocd.hearthly.dev
