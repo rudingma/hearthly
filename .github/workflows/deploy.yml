@@ -205,6 +205,10 @@ jobs:
     needs: [changes, build-api, build-app, build-keycloak]
     if: always() && (needs.build-api.result == 'success' || needs.build-app.result == 'success' || needs.build-keycloak.result == 'success')
     runs-on: ubuntu-latest
+    # Expose the commit SHA pushed (empty if no tag changed) so `verify` can
+    # assert ArgoCD actually synced THIS revision, not a stale one (D.4).
+    outputs:
+      commit_sha: ${{ steps.commit.outputs.sha }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -226,14 +230,63 @@ jobs:
           fi
 
       - name: Commit and push
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add apps/*/deploy/chart/values.yaml infrastructure/cluster-services/keycloak/values.yaml
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then
+            echo "sha=" >> "$GITHUB_OUTPUT"   # nothing deployed -> verify skips
+            exit 0
+          fi
           git commit -m "deploy: update image tags to ${{ github.sha }}"
           for i in 1 2 3; do
             git push && break
             echo "Push failed, retrying after rebase..."
             git pull --rebase origin main
           done
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  # Verify ArgoCD actually deployed the revision we just pushed, then smoke-test.
+  # Gated on ARGOCD_TOKEN: safe to merge before the read-only token secret is
+  # set — the job no-ops with a warning until then (same pattern as the deadman
+  # check in healthcheck.yml). See PR / infrastructure/cluster/BOOTSTRAP.md. (D.4)
+  verify:
+    needs: [changes, build-api, build-app, build-keycloak, update-tags]
+    if: always() && needs.update-tags.result == 'success' && needs.update-tags.outputs.commit_sha != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for ArgoCD to sync THIS revision + smoke test
+        env:
+          ARGOCD_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+          WANT_SHA: ${{ needs.update-tags.outputs.commit_sha }}
+        run: |
+          if [ -z "$ARGOCD_TOKEN" ]; then
+            echo "::warning::ARGOCD_TOKEN not set — skipping ArgoCD revision verification (set the GitHub secret to enable it)"
+            exit 0
+          fi
+
+          apps=()
+          [ "${{ needs.changes.outputs.api }}" = "true" ] && [ "${{ needs.build-api.result }}" = "success" ] && apps+=("hearthly-api")
+          [ "${{ needs.changes.outputs.app }}" = "true" ] && [ "${{ needs.build-app.result }}" = "success" ] && apps+=("hearthly-app")
+          [ "${{ needs.build-keycloak.result }}" = "success" ] && apps+=("keycloak")
+
+          # ArgoCD tracks the repo revision, so each app's status.sync.revision
+          # should converge to the commit update-tags just pushed. Exact match
+          # assumes no newer commit lands on main before Argo syncs this one —
+          # the normal case (deploys serialize; update-tags rebases onto HEAD).
+          for app in "${apps[@]}"; do
+            for i in $(seq 1 30); do
+              json=$(curl -fsSL -H "Authorization: Bearer $ARGOCD_TOKEN" \
+                     "https://argocd.hearthly.dev/api/v1/applications/$app")
+              s=$(echo "$json" | jq -r '"\(.status.sync.status)/\(.status.health.status)"')
+              rev=$(echo "$json" | jq -r '.status.sync.revision')
+              echo "[$i] $app: $s @ ${rev:0:7} (want ${WANT_SHA:0:7})"
+              if [ "$s" = "Synced/Healthy" ] && [ "$rev" = "$WANT_SHA" ]; then break; fi
+              [ "$i" = "30" ] && { echo "::error::$app not Synced/Healthy at $WANT_SHA"; exit 1; }
+              sleep 10
+            done
+          done
+
+          # Smoke test: the deep DB-backed readiness endpoint (C.6).
+          curl -fsSL https://api.hearthly.dev/health/deep | grep -q '"status":"ok"'
