@@ -1,0 +1,20 @@
+# Retain variant of the default hcloud-volumes StorageClass, for stateful data
+# that must survive accidental PVC/Cluster deletion (PostgreSQL).
+#
+# The kube-hetzner module's default `hcloud-volumes` is reclaimPolicy: Delete —
+# so deleting a PVC (or `kubectl delete cluster`) destroys the underlying Hetzner
+# volume and its data. DB volumes point here instead (see the CNPG Cluster specs)
+# so retention is DECLARATIVE and in Git, rather than a manual `kubectl patch` on
+# each PV (the manual patch was applied unevenly — the Phase A HA standbys were
+# missed). Backups (D.6 Barman) remain the recovery mechanism; Retain is the
+# accidental-deletion safety net. See issue #131, architecture plan D.5.
+#
+# Identical to hcloud-volumes except reclaimPolicy and NOT the default class.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hcloud-volumes-retain
+provisioner: csi.hetzner.cloud
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
