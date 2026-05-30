@@ -28,7 +28,8 @@ spec:
     spec:
       # Don't pile up retries on the disk-constrained nodes; one attempt per tick.
       backoffLimit: 0
-      activeDeadlineSeconds: 60
+      # Headroom for the egress-programming retry loop (~6 x (curl+sleep)).
+      activeDeadlineSeconds: 90
       template:
         metadata:
           labels:
@@ -66,20 +67,30 @@ spec:
                   # to the API's JSON whitespace. If Alertmanager is down, curl -f
                   # fails -> no match -> heartbeat withheld -> deadman fires.
                   AM='http://monitoring-kube-prometheus-alertmanager:9093/api/v2/alerts?active=true&filter=alertname%3DWatchdog'
-                  if curl -sf --max-time 10 "$AM" | grep -q 'Watchdog'; then
-                    if curl -sf --max-time 10 \
-                         -H 'Title: hearthly-deadman' \
-                         -H 'Priority: min' \
-                         -H 'Tags: heartbeat' \
-                         -d 'in-cluster monitoring pipeline alive (Watchdog active)' \
-                         "https://ntfy.sh/${DEADMAN_TOPIC}" >/dev/null; then
-                      echo "heartbeat published"
-                    else
-                      echo "WARN: heartbeat publish to ntfy failed (egress/ntfy issue)"
+                  # Retry: kube-router programs a new pod's egress rules a few
+                  # seconds AFTER it starts, so an immediate query can be dropped.
+                  # Retrying ~30s avoids a falsely-withheld heartbeat during that
+                  # window (and rides out transient Alertmanager blips). A genuine
+                  # dead pipeline still yields no match -> withheld -> deadman fires.
+                  n=0
+                  while [ $n -lt 6 ]; do
+                    if curl -sf --max-time 8 "$AM" | grep -q 'Watchdog'; then
+                      if curl -sf --max-time 10 \
+                           -H 'Title: hearthly-deadman' \
+                           -H 'Priority: min' \
+                           -H 'Tags: heartbeat' \
+                           -d 'in-cluster monitoring pipeline alive (Watchdog active)' \
+                           "https://ntfy.sh/${DEADMAN_TOPIC}" >/dev/null; then
+                        echo "heartbeat published"
+                      else
+                        echo "WARN: heartbeat publish to ntfy failed (egress/ntfy issue)"
+                      fi
+                      exit 0
                     fi
-                  else
-                    echo "Watchdog NOT active in Alertmanager — withholding heartbeat (deadman will fire externally)"
-                  fi
+                    n=$((n + 1))
+                    sleep 5
+                  done
+                  echo "Watchdog NOT active in Alertmanager after retries — withholding heartbeat (deadman will fire externally)"
                   exit 0
               resources:
                 requests:
