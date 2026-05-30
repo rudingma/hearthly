@@ -1,0 +1,65 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-database
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: cnpg
+      rules:
+        # An instance's metrics collector cannot reach its local PostgreSQL =
+        # that instance is down or unhealthy. Per-instance (labels: namespace,
+        # pod). A single-instance DB that could not be drained caused the
+        # 2026-05 outage (#131) — instance health is now a first-class signal.
+        - alert: CnpgInstanceDown
+          expr: cnpg_collector_up == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'CNPG instance {{ "{{ $labels.pod }}" }} ({{ "{{ $labels.namespace }}" }}) is down'
+            description: 'cnpg_collector_up=0 for {{ "{{ $labels.pod }}" }} for 5m — the instance is unreachable/unhealthy. Check `kubectl get cluster -n {{ "{{ $labels.namespace }}" }}` and the pod logs.'
+        # The primary reports the number of STREAMING standbys; a healthy 2-node
+        # cluster has 1. If max-per-namespace drops below 1, the cluster has
+        # silently degraded to a single effective instance — exactly the
+        # fragility behind the 2026-05 outage (single-instance DB blocked the
+        # kured drain). Assumes every CNPG cluster here runs >= 2 instances
+        # (hearthly-db, keycloak-db both do). `for: 5m` rides out switchovers.
+        - alert: CnpgHAReplicaMissing
+          expr: max by (namespace) (cnpg_pg_replication_streaming_replicas) < 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'CNPG cluster in {{ "{{ $labels.namespace }}" }} has no streaming standby'
+            description: 'No standby is streaming from the primary in {{ "{{ $labels.namespace }}" }} for 5m — HA has degraded toward a single instance (the 2026-05 outage condition). A drain/reboot of the primary node would now risk downtime + block kured.'
+        # Async replication lag widening = growing RPO. Healthy is ~0s.
+        - alert: CnpgReplicationLagHigh
+          expr: cnpg_pg_replication_lag > 30
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'CNPG replication lag high in {{ "{{ $labels.namespace }}" }}'
+            description: 'Replication lag on {{ "{{ $labels.pod }}" }} has exceeded 30s for 10m (current {{ "{{ $value | humanizeDuration }}" }}) — the standby is falling behind; RPO on a hard primary failure is widening.'
+        # CNPG flags when it cannot complete a switchover automatically and needs
+        # operator intervention (e.g. primary pinned to a node that must drain).
+        - alert: CnpgManualSwitchoverRequired
+          expr: cnpg_collector_manual_switchover_required > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'CNPG manual switchover required in {{ "{{ $labels.namespace }}" }}'
+            description: 'CNPG signalled manual_switchover_required on {{ "{{ $labels.pod }}" }} — the operator cannot resolve a switchover on its own. Investigate before draining that node.'
+        # The CNPG scrape pipeline must not go dark silently (the 16-day outage
+        # stayed invisible because monitoring was blind). If every cnpg_* series
+        # disappears, the PodMonitor/NetworkPolicy/scrape path has broken.
+        - alert: CnpgMetricsAbsent
+          expr: absent(cnpg_collector_up)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'CNPG metrics are absent — databases are UNMONITORED'
+            description: 'No cnpg_collector_up series for 15m. The CNPG PodMonitor scrape path (apps/*/infra/podmonitor.yaml, networkpolicy-db.yaml monitoring:9187 ingress, allow-prometheus-scraping egress) may have broken — DB alerting is blind.'
