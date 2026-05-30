@@ -1,0 +1,40 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ingress-blackbox
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: ingress
+      rules:
+        # A routed, healthy host returns an "alive" status (200/30x/40x auth).
+        # probe_success=0 means: connection/TLS/timeout failure, a 404 (no Traefik
+        # router — the 2026-05 outage signature), or a 5xx. Fire loudly.
+        - alert: IngressHostDown
+          expr: probe_success{job="ingress-blackbox"} == 0
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Ingress host {{ "{{ $labels.instance }}" }} is not serving correctly'
+            description: 'blackbox probe of {{ "{{ $labels.instance }}" }} has failed for 3m — a connection/TLS/timeout failure, a 404 (no Traefik router — the 2026-05 outage signature), or a 5xx. Check Traefik routing, the cert, and the LB (#131).'
+        # The full-outage signature: EVERY host failing at once = Traefik built zero
+        # routers (e.g. Gateway API CRD skew). Fire fast.
+        - alert: IngressAllHostsDown
+          expr: count(probe_success{job="ingress-blackbox"} == 0) == count(probe_success{job="ingress-blackbox"})
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'ALL ingress hosts are failing — full ingress outage'
+            description: 'Every probed host is failing. Traefik likely built zero HTTP routers (the 2026-05-29 outage signature — Traefik/Gateway-API CRD skew). Check Traefik and infrastructure/cluster-services/gateway-api-crds/.'
+        # The probe pipeline itself must not go dark (that is how the outage stayed
+        # silent for 16 days).
+        - alert: IngressProbesNoData
+          expr: absent(probe_success{job="ingress-blackbox"})
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Ingress blackbox probes are returning no data'
+            description: 'No probe_success series for job ingress-blackbox — blackbox-exporter may be down or unscraped, leaving ingress UNMONITORED.'
