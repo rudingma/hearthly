@@ -280,13 +280,21 @@ kube-prometheus-stack:
         memory: 128Mi
 
   # --- Node exporter (runs on every node) ---
+  # --- node-exporter ---
+  # CPU limit raised 100m->200m: node-exporter briefly bursts above 100m while
+  # all collectors run during a scrape, throttling >25% of CFS periods and
+  # firing CPUThrottlingHigh (info). At a 100m limit the container gets only
+  # 10ms of CPU per 100ms period; nodes have ample CPU headroom, so the
+  # container limit — not the node — was the bottleneck. Same CFS-throttle root
+  # cause as the kube-state-metrics fix below (#143). Memory left at 64Mi
+  # (node-exporter's RSS is steady, no throttling/OOM pressure there).
   prometheus-node-exporter:
     resources:
       requests:
         cpu: 20m
         memory: 32Mi
       limits:
-        cpu: 100m
+        cpu: 200m
         memory: 64Mi
 
   # --- kube-state-metrics ---
