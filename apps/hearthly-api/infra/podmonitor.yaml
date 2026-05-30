@@ -1,0 +1,25 @@
+# Scrapes CNPG instance metrics (cnpg_* series) for hearthly-db.
+#
+# Managed manually rather than via spec.monitoring.enablePodMonitor (deprecated
+# in CNPG, scheduled for removal). Lives in the hearthly namespace alongside the
+# Cluster; kube-prometheus-stack discovers PodMonitors cluster-wide
+# (podMonitorSelectorNilUsesHelmValues=false). The Prometheus -> :9187 scrape
+# path is already open: networkpolicy-db.yaml allows monitoring ingress on 9187
+# and the monitoring chart's allow-prometheus-scraping covers egress.
+#
+# Feeds the CNPG alert rules (prometheusrule-cnpg.yaml). A single-instance DB
+# caused the 2026-05 outage and the DB had zero alerting — closing that gap.
+# See issue #131.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: hearthly-db
+  namespace: hearthly
+  labels:
+    cnpg.io/cluster: hearthly-db
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: hearthly-db
+  podMetricsEndpoints:
+    - port: metrics
