@@ -62,4 +62,6 @@ back to a synced state. Listed here so the cold-recovery runbook (D.7) is comple
 | `NTFY_TOPIC` (alerting)                                                | Infisical + GitHub Secret | already mirrored in GitHub (external healthcheck uses it)                                                                                              |
 
 These should be sourced from GitHub-backed bootstrap manifests as part of D.7; until then they
-are documented manual steps in the cold-recovery procedure.
+are documented manual steps in the cold-recovery procedure — see
+[`runbook-cold-recovery.md`](./runbook-cold-recovery.md) (infra + k3s) and
+[`docs/runbooks/argocd-cold-bootstrap.md`](../../docs/runbooks/argocd-cold-bootstrap.md) (the GitOps layer).
