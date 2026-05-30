@@ -88,13 +88,15 @@ kube-prometheus-stack:
               requests:
                 storage: 10Gi
 
-      # Discover ALL PrometheusRules, ServiceMonitors and PodMonitors, not
+      # Discover ALL PrometheusRules, ServiceMonitors, PodMonitors and Probes, not
       # just those with a release label matching this Helm chart. Required for
       # custom rules in wrapper chart templates, cross-namespace ServiceMonitors,
-      # and the kured PodMonitor (kured is a raw DaemonSet in kube-system).
+      # the kured PodMonitor (kured is a raw DaemonSet in kube-system), and the
+      # ingress blackbox Probe.
       ruleSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
       podMonitorSelectorNilUsesHelmValues: false
+      probeSelectorNilUsesHelmValues: false
 
   # --- Alertmanager → ntfy.sh via alertmanager-ntfy sidecar ---
   alertmanager:
