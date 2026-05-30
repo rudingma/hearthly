@@ -14,6 +14,19 @@ global:
 configs:
   params:
     server.insecure: true
+  # Read-only API account for the deploy workflow's ArgoCD revision check (D.4).
+  # apiKey only (no UI login). Generate its token once after this syncs:
+  #   argocd account generate-token --account deploy-verify
+  # then store it as the GitHub repo secret ARGOCD_TOKEN.
+  cm:
+    accounts.deploy-verify: apiKey
+  # Least-privilege: deploy-verify may only `get` applications (the verify job
+  # reads status.sync.revision/health). admin keeps full access via the built-in
+  # role; policy.default stays empty (no blanket grant).
+  rbac:
+    policy.csv: |
+      p, role:deploy-verify, applications, get, */*, allow
+      g, deploy-verify, role:deploy-verify
 
 # Disable components we don't need yet
 dex:
