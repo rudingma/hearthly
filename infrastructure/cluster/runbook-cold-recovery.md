@@ -33,8 +33,9 @@ cluster (and Infisical) is completely down. Full inventory: `BOOTSTRAP.md`
 - A **clean clone** of this repo at `main`.
 - The **Terraform state is intact** in the `hearthly-tfstate` bucket (Hetzner
   Object Storage — independent of the cluster, which is the point). If the
-  _state_ is also lost, this is a different, harder recovery (import surviving
-  resources or rebuild fresh) and out of scope here.
+  _state_ (and buckets/snapshot) are also gone, this is a different, harder
+  rebuild from absolute zero — see
+  [`docs/runbooks/cold-shutdown-and-genesis.md`](../../docs/runbooks/cold-shutdown-and-genesis.md).
 - The bootstrap secret **values** (from `BOOTSTRAP.md`):
   | Value | Used for |
   | --- | --- |
