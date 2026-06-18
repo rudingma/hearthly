@@ -110,7 +110,8 @@ cd infrastructure/cluster && terraform plan
 cd infrastructure/cluster && terraform apply
 ```
 
-- **Cold recovery (rebuild from nothing):** `infrastructure/cluster/runbook-cold-recovery.md` — clean clone → `terraform apply` with no reachable cluster → hand off to the ArgoCD cold-bootstrap runbook. Bootstrap creds inventory in `BOOTSTRAP.md`.
+- **Cold recovery (state intact, rebuild from nothing):** `infrastructure/cluster/runbook-cold-recovery.md` — clean clone → `terraform apply` with no reachable cluster → hand off to the ArgoCD cold-bootstrap runbook. Bootstrap creds inventory in `BOOTSTRAP.md`.
+- **Complete shutdown / cold genesis (state + buckets + snapshot also gone):** `docs/runbooks/cold-shutdown-and-genesis.md` — deliberate full teardown, then a first-time deploy from absolute zero (recreate buckets + snapshot + re-seed Infisical before the cold-recovery handoff). Use when there is no Terraform state to recover.
 
 ## Known Issues
 
