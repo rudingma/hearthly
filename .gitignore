@@ -38,8 +38,6 @@ infrastructure/cluster-services/*/charts/
 
 # Claude Code
 .claude/settings.local.json
-docs/superpowers/
-.superpowers/
 
 .angular
 
